@@ -5,14 +5,14 @@ Set up the Tauri backend with necessary plugins and custom commands to support f
 
 ## Tasks
 
-- [ ] **Add Dependencies**
+- [x] **Add Dependencies**
     - Add `tauri-plugin-dialog` to `src-tauri/Cargo.toml`.
     - Run `cargo build` to ensure dependencies are downloaded.
 
-- [ ] **Register Plugin**
+- [x] **Register Plugin**
     - Initialize and register `tauri-plugin-dialog` in `src-tauri/src/lib.rs`.
 
-- [ ] **Implement `batch_rename` Command**
+- [x] **Implement `batch_rename` Command**
     - Create a new command function `batch_rename` in `src-tauri/src/lib.rs` (or a separate module).
     - **Signature**: `fn batch_rename(files: Vec<(String, String)>) -> Result<Vec<String>, String>`
     - **Logic**:
