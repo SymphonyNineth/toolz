@@ -10,11 +10,16 @@ Implement advanced renaming capabilities and improve user confidence with better
     - In the "New Name" column, highlight characters that will be added in **green**.
     - Keep unchanged characters with standard styling.
 
-- [ ] **Advanced Regex Support**
+- [x] **Advanced Regex Support**
     - Add a toggle/mode for "Regex Mode".
     - Allow users to enter valid JavaScript Regular Expressions.
     - Provide a cheat sheet for common regex patterns.
     - Validate regex input and show errors if invalid.
+
+- [ ] **Working with Regex groups**
+    - At the moment users can input regex groups, but it's unclear how to use them.
+    - Figure out a way to make it work.
+    - Maybe detect groups and add a replacement field for each group.
 
 - [ ] **Numbering & Sequencing**
     - Add a feature to append or prepend numbers to filenames.
