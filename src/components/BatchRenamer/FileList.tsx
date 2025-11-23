@@ -1,4 +1,5 @@
 import { Component, For } from "solid-js";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import DiffText from "./DiffText";
 
 export interface FileItem {
@@ -31,12 +32,22 @@ const StatusIcon = (props: { status: FileItem['status'] }) => {
 };
 
 const FileList: Component<FileListProps> = (props) => {
+    const handleShowInFolder = async (filePath: string) => {
+        try {
+            await revealItemInDir(filePath);
+        } catch (error) {
+            console.error("Failed to open folder:", error);
+            alert(`Failed to open folder: ${error}`);
+        }
+    };
+
     return (
         <div class="w-full max-w-6xl mx-auto mt-6 bg-base-100 rounded-box shadow flex flex-col max-h-[60vh]">
             <div class="overflow-x-auto overflow-y-auto flex-1">
                 <table class="table table-zebra w-full table-pin-rows">
                     <thead>
                         <tr>
+                            <th class="w-10 bg-base-200"></th>
                             <th class="w-10 bg-base-200"></th>
                             <th class="bg-base-200">Original Name</th>
                             <th class="bg-base-200">New Name</th>
@@ -45,7 +56,7 @@ const FileList: Component<FileListProps> = (props) => {
                     <tbody>
                         <For each={props.files} fallback={
                             <tr>
-                                <td colspan="3" class="text-center py-8 text-base-content/60">
+                                <td colspan="4" class="text-center py-8 text-base-content/60">
                                     No files selected
                                 </td>
                             </tr>
@@ -54,6 +65,18 @@ const FileList: Component<FileListProps> = (props) => {
                                 <tr class="hover">
                                     <td>
                                         <StatusIcon status={file.status} />
+                                    </td>
+                                    <td>
+                                        <div class="tooltip tooltip-right" data-tip="Show in folder">
+                                            <button
+                                                onClick={() => handleShowInFolder(file.path)}
+                                                class="btn btn-ghost btn-xs p-1 h-6 w-6 min-h-0"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </td>
                                     <td class="truncate max-w-lg" title={file.path}>
                                         <DiffText
