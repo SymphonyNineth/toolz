@@ -29,3 +29,7 @@
 - **Extract generic/reusable components** into separate files
 - Create shared components in `src/components/`
 - Reuse components across the application rather than duplicating code
+
+## Docs
+
+- Information about the project is available inside the /docs directory
