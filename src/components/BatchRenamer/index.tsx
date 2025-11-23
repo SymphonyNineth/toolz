@@ -5,6 +5,7 @@ import RenamerControls from "./RenamerControls";
 import FileList, { FileItem } from "./FileList";
 import Button from "../ui/Button";
 import ThemeToggle from "../ui/ThemeToggle";
+import { calculateNewName } from "./renamingUtils";
 
 export default function BatchRenamer() {
   const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
@@ -50,32 +51,23 @@ export default function BatchRenamer() {
       const name = getFileName(path);
       let newName = name;
 
-      if (findText()) {
-        try {
-          let regex: RegExp;
+      const result = calculateNewName(
+        name,
+        findText(),
+        replaceText(),
+        caseSensitive(),
+        regexMode()
+      );
 
-          if (regexMode()) {
-            // In regex mode, use the pattern directly
-            const flags = caseSensitive() ? "g" : "gi";
-            regex = new RegExp(findText(), flags);
-            // Clear any previous regex error
-            setRegexError(undefined);
-          } else {
-            // In normal mode, escape special characters
-            const flags = caseSensitive() ? "g" : "gi";
-            const escapedFindText = findText().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            regex = new RegExp(escapedFindText, flags);
-          }
+      newName = result.newName;
 
-          newName = name.replace(regex, replaceText());
-        } catch (e) {
-          if (regexMode()) {
-            // Only show error in regex mode
-            const errorMessage = e instanceof Error ? e.message : String(e);
-            setRegexError(errorMessage);
-          }
-          console.error("Regex error", e);
+      if (result.error) {
+        if (regexMode()) {
+          setRegexError(result.error);
         }
+        console.error("Renaming error", result.error);
+      } else if (regexMode()) {
+        setRegexError(undefined);
       }
       return { path, name, newName };
     });

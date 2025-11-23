@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import solid from "vite-plugin-solid";
 import tailwindcss from '@tailwindcss/vite'
 import path from "path"
@@ -29,5 +29,23 @@ export default defineConfig(async () => ({
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
     },
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true, // allows using describe, it, expect without importing
+    setupFiles: ['./src/setupTests.ts'],
+    // Critical for SolidJS: ensures reactivity works in tests
+    server: {
+      deps: {
+        inline: [/solid-js/],
+      },
+    },
+    // Isolates cleanup between tests
+    testTransformMode: {
+      web: [/\.[jt]sx?$/],
+    },
+  },
+  resolve: {
+    conditions: ['development', 'browser'],
   },
 }));
