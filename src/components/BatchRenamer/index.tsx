@@ -154,6 +154,30 @@ export default function BatchRenamer() {
         }
     }
 
+    // Check if rename button should be disabled and why
+    const renameDisabledReason = createMemo(() => {
+        const items = fileItems();
+
+        // Check for regex errors
+        if (regexError()) {
+            return `Invalid regex: ${regexError()}`;
+        }
+
+        // Check if there are any changes
+        const hasChanges = items.some(f => f.name !== f.newName);
+        if (!hasChanges) {
+            return "No changes to apply";
+        }
+
+        // Check for collisions
+        const hasCollisions = items.some(f => f.hasCollision);
+        if (hasCollisions) {
+            return "Cannot rename: duplicate file names detected";
+        }
+
+        return undefined;
+    });
+
     return (
         <div class="min-h-screen bg-base-300 p-8">
             <div class="max-w-6xl mx-auto">
@@ -181,13 +205,21 @@ export default function BatchRenamer() {
                     >
                         Select Files
                     </Button>
-                    <Button
-                        onClick={handleRename}
-                        disabled={fileItems().every(f => f.name === f.newName)}
-                        variant="primary"
-                    >
-                        Rename Files
-                    </Button>
+                    <div class="relative inline-block group">
+                        <Button
+                            onClick={handleRename}
+                            disabled={!!renameDisabledReason()}
+                            variant="primary"
+                        >
+                            Rename Files
+                        </Button>
+                        {renameDisabledReason() && (
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-base-100 text-base-content text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-base-300 z-10">
+                                {renameDisabledReason()}
+                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-base-100"></div>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <FileList files={fileItems()} />
