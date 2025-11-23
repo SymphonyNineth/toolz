@@ -178,6 +178,19 @@ export default function BatchRenamer() {
         return undefined;
     });
 
+    const handleRemoveFiles = (pathsToRemove: string[]) => {
+        const pathsSet = new Set(pathsToRemove);
+        const newPaths = selectedPaths().filter(path => !pathsSet.has(path));
+        setSelectedPaths(newPaths);
+
+        // Clear status for removed files
+        const newStatusMap = { ...statusMap() };
+        pathsToRemove.forEach(path => {
+            delete newStatusMap[path];
+        });
+        setStatusMap(newStatusMap);
+    };
+
     return (
         <div class="min-h-screen bg-base-300 p-8">
             <div class="max-w-6xl mx-auto">
@@ -222,7 +235,7 @@ export default function BatchRenamer() {
                     </div>
                 </div>
 
-                <FileList files={fileItems()} />
+                <FileList files={fileItems()} onRemoveFiles={handleRemoveFiles} />
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
-import { Component, For } from "solid-js";
+import { Component, For, createSignal, createMemo } from "solid-js";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import DiffText from "./DiffText";
+import Button from "../ui/Button";
 
 export interface FileItem {
     path: string;
@@ -12,6 +13,7 @@ export interface FileItem {
 
 interface FileListProps {
     files: FileItem[];
+    onRemoveFiles?: (pathsToRemove: string[]) => void;
 }
 
 const StatusIcon = (props: { status: FileItem['status'] }) => {
@@ -32,6 +34,8 @@ const StatusIcon = (props: { status: FileItem['status'] }) => {
 };
 
 const FileList: Component<FileListProps> = (props) => {
+    const [selectedPaths, setSelectedPaths] = createSignal<Set<string>>(new Set());
+
     const handleShowInFolder = async (filePath: string) => {
         try {
             await revealItemInDir(filePath);
@@ -41,12 +45,103 @@ const FileList: Component<FileListProps> = (props) => {
         }
     };
 
+    const toggleSelection = (path: string) => {
+        const current = new Set<string>(selectedPaths());
+        if (current.has(path)) {
+            current.delete(path);
+        } else {
+            current.add(path);
+        }
+        setSelectedPaths(current);
+    };
+
+    const toggleSelectAll = () => {
+        const current = selectedPaths();
+        if (current.size === props.files.length) {
+            setSelectedPaths(new Set<string>());
+        } else {
+            setSelectedPaths(new Set<string>(props.files.map(f => f.path)));
+        }
+    };
+
+    const allSelected = createMemo(() =>
+        props.files.length > 0 && selectedPaths().size === props.files.length
+    );
+
+    const someSelected = createMemo(() =>
+        selectedPaths().size > 0 && selectedPaths().size < props.files.length
+    );
+
+    const handleClearAll = () => {
+        if (props.files.length === 0) return;
+        props.onRemoveFiles?.(props.files.map(f => f.path));
+        setSelectedPaths(new Set<string>());
+    };
+
+    const handleClearRenamed = () => {
+        const renamedFiles = props.files.filter(f => f.status === 'success');
+        if (renamedFiles.length === 0) return;
+        props.onRemoveFiles?.(renamedFiles.map(f => f.path));
+        setSelectedPaths(new Set<string>());
+    };
+
+    const handleRemoveSelected = () => {
+        const selected = selectedPaths();
+        if (selected.size === 0) return;
+        props.onRemoveFiles?.(Array.from(selected));
+        setSelectedPaths(new Set<string>());
+    };
+
+    const renamedCount = createMemo(() =>
+        props.files.filter(f => f.status === 'success').length
+    );
+
     return (
         <div class="w-full max-w-6xl mx-auto mt-6 bg-base-100 rounded-box shadow flex flex-col max-h-[60vh]">
+            {/* Action Buttons */}
+            {props.files.length > 0 && (
+                <div class="p-4 border-b border-base-300 flex gap-2 justify-end">
+                    <Button
+                        onClick={handleClearAll}
+                        variant="error"
+                        size="sm"
+                    >
+                        Clear All ({props.files.length})
+                    </Button>
+                    <Button
+                        onClick={handleClearRenamed}
+                        variant="warning"
+                        size="sm"
+                        disabled={renamedCount() === 0}
+                    >
+                        Clear Renamed ({renamedCount()})
+                    </Button>
+                    <Button
+                        onClick={handleRemoveSelected}
+                        variant="secondary"
+                        size="sm"
+                        disabled={selectedPaths().size === 0}
+                    >
+                        Remove Selected ({selectedPaths().size})
+                    </Button>
+                </div>
+            )}
+
             <div class="overflow-x-auto overflow-y-auto flex-1">
                 <table class="table table-zebra w-full table-pin-rows">
                     <thead>
                         <tr>
+                            <th class="w-10 bg-base-200">
+                                <input
+                                    type="checkbox"
+                                    class="checkbox checkbox-sm"
+                                    checked={allSelected()}
+                                    ref={(el) => {
+                                        if (el) el.indeterminate = someSelected();
+                                    }}
+                                    onChange={toggleSelectAll}
+                                />
+                            </th>
                             <th class="w-10 bg-base-200"></th>
                             <th class="w-10 bg-base-200"></th>
                             <th class="bg-base-200">Original Name</th>
@@ -56,13 +151,21 @@ const FileList: Component<FileListProps> = (props) => {
                     <tbody>
                         <For each={props.files} fallback={
                             <tr>
-                                <td colspan="4" class="text-center py-8 text-base-content/60">
+                                <td colspan="5" class="text-center py-8 text-base-content/60">
                                     No files selected
                                 </td>
                             </tr>
                         }>
                             {(file) => (
                                 <tr class="hover">
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            class="checkbox checkbox-sm"
+                                            checked={selectedPaths().has(file.path)}
+                                            onChange={() => toggleSelection(file.path)}
+                                        />
+                                    </td>
                                     <td>
                                         <StatusIcon status={file.status} />
                                     </td>
