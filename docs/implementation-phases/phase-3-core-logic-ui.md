@@ -5,7 +5,7 @@ Build the user interface for renaming controls and implement the live preview an
 
 ## Tasks
 
-- [ ] **Implement Renamer Controls**
+- [x] **Implement Renamer Controls**
     - Create `src/components/BatchRenamer/RenamerControls.tsx`.
     - Add inputs for:
         - Find Text
@@ -13,7 +13,7 @@ Build the user interface for renaming controls and implement the live preview an
     - Add a checkbox for "Case Sensitive".
     - Bind these inputs to the parent state (signals).
 
-- [ ] **Implement File List & Preview**
+- [x] **Implement File List & Preview**
     - Create `src/components/BatchRenamer/FileList.tsx`.
     - Display a list of files with two columns:
         - **Original Name**: The current filename.
@@ -24,7 +24,7 @@ Build the user interface for renaming controls and implement the live preview an
         - Respect the "Case Sensitive" setting (construct Regex accordingly).
         - Highlight changes if possible (optional).
 
-- [ ] **Implement Rename Execution**
+- [x] **Implement Rename Execution**
     - Add a "Rename" button in the main component.
     - **Handler**:
         - Filter out files where `Original Name == New Name`.

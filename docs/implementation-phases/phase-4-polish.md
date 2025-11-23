@@ -11,7 +11,7 @@ Refine the user experience and styling.
         - Success (Green checkmark)
         - Error (Red X with tooltip)
 
-- [ ] **Styling**
+- [x] **Styling**
     - Use CSS Grid or Flexbox to create a clean split-view layout for the file list.
     - Style the inputs and buttons to match the application theme.
     - Ensure the list handles scrolling for large numbers of files.
