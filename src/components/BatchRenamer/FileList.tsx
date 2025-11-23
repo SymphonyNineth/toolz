@@ -31,54 +31,56 @@ const StatusIcon = (props: { status: FileItem['status'] }) => {
 
 const FileList: Component<FileListProps> = (props) => {
     return (
-        <div class="w-full max-w-4xl mx-auto mt-6 overflow-x-auto bg-base-100 rounded-box shadow">
-            <table class="table table-zebra w-full">
-                <thead>
-                    <tr>
-                        <th class="w-10"></th>
-                        <th>Original Name</th>
-                        <th>New Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <For each={props.files} fallback={
+        <div class="w-full max-w-6xl mx-auto mt-6 bg-base-100 rounded-box shadow flex flex-col max-h-[60vh]">
+            <div class="overflow-x-auto overflow-y-auto flex-1">
+                <table class="table table-zebra w-full table-pin-rows">
+                    <thead>
                         <tr>
-                            <td colspan="3" class="text-center py-8 text-base-content/60">
-                                No files selected
-                            </td>
+                            <th class="w-10 bg-base-200"></th>
+                            <th class="bg-base-200">Original Name</th>
+                            <th class="bg-base-200">New Name</th>
                         </tr>
-                    }>
-                        {(file) => (
-                            <tr class="hover">
-                                <td>
-                                    <StatusIcon status={file.status} />
-                                </td>
-                                <td class="font-mono text-sm truncate max-w-xs" title={file.path}>
-                                    {file.name}
-                                </td>
-                                <td class="font-mono text-sm truncate max-w-xs flex items-center gap-2">
-                                    <span
-                                        classList={{
-                                            "text-success font-bold": file.name !== file.newName && !file.hasCollision,
-                                            "text-error font-bold": file.hasCollision,
-                                            "text-base-content": file.name === file.newName
-                                        }}
-                                    >
-                                        {file.newName}
-                                    </span>
-                                    {file.hasCollision && (
-                                        <div class="tooltip tooltip-left" data-tip="Name collision detected">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    )}
+                    </thead>
+                    <tbody>
+                        <For each={props.files} fallback={
+                            <tr>
+                                <td colspan="3" class="text-center py-8 text-base-content/60">
+                                    No files selected
                                 </td>
                             </tr>
-                        )}
-                    </For>
-                </tbody>
-            </table>
+                        }>
+                            {(file) => (
+                                <tr class="hover">
+                                    <td>
+                                        <StatusIcon status={file.status} />
+                                    </td>
+                                    <td class="font-mono text-sm truncate max-w-lg" title={file.path}>
+                                        {file.name}
+                                    </td>
+                                    <td class="font-mono text-sm truncate max-w-lg flex items-center gap-2">
+                                        <span
+                                            classList={{
+                                                "text-success font-bold": file.name !== file.newName && !file.hasCollision,
+                                                "text-error font-bold": file.hasCollision,
+                                                "text-base-content": file.name === file.newName
+                                            }}
+                                        >
+                                            {file.newName}
+                                        </span>
+                                        {file.hasCollision && (
+                                            <div class="tooltip tooltip-left" data-tip="Name collision detected">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-warning" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
+                            )}
+                        </For>
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

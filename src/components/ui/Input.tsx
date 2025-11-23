@@ -13,7 +13,7 @@ const Input: Component<InputProps> = (props) => {
     const [local, others] = splitProps(props, ["label", "error", "bordered", "ghost", "variant", "size", "class"]);
 
     return (
-        <div class="form-control w-full">
+        <div class="form-control w-full flex flex-col gap-1">
             {local.label && (
                 <label class="label" for={others.id}>
                     <span class="label-text font-semibold">{local.label}</span>

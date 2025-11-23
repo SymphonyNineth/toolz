@@ -20,3 +20,13 @@ Refine the user experience and styling.
     - Disable "Rename" button if no files are selected or if Find text is empty.
     - Show a warning if a rename would result in a name collision (if detectable on frontend).
     - Handle empty "Replace" text (effectively deleting the found text).
+
+- [ ] **Theme Support**
+    - Add a toggle for Dark/Light mode.
+    - Persist user preference.
+    - Use Tailwind CSS variables for colors/themes to make it easier to later add more themes.
+
+- [ ] **Layout Improvements**
+    - Increase content width to utilize available space (e.g., `max-w-6xl` or `max-w-full` with padding).
+    - Improve spacing between elements (inputs, buttons, list).
+    - Enhance visual hierarchy.

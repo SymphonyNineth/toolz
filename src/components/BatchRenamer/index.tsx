@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import RenamerControls from "./RenamerControls";
 import FileList, { FileItem } from "./FileList";
 import Button from "../ui/Button";
+import ThemeToggle from "../ui/ThemeToggle";
 
 export default function BatchRenamer() {
     const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
@@ -127,8 +128,11 @@ export default function BatchRenamer() {
 
     return (
         <div class="min-h-screen bg-base-300 p-8">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-3xl font-bold text-center mb-8 text-primary">Batch File Renamer</h2>
+            <div class="max-w-6xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-bold text-primary">Batch File Renamer</h2>
+                    <ThemeToggle />
+                </div>
 
                 <RenamerControls
                     findText={findText()}
