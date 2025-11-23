@@ -5,7 +5,7 @@ Implement advanced renaming capabilities and improve user confidence with better
 
 ## Tasks
 
-- [ ] **Diff Highlighting**
+- [x] **Diff Highlighting**
     - In the "Original Name" column, highlight characters that will be removed in **red**.
     - In the "New Name" column, highlight characters that will be added in **green**.
     - Keep unchanged characters with standard styling.

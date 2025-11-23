@@ -1,4 +1,5 @@
 import { Component, For } from "solid-js";
+import DiffText from "./DiffText";
 
 export interface FileItem {
     path: string;
@@ -54,18 +55,24 @@ const FileList: Component<FileListProps> = (props) => {
                                     <td>
                                         <StatusIcon status={file.status} />
                                     </td>
-                                    <td class="font-mono text-sm truncate max-w-lg" title={file.path}>
-                                        {file.name}
+                                    <td class="truncate max-w-lg" title={file.path}>
+                                        <DiffText
+                                            original={file.name}
+                                            modified={file.newName}
+                                            mode="original"
+                                        />
                                     </td>
-                                    <td class="font-mono text-sm truncate max-w-lg flex items-center gap-2">
+                                    <td class="truncate max-w-lg flex items-center gap-2">
                                         <span
                                             classList={{
-                                                "text-success font-bold": file.name !== file.newName && !file.hasCollision,
                                                 "text-error font-bold": file.hasCollision,
-                                                "text-base-content": file.name === file.newName
                                             }}
                                         >
-                                            {file.newName}
+                                            <DiffText
+                                                original={file.name}
+                                                modified={file.newName}
+                                                mode="modified"
+                                            />
                                         </span>
                                         {file.hasCollision && (
                                             <div class="tooltip tooltip-left" data-tip="Name collision detected">
