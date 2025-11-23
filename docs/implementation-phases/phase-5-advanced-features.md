@@ -13,7 +13,7 @@ Implement advanced renaming capabilities and improve user confidence with better
 - [ ] **Advanced Regex Support**
     - Add a toggle/mode for "Regex Mode".
     - Allow users to enter valid JavaScript Regular Expressions.
-    - Provide a cheat sheet or tooltip for common regex patterns.
+    - Provide a cheat sheet for common regex patterns.
     - Validate regex input and show errors if invalid.
 
 - [ ] **Numbering & Sequencing**

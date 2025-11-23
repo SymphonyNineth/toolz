@@ -11,12 +11,23 @@ export default function BatchRenamer() {
     const [findText, setFindText] = createSignal("");
     const [replaceText, setReplaceText] = createSignal("");
     const [caseSensitive, setCaseSensitive] = createSignal(false);
+    const [regexMode, setRegexMode] = createSignal(false);
+    const [regexError, setRegexError] = createSignal<string | undefined>(undefined);
     const [statusMap, setStatusMap] = createSignal<Record<string, 'idle' | 'success' | 'error'>>({});
 
     // Reset status when controls change
-    const updateFindText = (text: string) => { setFindText(text); setStatusMap({}); };
+    const updateFindText = (text: string) => {
+        setFindText(text);
+        setStatusMap({});
+        setRegexError(undefined);
+    };
     const updateReplaceText = (text: string) => { setReplaceText(text); setStatusMap({}); };
     const updateCaseSensitive = (val: boolean) => { setCaseSensitive(val); setStatusMap({}); };
+    const updateRegexMode = (val: boolean) => {
+        setRegexMode(val);
+        setStatusMap({});
+        setRegexError(undefined);
+    };
 
     // Helper to extract filename from path
     const getFileName = (path: string) => {
@@ -41,11 +52,28 @@ export default function BatchRenamer() {
 
             if (findText()) {
                 try {
-                    const flags = caseSensitive() ? "g" : "gi";
-                    const escapedFindText = findText().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(escapedFindText, flags);
+                    let regex: RegExp;
+
+                    if (regexMode()) {
+                        // In regex mode, use the pattern directly
+                        const flags = caseSensitive() ? "g" : "gi";
+                        regex = new RegExp(findText(), flags);
+                        // Clear any previous regex error
+                        setRegexError(undefined);
+                    } else {
+                        // In normal mode, escape special characters
+                        const flags = caseSensitive() ? "g" : "gi";
+                        const escapedFindText = findText().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        regex = new RegExp(escapedFindText, flags);
+                    }
+
                     newName = name.replace(regex, replaceText());
                 } catch (e) {
+                    if (regexMode()) {
+                        // Only show error in regex mode
+                        const errorMessage = e instanceof Error ? e.message : String(e);
+                        setRegexError(errorMessage);
+                    }
                     console.error("Regex error", e);
                 }
             }
@@ -141,6 +169,9 @@ export default function BatchRenamer() {
                     setReplaceText={updateReplaceText}
                     caseSensitive={caseSensitive()}
                     setCaseSensitive={updateCaseSensitive}
+                    regexMode={regexMode()}
+                    setRegexMode={updateRegexMode}
+                    regexError={regexError()}
                 />
 
                 <div class="flex justify-center gap-4 mt-8">
