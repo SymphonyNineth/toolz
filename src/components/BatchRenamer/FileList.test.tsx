@@ -239,4 +239,37 @@ describe('FileList', () => {
     consoleSpy.mockRestore();
     alertSpy.mockRestore();
   });
+
+  it('displays table headers', () => {
+    render(() => <FileList files={mockFiles} />);
+    expect(screen.getByText('Original Name')).toBeInTheDocument();
+    expect(screen.getByText('New Name')).toBeInTheDocument();
+  });
+
+  it('visually distinguishes changed filenames', () => {
+    const diffFiles: FileItem[] = [{
+      path: '/path/diff.txt',
+      name: 'old_name.txt',
+      newName: 'new_name.txt',
+      status: 'idle'
+    }];
+    render(() => <FileList files={diffFiles} />);
+    
+    const rows = screen.getAllByRole('row');
+    const fileRow = rows[1]; // Row 0 is header
+    const originalCell = fileRow.querySelectorAll('td')[3];
+    const newCell = fileRow.querySelectorAll('td')[4];
+    
+    // Original column (mode="original") should show removed parts
+    // 'old' is removed, replaced by 'new'
+    const removedSpan = originalCell.querySelector('.line-through');
+    expect(removedSpan).toBeInTheDocument();
+    expect(removedSpan).toHaveTextContent('old');
+    
+    // New column (mode="modified") should show added parts
+    // 'new' is added
+    const addedSpan = newCell.querySelector('.text-success');
+    expect(addedSpan).toBeInTheDocument();
+    expect(addedSpan).toHaveTextContent('new');
+  });
 });
