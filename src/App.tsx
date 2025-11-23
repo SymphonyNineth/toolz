@@ -4,7 +4,7 @@ import BatchRenamer from "./components/BatchRenamer";
 function App() {
 
   return (
-    <main class="container w-full">
+    <main class="w-full">
       <BatchRenamer />
     </main>
   );
