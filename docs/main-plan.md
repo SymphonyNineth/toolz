@@ -83,8 +83,11 @@ We will build a dedicated component for the renamer.
 2.  Basic styling for the split view (CSS Grid or Flexbox).
 3.  Handle edge cases (e.g., empty find string, name collisions - basic warning).
 
-## Future Considerations (Not in this scope)
-*   Regex support for advanced users.
-*   Numbering/Sequencing.
+### Phase 5: Advanced Features
+1.  Diff Highlighting (Red for deleted, Green for added).
+2.  Advanced Regex Support.
+3.  Numbering/Sequencing.
+4.  Undo Functionality.
+
+## Future Considerations
 *   Extension changing.
-*   Undo functionality.
