@@ -1,0 +1,22 @@
+# Phase 4: Polish
+
+## Goal
+Refine the user experience and styling.
+
+## Tasks
+
+- [ ] **Status Feedback**
+    - Add visual indicators for file status:
+        - Idle (default)
+        - Success (Green checkmark)
+        - Error (Red X with tooltip)
+
+- [ ] **Styling**
+    - Use CSS Grid or Flexbox to create a clean split-view layout for the file list.
+    - Style the inputs and buttons to match the application theme.
+    - Ensure the list handles scrolling for large numbers of files.
+
+- [ ] **Edge Case Handling**
+    - Disable "Rename" button if no files are selected or if Find text is empty.
+    - Show a warning if a rename would result in a name collision (if detectable on frontend).
+    - Handle empty "Replace" text (effectively deleting the found text).
