@@ -15,6 +15,7 @@
 - **Language**: TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS + DaisyUI
+- **Bundler**: Bun
 
 ## Code Style
 

@@ -5,15 +5,15 @@ Prepare the SolidJS frontend to interact with the backend and handle file select
 
 ## Tasks
 
-- [ ] **Install Frontend Dependencies**
+- [x] **Install Frontend Dependencies**
     - Run `npm install @tauri-apps/plugin-dialog`.
 
-- [ ] **Create Component Structure**
+- [x] **Create Component Structure**
     - Create directory `src/components/BatchRenamer`.
     - Create `src/components/BatchRenamer/index.tsx` as the main entry point.
     - Update `src/App.tsx` to render the `BatchRenamer` component (or set up routing if preferred).
 
-- [ ] **Implement File Selection Logic**
+- [x] **Implement File Selection Logic**
     - inside `BatchRenamer/index.tsx`:
         - Import `open` from `@tauri-apps/plugin-dialog`.
         - Create a "Select Files" button.
