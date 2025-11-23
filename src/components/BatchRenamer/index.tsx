@@ -10,6 +10,12 @@ export default function BatchRenamer() {
     const [findText, setFindText] = createSignal("");
     const [replaceText, setReplaceText] = createSignal("");
     const [caseSensitive, setCaseSensitive] = createSignal(false);
+    const [statusMap, setStatusMap] = createSignal<Record<string, 'idle' | 'success' | 'error'>>({});
+
+    // Reset status when controls change
+    const updateFindText = (text: string) => { setFindText(text); setStatusMap({}); };
+    const updateReplaceText = (text: string) => { setReplaceText(text); setStatusMap({}); };
+    const updateCaseSensitive = (val: boolean) => { setCaseSensitive(val); setStatusMap({}); };
 
     // Helper to extract filename from path
     const getFileName = (path: string) => {
@@ -24,29 +30,43 @@ export default function BatchRenamer() {
     };
 
     const fileItems = createMemo(() => {
-        return selectedPaths().map((path) => {
+        const paths = selectedPaths();
+        const currentStatus = statusMap();
+
+        // First pass: calculate new names
+        const items = paths.map((path) => {
             const name = getFileName(path);
             let newName = name;
 
             if (findText()) {
                 try {
                     const flags = caseSensitive() ? "g" : "gi";
-                    // Escape special regex characters in findText to treat it as literal string
                     const escapedFindText = findText().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     const regex = new RegExp(escapedFindText, flags);
                     newName = name.replace(regex, replaceText());
                 } catch (e) {
-                    // Fallback or ignore invalid regex if we were supporting raw regex
                     console.error("Regex error", e);
                 }
             }
+            return { path, name, newName };
+        });
+
+        // Check for collisions
+        const newNameCounts = new Map<string, number>();
+        items.forEach(item => {
+            const fullNewPath = item.path.replace(item.name, item.newName);
+            newNameCounts.set(fullNewPath, (newNameCounts.get(fullNewPath) || 0) + 1);
+        });
+
+        return items.map(item => {
+            const fullNewPath = item.path.replace(item.name, item.newName);
+            const hasCollision = newNameCounts.get(fullNewPath)! > 1;
 
             return {
-                path,
-                name,
-                newName,
-                status: 'idle',
-            } as FileItem;
+                ...item,
+                status: currentStatus[item.path] || 'idle',
+                hasCollision
+            } as FileItem & { hasCollision: boolean };
         });
     });
 
@@ -58,6 +78,7 @@ export default function BatchRenamer() {
 
         if (selected) {
             setSelectedPaths(selected as string[]);
+            setStatusMap({});
         }
     }
 
@@ -77,15 +98,29 @@ export default function BatchRenamer() {
             const result = await invoke<string[]>("batch_rename", { files: filesToRename });
             console.log("Renamed files:", result);
 
-            // Update selected paths to reflect new names so the UI updates
-            // We need to map the old paths to new paths in our selectedPaths state
             const newPathsMap = new Map(filesToRename);
-            const updatedPaths = selectedPaths().map(path => newPathsMap.get(path) || path);
-            setSelectedPaths(updatedPaths);
+            const newStatusMap: Record<string, 'idle' | 'success' | 'error'> = {};
 
-            // Optional: Clear find/replace or show success message
+            const updatedPaths = selectedPaths().map(path => {
+                const newPath = newPathsMap.get(path);
+                if (newPath) {
+                    newStatusMap[newPath] = 'success';
+                    return newPath;
+                }
+                return path;
+            });
+
+            setSelectedPaths(updatedPaths);
+            setStatusMap(newStatusMap);
+
         } catch (error) {
             console.error("Rename failed:", error);
+            // Mark attempted files as error
+            const errorStatusMap: Record<string, 'idle' | 'success' | 'error'> = {};
+            filesToRename.forEach(([oldPath]) => {
+                errorStatusMap[oldPath] = 'error';
+            });
+            setStatusMap(errorStatusMap);
             alert(`Rename failed: ${error}`);
         }
     }
@@ -97,11 +132,11 @@ export default function BatchRenamer() {
 
                 <RenamerControls
                     findText={findText()}
-                    setFindText={setFindText}
+                    setFindText={updateFindText}
                     replaceText={replaceText()}
-                    setReplaceText={setReplaceText}
+                    setReplaceText={updateReplaceText}
                     caseSensitive={caseSensitive()}
-                    setCaseSensitive={setCaseSensitive}
+                    setCaseSensitive={updateCaseSensitive}
                 />
 
                 <div class="flex justify-center gap-4 mt-8">
