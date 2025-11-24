@@ -7,7 +7,9 @@ import {
 } from "solid-js";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import DiffText from "./DiffText";
+import RegexHighlightText from "./RegexHighlightText";
 import Button from "../ui/Button";
+import { RegexMatch } from "./renamingUtils";
 
 export interface FileItem {
   path: string;
@@ -15,6 +17,8 @@ export interface FileItem {
   newName: string;
   status: "idle" | "success" | "error";
   hasCollision?: boolean;
+  regexMatches?: RegexMatch[];
+  newNameRegexMatches?: RegexMatch[];
 }
 
 interface FileListProps {
@@ -229,11 +233,20 @@ const FileList: Component<FileListProps> = (props) => {
                     </div>
                   </td>
                   <td class="truncate max-w-lg" title={file.path}>
-                    <DiffText
-                      original={file.name}
-                      modified={file.newName}
-                      mode="original"
-                    />
+                    <div class="flex flex-col gap-1">
+                      {file.regexMatches && file.regexMatches.length > 0 ? (
+                        <RegexHighlightText
+                          text={file.name}
+                          matches={file.regexMatches}
+                        />
+                      ) : (
+                        <DiffText
+                          original={file.name}
+                          modified={file.newName}
+                          mode="original"
+                        />
+                      )}
+                    </div>
                   </td>
                   <td class="truncate max-w-lg flex items-center gap-2">
                     <span
@@ -241,11 +254,18 @@ const FileList: Component<FileListProps> = (props) => {
                         "text-error font-bold": file.hasCollision,
                       }}
                     >
-                      <DiffText
-                        original={file.name}
-                        modified={file.newName}
-                        mode="modified"
-                      />
+                      {file.newNameRegexMatches ? (
+                        <RegexHighlightText
+                          text={file.newName}
+                          matches={file.newNameRegexMatches}
+                        />
+                      ) : (
+                        <DiffText
+                          original={file.name}
+                          modified={file.newName}
+                          mode="modified"
+                        />
+                      )}
                     </span>
                     {file.hasCollision && (
                       <div

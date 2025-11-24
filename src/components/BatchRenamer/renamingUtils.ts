@@ -36,3 +36,154 @@ export function calculateNewName(
     return { newName: originalName, error: errorMessage };
   }
 }
+
+export interface RegexMatch {
+  start: number;
+  end: number;
+  groupIndex: number; // 0 for full match, 1+ for capture groups
+  content: string;
+}
+
+export function getRegexMatches(text: string, regex: RegExp): RegexMatch[] {
+  const matches: RegexMatch[] = [];
+
+  try {
+    // Ensure the regex has the 'd' flag for indices if supported
+    // We create a new RegExp to avoid side effects on the passed regex object
+    // and to ensure we have the 'd' flag.
+    const flags = new Set(regex.flags.split(''));
+    flags.add('d');
+    if (!flags.has('g')) {
+      // We generally want global matching to find all occurrences if the original was global
+      // But if the user didn't ask for global, maybe we shouldn't? 
+      // Actually, for visualization, we probably want to visualize what the replacement does.
+      // The replacement logic in calculateNewName uses 'g' or 'gi'.
+      // So we should probably respect the 'g' flag from the input regex, 
+      // but calculateNewName constructs it with 'g'.
+    }
+
+    const safeRegex = new RegExp(regex.source, Array.from(flags).join(''));
+
+    let match;
+    while ((match = safeRegex.exec(text)) !== null) {
+      // @ts-ignore - indices property exists when 'd' flag is used
+      const indices = match.indices;
+
+      if (indices) {
+        for (let i = 0; i < indices.length; i++) {
+          if (indices[i]) {
+            matches.push({
+              start: indices[i][0],
+              end: indices[i][1],
+              groupIndex: i,
+              content: text.substring(indices[i][0], indices[i][1])
+            });
+          }
+        }
+      }
+
+      if (!safeRegex.global) break;
+    }
+  } catch (e) {
+    // Fallback or error handling if 'd' flag is not supported or invalid regex
+    console.error("Error extracting regex matches:", e);
+  }
+
+  return matches;
+}
+
+export function getReplacementSegments(
+  originalName: string,
+  regex: RegExp,
+  replaceText: string
+): { newName: string; segments: RegexMatch[] } {
+  const segments: RegexMatch[] = [];
+  let newName = "";
+  let lastIndex = 0;
+
+  try {
+    // Ensure 'd' flag for indices, and 'g' if original had it
+    const flags = new Set(regex.flags.split(""));
+    flags.add("d");
+    const safeRegex = new RegExp(regex.source, Array.from(flags).join(""));
+
+    let match;
+    while ((match = safeRegex.exec(originalName)) !== null) {
+      // Append non-matched part
+      newName += originalName.substring(lastIndex, match.index);
+
+      // Process replacement string
+      // We need to parse $$, $&, $1, $2, etc.
+      // Regex to find tokens: /\$(\$|&|`|'|\d+)/g
+      const tokenRegex = /\$(\$|&|`|'|\d+)/g;
+      let lastTokenIndex = 0;
+      let tokenMatch;
+
+      while ((tokenMatch = tokenRegex.exec(replaceText)) !== null) {
+        // Append literal part before token
+        newName += replaceText.substring(lastTokenIndex, tokenMatch.index);
+
+        const token = tokenMatch[1];
+        if (token === "$") {
+          newName += "$";
+        } else if (token === "&") {
+          // Entire match
+          const content = match[0];
+          segments.push({
+            start: newName.length,
+            end: newName.length + content.length,
+            groupIndex: 0,
+            content,
+          });
+          newName += content;
+        } else if (token === "`") {
+          // Before match
+          const content = originalName.substring(0, match.index);
+          newName += content;
+        } else if (token === "'") {
+          // After match
+          const content = originalName.substring(match.index + match[0].length);
+          newName += content;
+        } else {
+          // Group index
+          const groupIndex = parseInt(token, 10);
+          // Check if group exists
+          if (groupIndex > 0 && groupIndex < match.length) {
+            const content = match[groupIndex] || ""; // Group might be undefined (optional group)
+            if (content) {
+              segments.push({
+                start: newName.length,
+                end: newName.length + content.length,
+                groupIndex: groupIndex,
+                content,
+              });
+              newName += content;
+            }
+          } else {
+            // If group doesn't exist, JS replace usually treats it as literal "$n"
+            // e.g. "abc".replace(/(a)/, "$2") -> "$2bc"
+            newName += "$" + token;
+          }
+        }
+
+        lastTokenIndex = tokenRegex.lastIndex;
+      }
+
+      // Append remaining literal part of replacement string
+      newName += replaceText.substring(lastTokenIndex);
+
+      lastIndex = safeRegex.lastIndex;
+      if (!safeRegex.global) break;
+    }
+
+    // Append remaining part of original string
+    newName += originalName.substring(lastIndex);
+
+  } catch (e) {
+    console.error("Error calculating replacement segments:", e);
+    // Fallback: just return the string without segments
+    return { newName: originalName.replace(regex, replaceText), segments: [] };
+  }
+
+  return { newName, segments };
+}

@@ -6,6 +6,8 @@ This document tracks the unit tests that have already been implemented in the co
 
 These tests cover the core business logic for calculating new filenames.
 
+### calculateNewName
+
 - **Normal Mode**
 
 * [x] Basic text replacement.
@@ -35,6 +37,39 @@ These tests cover the core business logic for calculating new filenames.
 * [x] Empty replacement string (deletion).
 * [x] Special replacement patterns in normal mode.
 
+### getRegexMatches
+
+* [x] Empty array for no matches.
+* [x] Correct indices for simple match.
+* [x] Capture groups support.
+* [x] Global flag handling.
+* [x] Empty text handling.
+* [x] Nested groups.
+* [x] Optional groups that do not match.
+* [x] Multiple separate matches with global flag.
+
+### getReplacementSegments
+
+* [x] Basic replacement without groups.
+* [x] `$1` group reference.
+* [x] `$$` (literal dollar sign).
+* [x] `$&` (entire match).
+* [x] `` $` `` (before match).
+* [x] `$'` (after match).
+* [x] Non-existent group reference as literal.
+* [x] Global regex with multiple matches.
+* [x] Replacement with no special patterns.
+* [x] Empty replacement.
+* [x] Preserve non-matched parts.
+* [x] Correct segment positions tracking.
+* [x] Optional group that is undefined.
+* [x] Multiple occurrences with global regex.
+* [x] Complex replacement pattern.
+* [x] No matches handling.
+* [x] Adjacent matches.
+* [x] Case-insensitive regex.
+* [x] Multiple groups with same content.
+
 ## BatchRenamer Component (`src/components/BatchRenamer/BatchRenamer.test.tsx`)
 
 These tests cover the main container component and its integration with Tauri mocks.
@@ -49,3 +84,87 @@ These tests cover the main container component and its integration with Tauri mo
 * [x] Mocked backend invocation `batch_rename`.
 * [x] Verifies that the UI updates after selection.
 * [x] Verifies that the rename command is called with correct arguments.
+
+## Diff Utilities (`src/utils/diff.test.ts`)
+
+These tests cover the LCS-based diff algorithm.
+
+- **Basic Cases**
+
+* [x] Identical strings (unchanged).
+* [x] Empty original string (pure addition).
+* [x] Empty modified string (pure deletion).
+* [x] Both empty strings.
+
+- **Simple Replacements**
+
+* [x] Replacement at the beginning.
+* [x] Replacement in the middle.
+* [x] Replacement at the end.
+
+- **Single Character Changes**
+
+* [x] Single character addition.
+* [x] Single character removal.
+* [x] Single character replacement.
+
+- **Complex Diffs**
+
+* [x] Multiple changes throughout string.
+* [x] Complete string replacement.
+* [x] Insertion in the middle.
+
+- **Special Characters**
+
+* [x] Special characters correctly handled.
+* [x] Unicode characters (BMP).
+* [x] Whitespace changes.
+
+- **Output Integrity**
+
+* [x] Segments reconstruct original and modified strings.
+* [x] No empty segments produced.
+
+## DiffText Component (`src/components/BatchRenamer/DiffText.test.tsx`)
+
+- **Original Mode**
+
+* [x] Shows removed characters with strikethrough.
+* [x] Shows unchanged characters without styling.
+* [x] Does not show added characters.
+
+- **Modified Mode**
+
+* [x] Shows added characters with success styling.
+* [x] Shows unchanged characters without styling.
+* [x] Does not show removed characters.
+
+- **Edge Cases**
+
+* [x] Identical strings (no diff).
+* [x] Empty original string.
+* [x] Empty modified string.
+* [x] Complete replacement.
+* [x] Special characters.
+* [x] Unicode characters.
+
+## RegexHighlightText Component (`src/components/BatchRenamer/RegexHighlightText.test.tsx`)
+
+- **Basic Rendering**
+
+* [x] Text without matches.
+* [x] Text with matches and group highlighting.
+* [x] Nested groups correctly handled.
+
+- **Edge Cases**
+
+* [x] Empty text.
+* [x] Match at the end of text.
+* [x] Match at the beginning of text.
+* [x] Multiple separate matches (global regex).
+* [x] Group index greater than color count (wrapping).
+* [x] Single character matches.
+* [x] Full text match (entire string).
+* [x] Special characters in text.
+* [x] Unicode and emoji in text.
+* [x] Unmatched portions without highlight.

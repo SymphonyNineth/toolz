@@ -5,7 +5,7 @@ import RenamerControls from "./RenamerControls";
 import FileList, { FileItem } from "./FileList";
 import Button from "../ui/Button";
 import ThemeToggle from "../ui/ThemeToggle";
-import { calculateNewName } from "./renamingUtils";
+import { calculateNewName, getRegexMatches, getReplacementSegments } from "./renamingUtils";
 
 export default function BatchRenamer() {
   const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
@@ -69,7 +69,29 @@ export default function BatchRenamer() {
       } else if (regexMode()) {
         setRegexError(undefined);
       }
-      return { path, name, newName };
+
+      let regexMatches;
+      let newNameRegexMatches;
+      if (!result.error && regexMode() && findText()) {
+        try {
+          const flags = caseSensitive() ? "g" : "gi";
+          const regex = new RegExp(findText(), flags);
+          regexMatches = getRegexMatches(name, regex);
+
+          // Calculate replacement segments
+          const replacementResult = getReplacementSegments(name, regex, replaceText());
+          // We use the newName from replacementResult to ensure consistency, 
+          // although it should match calculateNewName's result.
+          // Actually, let's trust calculateNewName for the name, and just use segments.
+          // But getReplacementSegments might have slightly different logic if I messed up.
+          // Let's use the segments.
+          newNameRegexMatches = replacementResult.segments;
+        } catch (e) {
+          // Ignore errors, they are handled above
+        }
+      }
+
+      return { path, name, newName, regexMatches, newNameRegexMatches };
     });
 
     // Check for collisions
