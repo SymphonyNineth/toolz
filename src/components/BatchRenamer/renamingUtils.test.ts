@@ -334,13 +334,16 @@ describe("getReplacementSegments", () => {
   // Note: This function is designed to work with global regexes (with 'g' flag)
   // as that's how it's used in the application (calculateNewName always adds 'g' flag)
 
-  it("should handle basic replacement without groups", () => {
+  it("should handle basic replacement without groups and mark as literal (-1)", () => {
     const result = getReplacementSegments("hello", /hello/g, "world");
     expect(result.newName).toBe("world");
-    expect(result.segments).toHaveLength(0); // No group references
+    // Literal replacement text should have groupIndex = -1
+    expect(result.segments).toHaveLength(1);
+    expect(result.segments[0].groupIndex).toBe(-1);
+    expect(result.segments[0].content).toBe("world");
   });
 
-  it("should handle $1 group reference", () => {
+  it("should handle $1 group reference with literal text between", () => {
     const result = getReplacementSegments(
       "file123.txt",
       /(file)(\d+)/g,
@@ -348,33 +351,45 @@ describe("getReplacementSegments", () => {
     );
     expect(result.newName).toBe("file-123.txt");
 
-    // Should have segments for group 1 and group 2
-    expect(result.segments).toHaveLength(2);
+    // Should have segments for group 1, literal "-", and group 2
+    expect(result.segments).toHaveLength(3);
 
     const group1Segment = result.segments.find((s) => s.groupIndex === 1);
     expect(group1Segment?.content).toBe("file");
+
+    const literalSegment = result.segments.find((s) => s.groupIndex === -1);
+    expect(literalSegment?.content).toBe("-");
 
     const group2Segment = result.segments.find((s) => s.groupIndex === 2);
     expect(group2Segment?.content).toBe("123");
   });
 
-  it("should handle $$ (literal dollar sign)", () => {
+  it("should handle $$ (literal dollar sign) as literal segment", () => {
     const result = getReplacementSegments("price", /price/g, "$$100");
     expect(result.newName).toBe("$100");
+    // "$" from $$ and "100" should be literal
+    expect(result.segments.filter((s) => s.groupIndex === -1).length).toBe(2);
   });
 
   it("should handle $& (entire match)", () => {
     const result = getReplacementSegments("hello", /ell/g, "[$&]");
     expect(result.newName).toBe("h[ell]o");
 
-    // Should have segment for group 0 (full match)
+    // Should have segment for group 0 (full match) and literal "[" and "]"
     const group0Segment = result.segments.find((s) => s.groupIndex === 0);
     expect(group0Segment?.content).toBe("ell");
+
+    const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
+    expect(literalSegments).toHaveLength(2);
+    expect(literalSegments[0].content).toBe("[");
+    expect(literalSegments[1].content).toBe("]");
   });
 
   it("should handle $` (before match)", () => {
     const result = getReplacementSegments("hello", /ell/g, "$`");
     expect(result.newName).toBe("hho");
+    // $` returns text from original, not "new" literal text
+    // So no literal (-1) segments for the replaced part
   });
 
   it("should handle $' (after match)", () => {
@@ -388,25 +403,44 @@ describe("getReplacementSegments", () => {
     const result = getReplacementSegments("hello", /(h)ello/g, "$1-$5");
     // $5 doesn't exist, should be treated as literal "$5"
     expect(result.newName).toBe("h-$5");
+    
+    // "-" and "$5" should be literal segments
+    const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
+    expect(literalSegments).toHaveLength(2);
+    expect(literalSegments[0].content).toBe("-");
+    expect(literalSegments[1].content).toBe("$5");
   });
 
   it("should handle global regex with multiple matches", () => {
     const result = getReplacementSegments("a1b2c3", /(\w)(\d)/g, "[$1=$2]");
     expect(result.newName).toBe("[a=1][b=2][c=3]");
 
-    // Should have 6 segments (2 groups × 3 matches)
-    expect(result.segments).toHaveLength(6);
+    // Should have segments for each match: "[", group1, "=", group2, "]" × 3
+    // = 15 segments total (5 per match × 3 matches)
+    expect(result.segments).toHaveLength(15);
+    
+    // 6 group segments (2 groups × 3 matches)
+    const groupSegments = result.segments.filter((s) => s.groupIndex > 0);
+    expect(groupSegments).toHaveLength(6);
+    
+    // 9 literal segments (3 literals × 3 matches)
+    const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
+    expect(literalSegments).toHaveLength(9);
   });
 
-  it("should handle replacement with no special patterns", () => {
+  it("should handle replacement with no special patterns as literal", () => {
     const result = getReplacementSegments("old", /old/g, "new");
     expect(result.newName).toBe("new");
-    expect(result.segments).toHaveLength(0);
+    // All replacement text is literal
+    expect(result.segments).toHaveLength(1);
+    expect(result.segments[0].groupIndex).toBe(-1);
+    expect(result.segments[0].content).toBe("new");
   });
 
   it("should handle empty replacement", () => {
     const result = getReplacementSegments("hello", /ell/g, "");
     expect(result.newName).toBe("ho");
+    expect(result.segments).toHaveLength(0);
   });
 
   it("should preserve non-matched parts of the string", () => {
@@ -416,9 +450,13 @@ describe("getReplacementSegments", () => {
       "replaced"
     );
     expect(result.newName).toBe("prefix_replaced_suffix");
+    // Only the "replaced" part should be a segment
+    expect(result.segments).toHaveLength(1);
+    expect(result.segments[0].content).toBe("replaced");
+    expect(result.segments[0].groupIndex).toBe(-1);
   });
 
-  it("should track correct segment positions", () => {
+  it("should track correct segment positions with mixed groups and literals", () => {
     const result = getReplacementSegments(
       "file123",
       /(file)(\d+)/g,
@@ -426,28 +464,57 @@ describe("getReplacementSegments", () => {
     );
     expect(result.newName).toBe("[file]-[123]");
 
-    // Group 1 "file" should start after "[" (index 1)
-    const group1Segment = result.segments.find((s) => s.groupIndex === 1);
-    expect(group1Segment?.start).toBe(1);
-    expect(group1Segment?.end).toBe(5);
+    // Segments in order: "[", "file", "]-[", "123", "]"
+    // Note: consecutive literals between tokens are combined
+    const sortedSegments = [...result.segments].sort((a, b) => a.start - b.start);
+    
+    expect(sortedSegments).toHaveLength(5);
+    
+    expect(sortedSegments[0].content).toBe("[");
+    expect(sortedSegments[0].groupIndex).toBe(-1);
+    expect(sortedSegments[0].start).toBe(0);
+    expect(sortedSegments[0].end).toBe(1);
+    
+    expect(sortedSegments[1].content).toBe("file");
+    expect(sortedSegments[1].groupIndex).toBe(1);
+    expect(sortedSegments[1].start).toBe(1);
+    expect(sortedSegments[1].end).toBe(5);
 
-    // Group 2 "123" should start after "]-["
-    const group2Segment = result.segments.find((s) => s.groupIndex === 2);
-    expect(group2Segment?.start).toBe(8);
-    expect(group2Segment?.end).toBe(11);
+    expect(sortedSegments[2].content).toBe("]-[");
+    expect(sortedSegments[2].groupIndex).toBe(-1);
+    expect(sortedSegments[2].start).toBe(5);
+    expect(sortedSegments[2].end).toBe(8);
+    
+    expect(sortedSegments[3].content).toBe("123");
+    expect(sortedSegments[3].groupIndex).toBe(2);
+    expect(sortedSegments[3].start).toBe(8);
+    expect(sortedSegments[3].end).toBe(11);
+
+    expect(sortedSegments[4].content).toBe("]");
+    expect(sortedSegments[4].groupIndex).toBe(-1);
+    expect(sortedSegments[4].start).toBe(11);
+    expect(sortedSegments[4].end).toBe(12);
   });
 
   it("should handle optional group that is undefined", () => {
     const result = getReplacementSegments("ac", /a(b)?c/g, "[$1]");
     // Group 1 is undefined, so nothing should be inserted for $1
     expect(result.newName).toBe("[]");
-    expect(result.segments).toHaveLength(0);
+    // Only the brackets are literal segments
+    const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
+    expect(literalSegments).toHaveLength(2);
   });
 
   it("should handle multiple occurrences with global regex", () => {
     const result = getReplacementSegments("test test test", /test/g, "X");
     // Global should replace all matches
     expect(result.newName).toBe("X X X");
+    // 3 literal "X" segments
+    expect(result.segments).toHaveLength(3);
+    result.segments.forEach((s) => {
+      expect(s.groupIndex).toBe(-1);
+      expect(s.content).toBe("X");
+    });
   });
 
   it("should handle complex replacement pattern", () => {
@@ -457,6 +524,13 @@ describe("getReplacementSegments", () => {
       "$4_$1-$2-$3.jpg"
     );
     expect(result.newName).toBe("photo_2023-01-01.jpg");
+    
+    // Groups: photo ($4), 2023 ($1), 01 ($2), 01 ($3)
+    // Literals: "_", "-", "-", ".jpg"
+    const groupSegments = result.segments.filter((s) => s.groupIndex > 0);
+    const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
+    expect(groupSegments).toHaveLength(4);
+    expect(literalSegments).toHaveLength(4);
   });
 
   it("should handle no matches", () => {
@@ -468,17 +542,25 @@ describe("getReplacementSegments", () => {
   it("should handle adjacent matches", () => {
     const result = getReplacementSegments("aaa", /a/g, "b");
     expect(result.newName).toBe("bbb");
+    // 3 literal "b" segments
+    expect(result.segments).toHaveLength(3);
   });
 
   it("should handle case-insensitive regex", () => {
     const result = getReplacementSegments("Hello HELLO hello", /hello/gi, "hi");
     expect(result.newName).toBe("hi hi hi");
+    // 3 literal "hi" segments
+    expect(result.segments).toHaveLength(3);
   });
 
   it("should handle multiple groups with same content", () => {
     const result = getReplacementSegments("abab", /(ab)/g, "[$1]");
     expect(result.newName).toBe("[ab][ab]");
-    expect(result.segments).toHaveLength(2);
+    // 2 group segments + 4 literal brackets
+    const groupSegments = result.segments.filter((s) => s.groupIndex === 1);
+    const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
+    expect(groupSegments).toHaveLength(2);
+    expect(literalSegments).toHaveLength(4);
   });
 
   describe("Zero-length matches (memory leak prevention)", () => {
@@ -491,11 +573,15 @@ describe("getReplacementSegments", () => {
     it("should handle ^ anchor without infinite loop", () => {
       const result = getReplacementSegments("hello", /^/g, "START-");
       expect(result.newName).toBe("START-hello");
+      // "START-" is literal
+      expect(result.segments.some((s) => s.groupIndex === -1 && s.content === "START-")).toBe(true);
     });
 
     it("should handle $ anchor without infinite loop", () => {
       const result = getReplacementSegments("hello", /$/g, "-END");
       expect(result.newName).toBe("hello-END");
+      // "-END" is literal
+      expect(result.segments.some((s) => s.groupIndex === -1 && s.content === "-END")).toBe(true);
     });
 
     it("should handle a* regex (zero or more) without infinite loop", () => {

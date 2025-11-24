@@ -39,7 +39,7 @@ export function calculateNewName(
 export interface RegexMatch {
   start: number;
   end: number;
-  groupIndex: number; // 0 for full match, 1+ for capture groups
+  groupIndex: number; // 0 for full match, 1+ for capture groups, -1 for literal replacement text
   content: string;
 }
 
@@ -105,6 +105,19 @@ export function getReplacementSegments(
   let newName = "";
   let lastIndex = 0;
 
+  // Helper to add literal segment (groupIndex = -1)
+  const addLiteralSegment = (content: string) => {
+    if (content.length > 0) {
+      segments.push({
+        start: newName.length,
+        end: newName.length + content.length,
+        groupIndex: -1, // -1 indicates literal replacement text (new/added)
+        content,
+      });
+      newName += content;
+    }
+  };
+
   try {
     // Ensure 'd' flag for indices, and 'g' if original had it
     const flags = new Set(regex.flags.split(""));
@@ -113,7 +126,7 @@ export function getReplacementSegments(
 
     let match;
     while ((match = safeRegex.exec(originalName)) !== null) {
-      // Append non-matched part
+      // Append non-matched part (unchanged from original, not highlighted)
       newName += originalName.substring(lastIndex, match.index);
 
       // Process replacement string
@@ -124,14 +137,16 @@ export function getReplacementSegments(
       let tokenMatch;
 
       while ((tokenMatch = tokenRegex.exec(replaceText)) !== null) {
-        // Append literal part before token
-        newName += replaceText.substring(lastTokenIndex, tokenMatch.index);
+        // Append literal part before token as "new/added" text
+        const literalBefore = replaceText.substring(lastTokenIndex, tokenMatch.index);
+        addLiteralSegment(literalBefore);
 
         const token = tokenMatch[1];
         if (token === "$") {
-          newName += "$";
+          // Escaped $, treat as literal
+          addLiteralSegment("$");
         } else if (token === "&") {
-          // Entire match
+          // Entire match - use groupIndex 0
           const content = match[0];
           segments.push({
             start: newName.length,
@@ -141,11 +156,11 @@ export function getReplacementSegments(
           });
           newName += content;
         } else if (token === "`") {
-          // Before match
+          // Before match - this is text from original, not "new"
           const content = originalName.substring(0, match.index);
           newName += content;
         } else if (token === "'") {
-          // After match
+          // After match - this is text from original, not "new"
           const content = originalName.substring(match.index + match[0].length);
           newName += content;
         } else {
@@ -166,15 +181,16 @@ export function getReplacementSegments(
           } else {
             // If group doesn't exist, JS replace usually treats it as literal "$n"
             // e.g. "abc".replace(/(a)/, "$2") -> "$2bc"
-            newName += "$" + token;
+            addLiteralSegment("$" + token);
           }
         }
 
         lastTokenIndex = tokenRegex.lastIndex;
       }
 
-      // Append remaining literal part of replacement string
-      newName += replaceText.substring(lastTokenIndex);
+      // Append remaining literal part of replacement string as "new/added" text
+      const literalAfter = replaceText.substring(lastTokenIndex);
+      addLiteralSegment(literalAfter);
 
       lastIndex = safeRegex.lastIndex;
 
@@ -186,7 +202,7 @@ export function getReplacementSegments(
       if (!safeRegex.global) break;
     }
 
-    // Append remaining part of original string
+    // Append remaining part of original string (unchanged, not highlighted)
     newName += originalName.substring(lastIndex);
   } catch (e) {
     console.error("Error calculating replacement segments:", e);

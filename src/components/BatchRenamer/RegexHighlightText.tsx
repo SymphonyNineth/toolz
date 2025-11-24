@@ -4,25 +4,32 @@ import { RegexMatch } from "./renamingUtils";
 interface RegexHighlightTextProps {
   text: string;
   matches: RegexMatch[];
+  mode: "original" | "modified";
 }
 
+// Colors for capture groups (1, 2, 3...) - excludes red and green which are reserved
+// for removed/added text highlighting
 const GROUP_COLORS = [
-  "bg-base-content/20 text-base-content", // Group 0 (Full match)
-  "bg-blue-500/20 text-blue-600 dark:text-blue-400",
-  "bg-green-500/20 text-green-600 dark:text-green-400",
-  "bg-purple-500/20 text-purple-600 dark:text-purple-400",
-  "bg-orange-500/20 text-orange-600 dark:text-orange-400",
-  "bg-pink-500/20 text-pink-600 dark:text-pink-400",
-  "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400",
-  "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400",
-  "bg-red-500/20 text-red-600 dark:text-red-400",
+  "bg-blue-500/20 text-blue-600 dark:text-blue-400",      // Group 1
+  "bg-purple-500/20 text-purple-600 dark:text-purple-400", // Group 2
+  "bg-orange-500/20 text-orange-600 dark:text-orange-400", // Group 3
+  "bg-pink-500/20 text-pink-600 dark:text-pink-400",       // Group 4
+  "bg-cyan-500/20 text-cyan-600 dark:text-cyan-400",       // Group 5
+  "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400", // Group 6
+  "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400", // Group 7
+  "bg-teal-500/20 text-teal-600 dark:text-teal-400",       // Group 8
 ];
+
+// Special highlight classes
+const REMOVED_CLASS = "bg-error/20 text-error line-through decoration-2"; // Red - for removed text (group 0 in original mode)
+const ADDED_CLASS = "bg-success/20 text-success font-semibold"; // Green - for added text (literal replacement in modified mode)
 
 const RegexHighlightText: Component<RegexHighlightTextProps> = (props) => {
   const segments = () => {
     const text = props.text;
     const matches = props.matches;
-    const charStyles = new Array(text.length).fill(-1);
+    // Use -2 as "no style" marker, since -1 is now used for literal replacement text
+    const charStyles = new Array(text.length).fill(-2);
 
     // Apply styles. Later matches (higher group indices usually) overwrite earlier ones.
     // Since matches are flattened, we need to be careful.
@@ -66,18 +73,53 @@ const RegexHighlightText: Component<RegexHighlightTextProps> = (props) => {
     return result;
   };
 
+  const getColorClass = (groupIndex: number): string | null => {
+    if (props.mode === "original") {
+      // In original mode:
+      // - Group 0 (full match) = red (being removed/replaced)
+      // - Groups 1+ = their respective colors
+      // - No match (-2) = no highlight
+      if (groupIndex === -2) return null;
+      if (groupIndex === 0) return REMOVED_CLASS;
+      // Groups 1+ use GROUP_COLORS array (index 1 -> GROUP_COLORS[0], etc.)
+      return GROUP_COLORS[(groupIndex - 1) % GROUP_COLORS.length];
+    } else {
+      // In modified mode:
+      // - Group -1 (literal replacement) = green (new/added)
+      // - Groups 0+ = their respective colors (from original groups)
+      // - No match (-2) = no highlight
+      if (groupIndex === -2) return null;
+      if (groupIndex === -1) return ADDED_CLASS;
+      if (groupIndex === 0) {
+        // $& reference - use a neutral color since it's from full match
+        return "bg-base-content/20 text-base-content";
+      }
+      // Groups 1+ use GROUP_COLORS array (index 1 -> GROUP_COLORS[0], etc.)
+      return GROUP_COLORS[(groupIndex - 1) % GROUP_COLORS.length];
+    }
+  };
+
+  const getTitle = (groupIndex: number): string | undefined => {
+    if (groupIndex === -2) return undefined;
+    if (groupIndex === -1) return "New text";
+    if (groupIndex === 0) {
+      return props.mode === "original" ? "Matched text (will be replaced)" : "Full match ($&)";
+    }
+    return `Group ${groupIndex}`;
+  };
+
   return (
     <span class="font-mono text-sm break-all">
       <For each={segments()}>
         {(segment) => {
-          if (segment.groupIndex === -1) {
+          const colorClass = getColorClass(segment.groupIndex);
+          if (!colorClass) {
             return <span>{segment.text}</span>;
           }
-          const colorClass = GROUP_COLORS[segment.groupIndex % GROUP_COLORS.length];
           return (
             <span
               class={`rounded-sm px-0.5 mx-px ${colorClass}`}
-              title={`Group ${segment.groupIndex}`}
+              title={getTitle(segment.groupIndex)}
             >
               {segment.text}
             </span>

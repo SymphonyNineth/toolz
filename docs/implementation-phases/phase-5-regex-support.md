@@ -52,10 +52,39 @@ Add advanced regex pattern matching capabilities to the batch file renamer, allo
   - Extract part of filename: `^(.+)_old$` → `$1_new`
 - Add a close button to dismiss the cheat sheet.
 
+---
+
+### Regex Highlighting System
+#### [RegexHighlightText.tsx](file:///home/hayk/side-projects/simple-tools/src/components/BatchRenamer/RegexHighlightText.tsx)
+The component visualizes regex matches and replacements with color-coded highlighting:
+
+**Original Name (mode="original"):**
+- **Red with strikethrough**: Group 0 (full match) - text that will be removed/replaced
+- **Group colors (blue, purple, orange, etc.)**: Capture groups (1, 2, 3...) - text that can be referenced in replacement
+
+**New Name (mode="modified"):**
+- **Green**: Literal replacement text (groupIndex -1) - new text being added
+- **Group colors**: Text from group references ($1, $2, etc.) - showing origin of content
+
+**Color Scheme:**
+- Red and green are reserved exclusively for removed/added text highlighting
+- Capture groups use distinct colors: blue, purple, orange, pink, cyan, yellow, indigo, teal
+- This ensures clear visual distinction between "what changes" and "what transfers"
+
+#### [renamingUtils.ts](file:///home/hayk/side-projects/simple-tools/src/components/BatchRenamer/renamingUtils.ts)
+- `getRegexMatches()`: Returns regex matches with group indices for original name highlighting
+- `getReplacementSegments()`: Returns segments for new name highlighting, including:
+  - Group reference segments (groupIndex > 0)
+  - Full match reference segments (groupIndex 0, for $&)
+  - Literal replacement text segments (groupIndex -1)
+
+---
+
 ## Verification Plan
 
 ### Automated Tests
-- None planned for this phase (UI-focused feature).
+- `RegexHighlightText.test.tsx`: Tests for both original and modified mode highlighting
+- `renamingUtils.test.ts`: Tests for `getReplacementSegments` including literal segment tracking
 
 ### Manual Verification
 1. **Regex Mode Toggle**:

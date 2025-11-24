@@ -4,9 +4,9 @@ import { RegexMatch } from "./renamingUtils";
 import { describe, it, expect } from "vitest";
 
 describe("RegexHighlightText", () => {
-  describe("Basic Rendering", () => {
+  describe("Original Mode - Basic Rendering", () => {
     it("renders text without matches correctly", () => {
-      render(() => <RegexHighlightText text="Hello World" matches={[]} />);
+      render(() => <RegexHighlightText text="Hello World" matches={[]} mode="original" />);
       expect(screen.getByText("Hello World")).toBeInTheDocument();
     });
 
@@ -22,20 +22,36 @@ describe("RegexHighlightText", () => {
         { start: 4, end: 7, groupIndex: 2, content: "123" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       // Check if segments are rendered
       expect(screen.getByText("file")).toBeInTheDocument();
       expect(screen.getByText("123")).toBeInTheDocument();
       expect(screen.getByText(".txt")).toBeInTheDocument();
 
-      // Check for highlighting classes (indirectly via title or class presence)
-      // The component adds title={`Group ${groupIndex}`}
+      // Check for highlighting classes (indirectly via title)
       const fileSpan = screen.getByText("file");
       expect(fileSpan).toHaveAttribute("title", "Group 1");
 
       const numberSpan = screen.getByText("123");
       expect(numberSpan).toHaveAttribute("title", "Group 2");
+    });
+
+    it("handles group 0 only (no capture groups) with red highlighting", () => {
+      const text = "hello world";
+      const matches: RegexMatch[] = [
+        { start: 0, end: 5, groupIndex: 0, content: "hello" },
+      ];
+
+      const { container } = render(() => (
+        <RegexHighlightText text={text} matches={matches} mode="original" />
+      ));
+
+      const helloSpan = screen.getByText("hello");
+      expect(helloSpan).toHaveAttribute("title", "Matched text (will be replaced)");
+      // Should have error/red classes for removed text
+      expect(helloSpan.className).toContain("text-error");
+      expect(helloSpan.className).toContain("line-through");
     });
 
     it("handles nested groups correctly", () => {
@@ -50,7 +66,7 @@ describe("RegexHighlightText", () => {
         { start: 1, end: 2, groupIndex: 2, content: "b" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       // Expected segments: "a" (Group 1), "b" (Group 2), "c" (Group 1)
       const aSpan = screen.getByText("a");
@@ -64,10 +80,74 @@ describe("RegexHighlightText", () => {
     });
   });
 
+  describe("Modified Mode - Basic Rendering", () => {
+    it("renders text without matches correctly", () => {
+      render(() => <RegexHighlightText text="Hello World" matches={[]} mode="modified" />);
+      expect(screen.getByText("Hello World")).toBeInTheDocument();
+    });
+
+    it("highlights literal replacement text (groupIndex -1) as added/green", () => {
+      const text = "newtext";
+      const matches: RegexMatch[] = [
+        { start: 0, end: 7, groupIndex: -1, content: "newtext" },
+      ];
+
+      const { container } = render(() => (
+        <RegexHighlightText text={text} matches={matches} mode="modified" />
+      ));
+
+      const newTextSpan = screen.getByText("newtext");
+      expect(newTextSpan).toHaveAttribute("title", "New text");
+      // Should have success/green classes for added text
+      expect(newTextSpan.className).toContain("text-success");
+    });
+
+    it("renders group references with their group colors", () => {
+      const text = "file123";
+      // Simulating $1$2 replacement where file is group 1 and 123 is group 2
+      const matches: RegexMatch[] = [
+        { start: 0, end: 4, groupIndex: 1, content: "file" },
+        { start: 4, end: 7, groupIndex: 2, content: "123" },
+      ];
+
+      render(() => <RegexHighlightText text={text} matches={matches} mode="modified" />);
+
+      const fileSpan = screen.getByText("file");
+      expect(fileSpan).toHaveAttribute("title", "Group 1");
+
+      const numberSpan = screen.getByText("123");
+      expect(numberSpan).toHaveAttribute("title", "Group 2");
+    });
+
+    it("handles mixed literal and group reference text", () => {
+      const text = "prefix_file_suffix";
+      // Simulating "prefix_$1_suffix" where "prefix_" and "_suffix" are literal (-1)
+      // and "file" is from group 1
+      const matches: RegexMatch[] = [
+        { start: 0, end: 7, groupIndex: -1, content: "prefix_" },
+        { start: 7, end: 11, groupIndex: 1, content: "file" },
+        { start: 11, end: 18, groupIndex: -1, content: "_suffix" },
+      ];
+
+      render(() => <RegexHighlightText text={text} matches={matches} mode="modified" />);
+
+      const prefixSpan = screen.getByText("prefix_");
+      expect(prefixSpan).toHaveAttribute("title", "New text");
+      expect(prefixSpan.className).toContain("text-success");
+
+      const fileSpan = screen.getByText("file");
+      expect(fileSpan).toHaveAttribute("title", "Group 1");
+
+      const suffixSpan = screen.getByText("_suffix");
+      expect(suffixSpan).toHaveAttribute("title", "New text");
+      expect(suffixSpan.className).toContain("text-success");
+    });
+  });
+
   describe("Edge Cases", () => {
     it("handles empty text", () => {
       const { container } = render(() => (
-        <RegexHighlightText text="" matches={[]} />
+        <RegexHighlightText text="" matches={[]} mode="original" />
       ));
       // Should render empty span without errors
       expect(container.querySelector("span")).toBeInTheDocument();
@@ -81,7 +161,7 @@ describe("RegexHighlightText", () => {
         { start: 5, end: 8, groupIndex: 1, content: "123" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       expect(screen.getByText("hello")).toBeInTheDocument();
       expect(screen.getByText("123")).toBeInTheDocument();
@@ -95,7 +175,7 @@ describe("RegexHighlightText", () => {
         { start: 0, end: 3, groupIndex: 1, content: "123" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       expect(screen.getByText("123")).toBeInTheDocument();
       expect(screen.getByText("hello")).toBeInTheDocument();
@@ -117,7 +197,7 @@ describe("RegexHighlightText", () => {
         { start: 7, end: 8, groupIndex: 2, content: "3" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       // Check that letters and numbers are highlighted
       expect(screen.getByText("a")).toHaveAttribute("title", "Group 1");
@@ -136,7 +216,7 @@ describe("RegexHighlightText", () => {
       ];
 
       const { container } = render(() => (
-        <RegexHighlightText text={text} matches={matches} />
+        <RegexHighlightText text={text} matches={matches} mode="original" />
       ));
 
       // Should still render without errors
@@ -155,7 +235,7 @@ describe("RegexHighlightText", () => {
         { start: 1, end: 2, groupIndex: 1, content: "b" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       expect(screen.getByText("a")).toBeInTheDocument();
       expect(screen.getByText("b")).toBeInTheDocument();
@@ -170,7 +250,7 @@ describe("RegexHighlightText", () => {
         { start: 0, end: 5, groupIndex: 1, content: "hello" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       expect(screen.getByText("hello")).toBeInTheDocument();
       expect(screen.getByText("hello")).toHaveAttribute("title", "Group 1");
@@ -183,7 +263,7 @@ describe("RegexHighlightText", () => {
         { start: 4, end: 7, groupIndex: 1, content: "(1)" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       expect(screen.getByText("file")).toBeInTheDocument();
       expect(screen.getByText("(1)")).toBeInTheDocument();
@@ -198,7 +278,7 @@ describe("RegexHighlightText", () => {
         { start: 5, end: 7, groupIndex: 1, content: "🌍" },
       ];
 
-      render(() => <RegexHighlightText text={text} matches={matches} />);
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
 
       expect(screen.getByText("hello")).toBeInTheDocument();
       expect(screen.getByText("🌍")).toBeInTheDocument();
@@ -213,7 +293,7 @@ describe("RegexHighlightText", () => {
       ];
 
       const { container } = render(() => (
-        <RegexHighlightText text={text} matches={matches} />
+        <RegexHighlightText text={text} matches={matches} mode="original" />
       ));
 
       const prefixSpan = screen.getByText("prefix_");
@@ -222,6 +302,51 @@ describe("RegexHighlightText", () => {
       // Unmatched portions should not have title attribute
       expect(prefixSpan).not.toHaveAttribute("title");
       expect(suffixSpan).not.toHaveAttribute("title");
+    });
+  });
+
+  describe("Color Class Verification", () => {
+    it("uses error/red color for group 0 in original mode", () => {
+      const text = "match";
+      const matches: RegexMatch[] = [
+        { start: 0, end: 5, groupIndex: 0, content: "match" },
+      ];
+
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
+
+      const matchSpan = screen.getByText("match");
+      expect(matchSpan.className).toContain("bg-error");
+      expect(matchSpan.className).toContain("text-error");
+      expect(matchSpan.className).toContain("line-through");
+    });
+
+    it("uses success/green color for literal text (-1) in modified mode", () => {
+      const text = "added";
+      const matches: RegexMatch[] = [
+        { start: 0, end: 5, groupIndex: -1, content: "added" },
+      ];
+
+      render(() => <RegexHighlightText text={text} matches={matches} mode="modified" />);
+
+      const addedSpan = screen.getByText("added");
+      expect(addedSpan.className).toContain("bg-success");
+      expect(addedSpan.className).toContain("text-success");
+    });
+
+    it("does not use red or green for capture groups (1+)", () => {
+      const text = "group1";
+      const matches: RegexMatch[] = [
+        { start: 0, end: 6, groupIndex: 1, content: "group1" },
+      ];
+
+      render(() => <RegexHighlightText text={text} matches={matches} mode="original" />);
+
+      const groupSpan = screen.getByText("group1");
+      // Should not have error (red) or success (green) colors
+      expect(groupSpan.className).not.toContain("text-error");
+      expect(groupSpan.className).not.toContain("text-success");
+      // Should have some other color (blue is first in GROUP_COLORS)
+      expect(groupSpan.className).toContain("text-blue");
     });
   });
 });

@@ -238,6 +238,7 @@ const FileList: Component<FileListProps> = (props) => {
                         <RegexHighlightText
                           text={file.name}
                           matches={file.regexMatches}
+                          mode="original"
                         />
                       ) : (
                         <DiffText
@@ -258,6 +259,7 @@ const FileList: Component<FileListProps> = (props) => {
                         <RegexHighlightText
                           text={file.newName}
                           matches={file.newNameRegexMatches}
+                          mode="modified"
                         />
                       ) : (
                         <DiffText
