@@ -1,4 +1,3 @@
-
 export interface RenameResult {
   newName: string;
   error?: string;
@@ -25,7 +24,7 @@ export function calculateNewName(
     } else {
       // In normal mode, escape special characters
       const flags = caseSensitive ? "g" : "gi";
-      const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       regex = new RegExp(escapedFindText, flags);
     }
 
@@ -51,18 +50,18 @@ export function getRegexMatches(text: string, regex: RegExp): RegexMatch[] {
     // Ensure the regex has the 'd' flag for indices if supported
     // We create a new RegExp to avoid side effects on the passed regex object
     // and to ensure we have the 'd' flag.
-    const flags = new Set(regex.flags.split(''));
-    flags.add('d');
-    if (!flags.has('g')) {
+    const flags = new Set(regex.flags.split(""));
+    flags.add("d");
+    if (!flags.has("g")) {
       // We generally want global matching to find all occurrences if the original was global
-      // But if the user didn't ask for global, maybe we shouldn't? 
+      // But if the user didn't ask for global, maybe we shouldn't?
       // Actually, for visualization, we probably want to visualize what the replacement does.
       // The replacement logic in calculateNewName uses 'g' or 'gi'.
-      // So we should probably respect the 'g' flag from the input regex, 
+      // So we should probably respect the 'g' flag from the input regex,
       // but calculateNewName constructs it with 'g'.
     }
 
-    const safeRegex = new RegExp(regex.source, Array.from(flags).join(''));
+    const safeRegex = new RegExp(regex.source, Array.from(flags).join(""));
 
     let match;
     while ((match = safeRegex.exec(text)) !== null) {
@@ -76,10 +75,15 @@ export function getRegexMatches(text: string, regex: RegExp): RegexMatch[] {
               start: indices[i][0],
               end: indices[i][1],
               groupIndex: i,
-              content: text.substring(indices[i][0], indices[i][1])
+              content: text.substring(indices[i][0], indices[i][1]),
             });
           }
         }
+      }
+
+      // Prevent infinite loop on zero-length matches (e.g., /.*/, /a*/, /^/, /$/)
+      if (match[0].length === 0) {
+        safeRegex.lastIndex++;
       }
 
       if (!safeRegex.global) break;
@@ -173,12 +177,17 @@ export function getReplacementSegments(
       newName += replaceText.substring(lastTokenIndex);
 
       lastIndex = safeRegex.lastIndex;
+
+      // Prevent infinite loop on zero-length matches (e.g., /.*/, /a*/, /^/, /$/)
+      if (match[0].length === 0) {
+        safeRegex.lastIndex++;
+      }
+
       if (!safeRegex.global) break;
     }
 
     // Append remaining part of original string
     newName += originalName.substring(lastIndex);
-
   } catch (e) {
     console.error("Error calculating replacement segments:", e);
     // Fallback: just return the string without segments
