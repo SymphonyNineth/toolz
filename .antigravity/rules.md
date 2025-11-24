@@ -1,0 +1,40 @@
+# Project Rules
+
+## Styling
+
+- Use **Tailwind CSS** for all styling
+- Use **DaisyUI** components and utilities when available
+- Prefer DaisyUI components over custom implementations when possible
+- Use Tailwind utility classes for layout, spacing, colors, and responsive design
+- Follow Tailwind's utility-first approach
+
+## Technology Stack
+
+- **Frontend Framework**: SolidJS
+- **Desktop Framework**: Tauri
+- **Language**: TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS + DaisyUI
+- **Bundler**: Bun
+
+## Code Style
+
+- Use TypeScript for type safety
+- Follow SolidJS patterns and best practices
+- Use functional components with signals for state management
+- Keep components small and focused
+
+## Component Organization
+
+- **Extract generic/reusable components** into separate files
+- Create shared components in `src/components/`
+- Reuse components across the application rather than duplicating code
+
+## Testing
+
+- **Every feature must be covered in unit tests**
+
+## Docs
+
+- Information about the project is available inside the /docs directory
+- Every new feature must be documented either in new file or in the according file if exists
