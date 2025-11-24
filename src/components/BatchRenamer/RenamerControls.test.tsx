@@ -14,6 +14,8 @@ describe("RenamerControls", () => {
     regexMode: false,
     setRegexMode: vi.fn(),
     regexError: undefined,
+    replaceFirstOnly: false,
+    setReplaceFirstOnly: vi.fn(),
   };
 
   beforeEach(() => {
@@ -33,6 +35,7 @@ describe("RenamerControls", () => {
 
       expect(screen.getByLabelText("Case Sensitive")).toBeInTheDocument();
       expect(screen.getByLabelText("Regex Mode")).toBeInTheDocument();
+      expect(screen.getByLabelText("Replace First Only")).toBeInTheDocument();
     });
 
     it("should display initial values from props", () => {
@@ -50,6 +53,7 @@ describe("RenamerControls", () => {
       expect(screen.getByLabelText("Replace with")).toHaveValue("initial replace");
       expect(screen.getByLabelText("Case Sensitive")).toBeChecked();
       expect(screen.getByLabelText("Regex Mode")).toBeChecked();
+      expect(screen.getByLabelText("Replace First Only")).not.toBeChecked();
     });
   });
 
@@ -88,6 +92,15 @@ describe("RenamerControls", () => {
       fireEvent.click(checkbox);
 
       expect(defaultProps.setRegexMode).toHaveBeenCalledWith(true);
+    });
+
+    it("should call setReplaceFirstOnly when toggling checkbox", () => {
+      render(() => <RenamerControls {...defaultProps} />);
+
+      const checkbox = screen.getByLabelText("Replace First Only");
+      fireEvent.click(checkbox);
+
+      expect(defaultProps.setReplaceFirstOnly).toHaveBeenCalledWith(true);
     });
   });
 

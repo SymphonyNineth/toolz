@@ -13,6 +13,7 @@ export default function BatchRenamer() {
   const [replaceText, setReplaceText] = createSignal("");
   const [caseSensitive, setCaseSensitive] = createSignal(false);
   const [regexMode, setRegexMode] = createSignal(false);
+  const [replaceFirstOnly, setReplaceFirstOnly] = createSignal(false);
   const [regexError, setRegexError] = createSignal<string | undefined>(undefined);
   const [statusMap, setStatusMap] = createSignal<Record<string, 'idle' | 'success' | 'error'>>({});
 
@@ -29,6 +30,7 @@ export default function BatchRenamer() {
     setStatusMap({});
     setRegexError(undefined);
   };
+  const updateReplaceFirstOnly = (val: boolean) => { setReplaceFirstOnly(val); setStatusMap({}); };
 
   // Helper to extract filename from path
   const getFileName = (path: string) => {
@@ -56,7 +58,8 @@ export default function BatchRenamer() {
         findText(),
         replaceText(),
         caseSensitive(),
-        regexMode()
+        regexMode(),
+        replaceFirstOnly()
       );
 
       newName = result.newName;
@@ -74,7 +77,7 @@ export default function BatchRenamer() {
       let newNameRegexMatches;
       if (!result.error && regexMode() && findText()) {
         try {
-          const flags = caseSensitive() ? "g" : "gi";
+          const flags = caseSensitive() ? (replaceFirstOnly() ? "" : "g") : (replaceFirstOnly() ? "i" : "gi");
           const regex = new RegExp(findText(), flags);
           regexMatches = getRegexMatches(name, regex);
 
@@ -256,6 +259,8 @@ export default function BatchRenamer() {
           regexMode={regexMode()}
           setRegexMode={updateRegexMode}
           regexError={regexError()}
+          replaceFirstOnly={replaceFirstOnly()}
+          setReplaceFirstOnly={updateReplaceFirstOnly}
         />
 
         <div class="flex justify-center gap-4 mt-8">

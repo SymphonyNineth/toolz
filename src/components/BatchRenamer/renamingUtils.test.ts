@@ -75,6 +75,18 @@ describe("calculateNewName", () => {
       const result = calculateNewName("file_v1.txt", "_v1", "", false, false);
       expect(result.newName).toBe("file.txt");
     });
+
+    it("should replace only first occurrence when replaceFirstOnly is true", () => {
+      const result = calculateNewName(
+        "test-test.txt",
+        "test",
+        "sample",
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe("sample-test.txt");
+    });
   });
 
   describe("Regex Mode", () => {
@@ -123,6 +135,18 @@ describe("calculateNewName", () => {
     it("should replace all occurrences in regex mode", () => {
       const result = calculateNewName("a1b2c3.txt", "\\d", "X", false, true);
       expect(result.newName).toBe("aXbXcX.txt");
+    });
+
+    it("should replace only first occurrence in regex mode when replaceFirstOnly is true", () => {
+      const result = calculateNewName(
+        "a1b2c3.txt",
+        "\\d",
+        "X",
+        false,
+        true,
+        true
+      );
+      expect(result.newName).toBe("aXb2c3.txt");
     });
   });
 
@@ -403,7 +427,7 @@ describe("getReplacementSegments", () => {
     const result = getReplacementSegments("hello", /(h)ello/g, "$1-$5");
     // $5 doesn't exist, should be treated as literal "$5"
     expect(result.newName).toBe("h-$5");
-    
+
     // "-" and "$5" should be literal segments
     const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
     expect(literalSegments).toHaveLength(2);
@@ -418,11 +442,11 @@ describe("getReplacementSegments", () => {
     // Should have segments for each match: "[", group1, "=", group2, "]" × 3
     // = 15 segments total (5 per match × 3 matches)
     expect(result.segments).toHaveLength(15);
-    
+
     // 6 group segments (2 groups × 3 matches)
     const groupSegments = result.segments.filter((s) => s.groupIndex > 0);
     expect(groupSegments).toHaveLength(6);
-    
+
     // 9 literal segments (3 literals × 3 matches)
     const literalSegments = result.segments.filter((s) => s.groupIndex === -1);
     expect(literalSegments).toHaveLength(9);
@@ -467,14 +491,14 @@ describe("getReplacementSegments", () => {
     // Segments in order: "[", "file", "]-[", "123", "]"
     // Note: consecutive literals between tokens are combined
     const sortedSegments = [...result.segments].sort((a, b) => a.start - b.start);
-    
+
     expect(sortedSegments).toHaveLength(5);
-    
+
     expect(sortedSegments[0].content).toBe("[");
     expect(sortedSegments[0].groupIndex).toBe(-1);
     expect(sortedSegments[0].start).toBe(0);
     expect(sortedSegments[0].end).toBe(1);
-    
+
     expect(sortedSegments[1].content).toBe("file");
     expect(sortedSegments[1].groupIndex).toBe(1);
     expect(sortedSegments[1].start).toBe(1);
@@ -484,7 +508,7 @@ describe("getReplacementSegments", () => {
     expect(sortedSegments[2].groupIndex).toBe(-1);
     expect(sortedSegments[2].start).toBe(5);
     expect(sortedSegments[2].end).toBe(8);
-    
+
     expect(sortedSegments[3].content).toBe("123");
     expect(sortedSegments[3].groupIndex).toBe(2);
     expect(sortedSegments[3].start).toBe(8);
@@ -524,7 +548,7 @@ describe("getReplacementSegments", () => {
       "$4_$1-$2-$3.jpg"
     );
     expect(result.newName).toBe("photo_2023-01-01.jpg");
-    
+
     // Groups: photo ($4), 2023 ($1), 01 ($2), 01 ($3)
     // Literals: "_", "-", "-", ".jpg"
     const groupSegments = result.segments.filter((s) => s.groupIndex > 0);

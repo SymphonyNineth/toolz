@@ -8,7 +8,8 @@ export function calculateNewName(
   findText: string,
   replaceText: string,
   caseSensitive: boolean,
-  regexMode: boolean
+  regexMode: boolean,
+  replaceFirstOnly: boolean = false
 ): RenameResult {
   if (!findText) {
     return { newName: originalName };
@@ -19,11 +20,11 @@ export function calculateNewName(
 
     if (regexMode) {
       // In regex mode, use the pattern directly
-      const flags = caseSensitive ? "g" : "gi";
+      const flags = caseSensitive ? (replaceFirstOnly ? "" : "g") : (replaceFirstOnly ? "i" : "gi");
       regex = new RegExp(findText, flags);
     } else {
       // In normal mode, escape special characters
-      const flags = caseSensitive ? "g" : "gi";
+      const flags = caseSensitive ? (replaceFirstOnly ? "" : "g") : (replaceFirstOnly ? "i" : "gi");
       const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       regex = new RegExp(escapedFindText, flags);
     }
