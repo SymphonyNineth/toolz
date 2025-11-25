@@ -27,7 +27,10 @@ const ActionButtons: Component<ActionButtonsProps> = (props) => {
         <div class="flex justify-center">
           <div class="inline-flex items-center gap-3 px-4 py-2 bg-base-100 rounded-full text-sm shadow-sm border border-base-300">
             <span class="text-base-content/70">
-              <span class="font-semibold text-base-content">{props.totalFilesCount}</span> files selected
+              <span class="font-semibold text-base-content">
+                {props.totalFilesCount}
+              </span>{" "}
+              files selected
             </span>
             <Show when={(props.filesToRenameCount ?? 0) > 0}>
               <span class="w-px h-4 bg-base-300" />
@@ -41,11 +44,7 @@ const ActionButtons: Component<ActionButtonsProps> = (props) => {
 
       {/* Action buttons */}
       <div class="flex justify-center gap-3">
-        <Button
-          onClick={props.onSelectFiles}
-          variant="secondary"
-          class="gap-2"
-        >
+        <Button onClick={props.onSelectFiles} variant="secondary" class="gap-2">
           <FilesIcon size="sm" />
           Select Files
         </Button>
@@ -64,14 +63,10 @@ const ActionButtons: Component<ActionButtonsProps> = (props) => {
           <Button
             onClick={props.onRename}
             disabled={!!props.renameDisabledReason}
-            variant="primary"
-            class={`gap-2 transition-all duration-300 ${
-              isRenameReady()
-                ? "shadow-lg shadow-primary/30 scale-105 ring-2 ring-primary/20"
-                : ""
-            }`}
+            variant={isRenameReady() ? "success" : "primary"}
+            class="gap-2"
           >
-            <RefreshIcon size="sm" class={isRenameReady() ? "animate-pulse" : ""} />
+            <RefreshIcon size="sm" />
             Rename Files
             <Show when={isRenameReady()}>
               <span class="badge badge-sm badge-neutral ml-1">
