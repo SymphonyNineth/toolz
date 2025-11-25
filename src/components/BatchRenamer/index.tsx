@@ -1,11 +1,12 @@
-import { createSignal, createMemo } from "solid-js";
+import { createSignal, createMemo, Show } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, Channel } from "@tauri-apps/api/core";
 import RenamerControls from "./RenamerControls";
 import NumberingControls from "./NumberingControls";
 import FileList, { FileItem } from "./FileList";
 import Header from "./Header";
 import ActionButtons from "./ActionButtons";
+import ProgressBar from "../ui/ProgressBar";
 import {
   calculateNewName,
   getRegexMatches,
@@ -16,6 +17,12 @@ import {
   DEFAULT_NUMBERING_OPTIONS,
 } from "./renamingUtils";
 import { getFileName, getDirectory, joinPath } from "../../utils/path";
+import {
+  ListProgressEvent,
+  ListProgressState,
+  RenameProgressEvent,
+  RenameProgressState,
+} from "./types";
 
 export default function BatchRenamer() {
   const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
@@ -34,6 +41,19 @@ export default function BatchRenamer() {
   const [numberingOptions, setNumberingOptions] =
     createSignal<NumberingOptions>(DEFAULT_NUMBERING_OPTIONS);
   const [numberingExpanded, setNumberingExpanded] = createSignal(false);
+
+  // Progress states
+  const [isScanning, setIsScanning] = createSignal(false);
+  const [isRenaming, setIsRenaming] = createSignal(false);
+  const [listProgress, setListProgress] = createSignal<ListProgressState>({
+    phase: "idle",
+    filesFound: 0,
+  });
+  const [renameProgress, setRenameProgress] = createSignal<RenameProgressState>({
+    phase: "idle",
+    current: 0,
+    total: 0,
+  });
 
   // Reset status when controls change
   const updateFindText = (text: string) => {
@@ -203,12 +223,43 @@ export default function BatchRenamer() {
         const folders = Array.isArray(selected) ? selected : [selected];
         const allFiles: string[] = [];
 
+        setIsScanning(true);
+        setListProgress({ phase: "scanning", filesFound: 0 });
+
         for (const folder of folders) {
-          const files = await invoke<string[]>("list_files_recursively", {
+          // Create a channel for receiving progress events
+          const progressChannel = new Channel<ListProgressEvent>();
+          
+          progressChannel.onmessage = (event: ListProgressEvent) => {
+            switch (event.type) {
+              case "started":
+                setListProgress({ phase: "scanning", filesFound: 0 });
+                break;
+              case "scanning":
+                setListProgress({
+                  phase: "scanning",
+                  currentDir: event.currentDir,
+                  filesFound: allFiles.length + event.filesFound,
+                });
+                break;
+              case "completed":
+                // Progress will be updated with actual files count
+                break;
+            }
+          };
+
+          const files = await invoke<string[]>("list_files_with_progress", {
             dirPath: folder,
+            onProgress: progressChannel,
           });
           allFiles.push(...files);
         }
+
+        setListProgress({
+          phase: "completed",
+          filesFound: allFiles.length,
+          totalFiles: allFiles.length,
+        });
 
         const allPaths = [...selectedPaths(), ...allFiles];
         const uniquePaths = Array.from(new Set(allPaths));
@@ -217,6 +268,12 @@ export default function BatchRenamer() {
       } catch (error) {
         console.error("Failed to list files:", error);
         alert(`Failed to list files: ${error}`);
+      } finally {
+        setIsScanning(false);
+        // Reset progress after a short delay
+        setTimeout(() => {
+          setListProgress({ phase: "idle", filesFound: 0 });
+        }, 500);
       }
     }
   }
@@ -232,10 +289,54 @@ export default function BatchRenamer() {
 
     if (filesToRename.length === 0) return;
 
+    setIsRenaming(true);
+
     try {
-      const result = await invoke<string[]>("batch_rename", {
-        files: filesToRename,
-      });
+      let result: string[];
+
+      // Use streaming progress for larger rename operations
+      if (filesToRename.length > 10) {
+        setRenameProgress({ phase: "renaming", current: 0, total: filesToRename.length });
+        
+        const progressChannel = new Channel<RenameProgressEvent>();
+        
+        progressChannel.onmessage = (event: RenameProgressEvent) => {
+          switch (event.type) {
+            case "started":
+              setRenameProgress({
+                phase: "renaming",
+                current: 0,
+                total: event.totalFiles,
+              });
+              break;
+            case "progress":
+              setRenameProgress({
+                phase: "renaming",
+                current: event.current,
+                total: event.total,
+                currentPath: event.currentPath,
+              });
+              break;
+            case "completed":
+              setRenameProgress({
+                phase: "completed",
+                current: event.successful,
+                total: event.successful + event.failed,
+              });
+              break;
+          }
+        };
+
+        result = await invoke<string[]>("batch_rename_with_progress", {
+          files: filesToRename,
+          onProgress: progressChannel,
+        });
+      } else {
+        result = await invoke<string[]>("batch_rename", {
+          files: filesToRename,
+        });
+      }
+
       console.log("Renamed files:", result);
 
       const newPathsMap = new Map(filesToRename);
@@ -260,6 +361,12 @@ export default function BatchRenamer() {
       });
       setStatusMap(errorStatusMap);
       alert(`Rename failed: ${error}`);
+    } finally {
+      setIsRenaming(false);
+      // Reset progress after a short delay
+      setTimeout(() => {
+        setRenameProgress({ phase: "idle", current: 0, total: 0 });
+      }, 500);
     }
   }
 
@@ -299,6 +406,37 @@ export default function BatchRenamer() {
     setStatusMap(newStatusMap);
   };
 
+  // Helper function to get list progress label
+  function getListProgressLabel(): string {
+    const progress = listProgress();
+    switch (progress.phase) {
+      case "scanning":
+        if (progress.currentDir) {
+          const parts = progress.currentDir.split(/[/\\]/);
+          const folderName = parts[parts.length - 1] || progress.currentDir;
+          return `Scanning: ${folderName}... (${progress.filesFound.toLocaleString()} files found)`;
+        }
+        return `Scanning directories... (${progress.filesFound.toLocaleString()} files found)`;
+      case "completed":
+        return `Found ${progress.totalFiles?.toLocaleString() ?? progress.filesFound.toLocaleString()} files`;
+      default:
+        return "";
+    }
+  }
+
+  // Helper function to get rename progress label
+  function getRenameProgressLabel(): string {
+    const progress = renameProgress();
+    switch (progress.phase) {
+      case "renaming":
+        return "Renaming files...";
+      case "completed":
+        return `Renamed ${progress.current.toLocaleString()} files`;
+      default:
+        return "";
+    }
+  }
+
   return (
     <div class="min-h-screen bg-base-300 p-8">
       <div class="max-w-7xl mx-auto">
@@ -336,7 +474,37 @@ export default function BatchRenamer() {
           renameDisabledReason={renameDisabledReason()}
           filesToRenameCount={filesToRenameCount()}
           totalFilesCount={selectedPaths().length}
+          isScanning={isScanning()}
+          isRenaming={isRenaming()}
         />
+
+        {/* Folder Scanning Progress */}
+        <Show when={isScanning() && listProgress().phase !== "idle"}>
+          <div class="bg-base-200 rounded-box p-4 shadow-lg mt-4">
+            <ProgressBar
+              label={getListProgressLabel()}
+              current={listProgress().filesFound}
+              showCount={false}
+              indeterminate={true}
+              variant="secondary"
+            />
+          </div>
+        </Show>
+
+        {/* Rename Progress */}
+        <Show when={isRenaming() && renameProgress().phase !== "idle"}>
+          <div class="bg-base-200 rounded-box p-4 shadow-lg mt-4">
+            <ProgressBar
+              label={getRenameProgressLabel()}
+              current={renameProgress().current}
+              total={renameProgress().total}
+              showCount={true}
+              showPercentage={true}
+              indeterminate={false}
+              variant="accent"
+            />
+          </div>
+        </Show>
 
         <FileList files={fileItems()} onRemoveFiles={handleRemoveFiles} />
       </div>

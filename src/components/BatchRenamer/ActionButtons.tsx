@@ -10,6 +10,8 @@ interface ActionButtonsProps {
   renameDisabledReason?: string;
   filesToRenameCount?: number;
   totalFilesCount?: number;
+  isScanning?: boolean;
+  isRenaming?: boolean;
 }
 
 /**
@@ -19,6 +21,8 @@ interface ActionButtonsProps {
 const ActionButtons: Component<ActionButtonsProps> = (props) => {
   const isRenameReady = () =>
     !props.renameDisabledReason && (props.filesToRenameCount ?? 0) > 0;
+  
+  const isOperationInProgress = () => props.isScanning || props.isRenaming;
 
   return (
     <div class="mt-8 space-y-4">
@@ -44,7 +48,12 @@ const ActionButtons: Component<ActionButtonsProps> = (props) => {
 
       {/* Action buttons */}
       <div class="flex justify-center gap-3">
-        <Button onClick={props.onSelectFiles} variant="secondary" class="gap-2">
+        <Button
+          onClick={props.onSelectFiles}
+          variant="secondary"
+          class="gap-2"
+          disabled={isOperationInProgress()}
+        >
           <FilesIcon size="sm" />
           Select Files
         </Button>
@@ -52,23 +61,26 @@ const ActionButtons: Component<ActionButtonsProps> = (props) => {
           onClick={props.onSelectFolders}
           variant="secondary"
           class="gap-2"
+          disabled={isOperationInProgress()}
+          loading={props.isScanning}
         >
           <FolderOpenIcon size="sm" />
-          Select Folders
+          {props.isScanning ? "Scanning..." : "Select Folders"}
         </Button>
         <Tooltip
           content={props.renameDisabledReason || ""}
-          show={!!props.renameDisabledReason}
+          show={!!props.renameDisabledReason && !isOperationInProgress()}
         >
           <Button
             onClick={props.onRename}
-            disabled={!!props.renameDisabledReason}
+            disabled={!!props.renameDisabledReason || isOperationInProgress()}
+            loading={props.isRenaming}
             variant={isRenameReady() ? "success" : "primary"}
             class="gap-2"
           >
             <RefreshIcon size="sm" />
-            Rename Files
-            <Show when={isRenameReady()}>
+            {props.isRenaming ? "Renaming..." : "Rename Files"}
+            <Show when={isRenameReady() && !props.isRenaming}>
               <span class="badge badge-sm badge-neutral ml-1">
                 {props.filesToRenameCount}
               </span>

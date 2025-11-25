@@ -1,13 +1,22 @@
-import { createSignal, createMemo, onMount } from "solid-js";
+import { createSignal, createMemo, onMount, Show } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, Channel } from "@tauri-apps/api/core";
 import Header from "./Header";
 import PatternControls from "./PatternControls";
 import ActionButtons from "./ActionButtons";
 import FileRemoverList from "./FileRemoverList";
 import DeleteConfirmModal from "./DeleteConfirmModal";
 import DeleteResultModal from "./DeleteResultModal";
-import { PatternType, FileMatchItem, DeleteResult, DeleteProgress } from "./types";
+import ProgressBar from "../ui/ProgressBar";
+import {
+  PatternType,
+  FileMatchItem,
+  DeleteResult,
+  DeleteProgress,
+  SearchProgressEvent,
+  SearchProgressState,
+  StreamingDeleteProgress,
+} from "./types";
 import { validatePattern, checkDangerousOperation } from "./utils";
 
 // localStorage keys for preferences
@@ -40,6 +49,12 @@ export default function FileRemover() {
 
   // Progress state for large deletions
   const [deleteProgress, setDeleteProgress] = createSignal<DeleteProgress | null>(null);
+
+  // Search progress state for streaming feedback
+  const [searchProgress, setSearchProgress] = createSignal<SearchProgressState>({
+    phase: "idle",
+    filesFound: 0,
+  });
 
   // Computed
   const selectedFiles = createMemo(() => files().filter((f) => f.selected));
@@ -118,29 +133,6 @@ export default function FileRemover() {
     }
   }
 
-  async function searchFilesWithRetry(maxRetries = 2): Promise<any[]> {
-    let lastError: Error | null = null;
-
-    for (let i = 0; i <= maxRetries; i++) {
-      try {
-        return await invoke<any[]>("search_files_by_pattern", {
-          basePath: basePath(),
-          pattern: pattern(),
-          patternType: patternType(),
-          includeSubdirs: includeSubdirs(),
-          caseSensitive: caseSensitive(),
-        });
-      } catch (error) {
-        lastError = error as Error;
-        if (i < maxRetries) {
-          await new Promise((r) => setTimeout(r, 500));
-        }
-      }
-    }
-
-    throw lastError;
-  }
-
   async function searchFiles() {
     if (!canSearch()) return;
 
@@ -153,9 +145,49 @@ export default function FileRemover() {
 
     setIsSearching(true);
     setPatternError(undefined);
+    setSearchProgress({ phase: "scanning", filesFound: 0 });
 
     try {
-      const results = await searchFilesWithRetry();
+      // Create a channel for receiving progress events
+      const progressChannel = new Channel<SearchProgressEvent>();
+      
+      progressChannel.onmessage = (event: SearchProgressEvent) => {
+        switch (event.type) {
+          case "started":
+            setSearchProgress({ phase: "scanning", filesFound: 0 });
+            break;
+          case "scanning":
+            setSearchProgress({
+              phase: "scanning",
+              currentDir: event.currentDir,
+              filesFound: event.filesFound,
+            });
+            break;
+          case "matching":
+            setSearchProgress({
+              phase: "matching",
+              filesFound: event.totalFiles,
+              totalFiles: event.totalFiles,
+            });
+            break;
+          case "completed":
+            setSearchProgress({
+              phase: "completed",
+              filesFound: event.matchesFound,
+              matchesFound: event.matchesFound,
+            });
+            break;
+        }
+      };
+
+      const results = await invoke<any[]>("search_files_with_progress", {
+        basePath: basePath(),
+        pattern: pattern(),
+        patternType: patternType(),
+        includeSubdirs: includeSubdirs(),
+        caseSensitive: caseSensitive(),
+        onProgress: progressChannel,
+      });
 
       setFiles(
         results.map((r) => ({
@@ -172,6 +204,10 @@ export default function FileRemover() {
       setFiles([]);
     } finally {
       setIsSearching(false);
+      // Reset progress after a short delay to allow user to see "completed"
+      setTimeout(() => {
+        setSearchProgress({ phase: "idle", filesFound: 0 });
+      }, 500);
     }
   }
 
@@ -219,8 +255,9 @@ export default function FileRemover() {
     try {
       let result: DeleteResult;
 
-      // For large deletions (>50 files), use batch processing with progress
-      if (filesToDelete.length > 50) {
+      // Use streaming progress for any deletion with more than 10 files
+      // This provides better UX feedback during deletion
+      if (filesToDelete.length > 10) {
         result = await handleDeleteWithProgress(filesToDelete);
       } else {
         result = await invoke<DeleteResult>("batch_delete", {
@@ -251,30 +288,53 @@ export default function FileRemover() {
 
   async function handleDeleteWithProgress(filesToDelete: FileMatchItem[]): Promise<DeleteResult> {
     const total = filesToDelete.length;
-    const batchSize = 50;
-    const results: DeleteResult = { successful: [], failed: [], deletedDirs: [] };
-
     setDeleteProgress({ current: 0, total });
 
-    for (let i = 0; i < filesToDelete.length; i += batchSize) {
-      const batch = filesToDelete.slice(i, i + batchSize).map((f) => f.path);
-      const isLastBatch = i + batchSize >= filesToDelete.length;
-
-      const batchResult = await invoke<DeleteResult>("batch_delete", {
-        files: batch,
-        deleteEmptyDirs: isLastBatch && deleteEmptyDirs(), // Only clean up on last batch
-      });
-
-      results.successful.push(...batchResult.successful);
-      results.failed.push(...batchResult.failed);
-      if (isLastBatch) {
-        results.deletedDirs.push(...batchResult.deletedDirs);
+    // Create a channel for receiving progress events
+    const progressChannel = new Channel<StreamingDeleteProgress>();
+    
+    progressChannel.onmessage = (event: StreamingDeleteProgress) => {
+      switch (event.type) {
+        case "started":
+          setDeleteProgress({ current: 0, total: event.totalFiles });
+          break;
+        case "progress":
+          setDeleteProgress({ current: event.current, total: event.total });
+          break;
+        case "completed":
+          setDeleteProgress({ current: total, total });
+          break;
       }
+    };
 
-      setDeleteProgress({ current: Math.min(i + batchSize, total), total });
+    const result = await invoke<DeleteResult>("batch_delete_with_progress", {
+      files: filesToDelete.map((f) => f.path),
+      deleteEmptyDirs: deleteEmptyDirs(),
+      onProgress: progressChannel,
+    });
+
+    return result;
+  }
+
+  // Helper function to get progress label text
+  function getSearchProgressLabel(): string {
+    const progress = searchProgress();
+    switch (progress.phase) {
+      case "scanning":
+        if (progress.currentDir) {
+          // Extract just the folder name from the path for cleaner display
+          const parts = progress.currentDir.split(/[/\\]/);
+          const folderName = parts[parts.length - 1] || progress.currentDir;
+          return `Scanning: ${folderName}... (${progress.filesFound.toLocaleString()} files found)`;
+        }
+        return `Scanning directories... (${progress.filesFound.toLocaleString()} files found)`;
+      case "matching":
+        return "Matching patterns...";
+      case "completed":
+        return `Found ${progress.matchesFound?.toLocaleString() ?? 0} matching files`;
+      default:
+        return "";
     }
-
-    return results;
   }
 
   return (
@@ -301,6 +361,21 @@ export default function FileRemover() {
             isSearching={isSearching()}
             canSearch={canSearch()}
           />
+
+          {/* Search Progress */}
+          <Show when={isSearching() && searchProgress().phase !== "idle"}>
+            <div class="bg-base-200 rounded-box p-4 shadow-lg">
+              <ProgressBar
+                label={getSearchProgressLabel()}
+                current={searchProgress().filesFound}
+                total={searchProgress().totalFiles}
+                showCount={searchProgress().phase === "matching"}
+                showPercentage={searchProgress().phase === "matching"}
+                indeterminate={searchProgress().phase === "scanning"}
+                variant="primary"
+              />
+            </div>
+          </Show>
 
           <ActionButtons
             onDelete={handleDeleteClick}
