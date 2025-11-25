@@ -127,11 +127,14 @@ struct FileInfo {
 
 2. **`src/components/FileRemover/PatternControls.tsx`**
 
-   - Pattern input field
+   - Folder selection button with path display (inline with controls)
+   - Pattern input field with integrated Search button
    - Pattern type selector (simple/extension/regex)
    - Case sensitivity toggle
    - Subdirectory inclusion toggle
-   - Pattern validation and error display
+   - Delete empty directories toggle
+   - Real-time pattern validation with error display
+   - Regex cheat sheet (collapsible, shared with BatchRenamer via `ui/RegexCheatSheet.tsx`)
 
 3. **`src/components/FileRemover/FileRemoverList.tsx`**
 
@@ -142,10 +145,10 @@ struct FileInfo {
 
 4. **`src/components/FileRemover/ActionButtons.tsx`**
 
-   - Folder selection button
-   - Search/refresh button
+   - Summary bar showing file count and selection status
    - Clear list button
    - Delete button with count
+   - Note: Folder selection and Search moved to PatternControls for better UX
 
 5. **`src/components/FileRemover/DeleteConfirmModal.tsx`**
 
@@ -160,6 +163,7 @@ struct FileInfo {
 #### Shared Components to Reuse
 
 - `RegexHighlightText` - For displaying matched portions in file names
+- `RegexCheatSheet` - Collapsible regex quick reference (shared between FileRemover and BatchRenamer)
 - `Button` - UI buttons
 - `Checkbox` - Selection checkboxes
 - `Input` - Pattern input
@@ -196,11 +200,20 @@ interface RemoverState {
 
 ### Layout
 
-- Pattern controls at the top (similar layout to BatchRenamer)
-- Options row below controls
-- Action buttons below options
+- Folder selection at the top with path display
+- Pattern type selector below folder selection
+- Pattern input with integrated Search button (real-time validation)
+- Options checkboxes in a grid layout
+- Regex cheat sheet (collapsible) below options when in regex mode
+- Summary bar with file count, selection status, and action buttons
 - File list taking up remaining space
-- Selection summary bar at bottom of file list
+
+### Consistency with BatchRenamer
+
+- Same card-style controls with `bg-base-200 rounded-box shadow-lg`
+- Same button styles and variants
+- Shared RegexCheatSheet component
+- Same pattern for checkboxes and input fields
 
 ### Visual Feedback
 

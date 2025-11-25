@@ -282,7 +282,7 @@ export default function FileRemover() {
       <div class="max-w-7xl mx-auto">
         <Header />
 
-        <div class="grid grid-cols-1 gap-6 mt-4">
+        <div class="space-y-6 mt-4">
           <PatternControls
             pattern={pattern()}
             setPattern={setPattern}
@@ -295,18 +295,18 @@ export default function FileRemover() {
             deleteEmptyDirs={deleteEmptyDirs()}
             setDeleteEmptyDirs={handleSetDeleteEmptyDirs}
             patternError={patternError()}
-          />
-
-          <ActionButtons
             basePath={basePath()}
             onSelectFolder={selectFolder}
             onSearch={searchFiles}
+            isSearching={isSearching()}
+            canSearch={canSearch()}
+          />
+
+          <ActionButtons
             onDelete={handleDeleteClick}
             onClearList={clearList}
-            isSearching={isSearching()}
             selectedCount={selectedCount()}
             totalCount={files().length}
-            canSearch={canSearch()}
           />
 
           <FileRemoverList

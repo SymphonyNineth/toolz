@@ -21,17 +21,19 @@ const FileRemoverList: Component<FileRemoverListProps> = (props) => {
   );
 
   return (
-    <div class="card bg-base-100 shadow-lg">
-      <div class="card-body p-0">
-        {/* Header */}
-        <div class="flex items-center justify-between px-4 py-3 border-b border-base-300">
-          <div class="flex items-center gap-4">
-            <span class="font-medium">{props.files.length} files found</span>
+    <div class="bg-base-200 rounded-box shadow-lg overflow-hidden">
+      {/* Header */}
+      <div class="flex items-center justify-between px-4 py-3 border-b border-base-300 bg-base-200">
+        <div class="flex items-center gap-4">
+          <span class="font-medium">{props.files.length} files found</span>
+          <Show when={props.files.length > 0}>
             <span class="text-sm text-base-content/60">
               {selectedCount()} selected ({formatFileSize(selectedSize())})
             </span>
-          </div>
+          </Show>
+        </div>
 
+        <Show when={props.files.length > 0}>
           <div class="flex gap-2">
             <button class="btn btn-xs btn-ghost" onClick={props.onSelectAll}>
               Select All
@@ -59,53 +61,52 @@ const FileRemoverList: Component<FileRemoverListProps> = (props) => {
               </button>
             </Show>
           </div>
-        </div>
-
-        {/* File List */}
-        <Show
-          when={props.files.length > 0}
-          fallback={
-            <div class="flex flex-col items-center justify-center py-16 text-base-content/50">
-              <svg
-                class="w-16 h-16 mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p>No files found matching the pattern</p>
-              <p class="text-sm mt-1">
-                Select a folder and enter a pattern to search
-              </p>
-            </div>
-          }
-        >
-          <div
-            role="list"
-            aria-label="Files to be deleted"
-            class="max-h-[500px] overflow-y-auto divide-y divide-base-200"
-          >
-            <For each={props.files}>
-              {(file) => (
-                <FileRemoverRow
-                  file={file}
-                  onToggleSelect={props.onToggleSelect}
-                />
-              )}
-            </For>
-          </div>
         </Show>
       </div>
+
+      {/* File List */}
+      <Show
+        when={props.files.length > 0}
+        fallback={
+          <div class="flex flex-col items-center justify-center py-16 text-base-content/50 bg-base-100">
+            <svg
+              class="w-16 h-16 mb-4 opacity-30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <p class="text-lg font-medium">No files found</p>
+            <p class="text-sm mt-1">
+              Select a folder and enter a pattern to search
+            </p>
+          </div>
+        }
+      >
+        <div
+          role="list"
+          aria-label="Files to be deleted"
+          class="max-h-[500px] overflow-y-auto divide-y divide-base-200 bg-base-100"
+        >
+          <For each={props.files}>
+            {(file) => (
+              <FileRemoverRow
+                file={file}
+                onToggleSelect={props.onToggleSelect}
+              />
+            )}
+          </For>
+        </div>
+      </Show>
     </div>
   );
 };
 
 export default FileRemoverList;
-

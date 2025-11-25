@@ -94,9 +94,7 @@ describe("FileRemoverList", () => {
     it("shows empty state when no files", () => {
       render(() => <FileRemoverList {...defaultProps} files={[]} />);
 
-      expect(
-        screen.getByText("No files found matching the pattern")
-      ).toBeInTheDocument();
+      expect(screen.getByText("No files found")).toBeInTheDocument();
       expect(
         screen.getByText("Select a folder and enter a pattern to search")
       ).toBeInTheDocument();

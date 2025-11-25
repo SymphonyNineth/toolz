@@ -16,6 +16,11 @@ describe("PatternControls", () => {
     setIncludeSubdirs: vi.fn(),
     deleteEmptyDirs: false,
     setDeleteEmptyDirs: vi.fn(),
+    basePath: "",
+    onSelectFolder: vi.fn(),
+    onSearch: vi.fn(),
+    isSearching: false,
+    canSearch: false,
   };
 
   beforeEach(() => {
@@ -39,10 +44,16 @@ describe("PatternControls", () => {
       expect(screen.getByLabelText("Delete Empty Directories")).toBeInTheDocument();
     });
 
-    it("renders the card title", () => {
+    it("renders Select Folder button", () => {
       render(() => <PatternControls {...defaultProps} />);
 
-      expect(screen.getByText("Pattern Settings")).toBeInTheDocument();
+      expect(screen.getByText("Select Folder")).toBeInTheDocument();
+    });
+
+    it("renders Search button", () => {
+      render(() => <PatternControls {...defaultProps} />);
+
+      expect(screen.getByText("Search")).toBeInTheDocument();
     });
 
     it("renders pattern input with correct initial value", () => {
@@ -50,6 +61,20 @@ describe("PatternControls", () => {
 
       const input = screen.getByPlaceholderText(/enter text to match/i);
       expect(input).toHaveValue("test-pattern");
+    });
+
+    it("displays base path when set", () => {
+      render(() => (
+        <PatternControls {...defaultProps} basePath="/home/user/documents" />
+      ));
+
+      expect(screen.getByText("/home/user/documents")).toBeInTheDocument();
+    });
+
+    it("shows help text when no folder selected", () => {
+      render(() => <PatternControls {...defaultProps} basePath="" />);
+
+      expect(screen.getByText("Choose a folder to search in")).toBeInTheDocument();
     });
   });
 
@@ -245,5 +270,69 @@ describe("PatternControls", () => {
       expect(screen.getByText("ⓘ")).toBeInTheDocument();
     });
   });
-});
 
+  describe("Folder Selection and Search", () => {
+    it("calls onSelectFolder when Select Folder clicked", async () => {
+      const onSelectFolder = vi.fn();
+      render(() => (
+        <PatternControls {...defaultProps} onSelectFolder={onSelectFolder} />
+      ));
+
+      await fireEvent.click(screen.getByText("Select Folder"));
+      expect(onSelectFolder).toHaveBeenCalledTimes(1);
+    });
+
+    it("calls onSearch when Search clicked and canSearch is true", async () => {
+      const onSearch = vi.fn();
+      render(() => (
+        <PatternControls {...defaultProps} onSearch={onSearch} canSearch={true} />
+      ));
+
+      await fireEvent.click(screen.getByText("Search"));
+      expect(onSearch).toHaveBeenCalledTimes(1);
+    });
+
+    it("disables Search button when canSearch is false", () => {
+      render(() => <PatternControls {...defaultProps} canSearch={false} />);
+
+      const searchBtn = screen.getByText("Search").closest("button");
+      expect(searchBtn).toBeDisabled();
+    });
+
+    it("enables Search button when canSearch is true", () => {
+      render(() => <PatternControls {...defaultProps} canSearch={true} />);
+
+      const searchBtn = screen.getByText("Search").closest("button");
+      expect(searchBtn).not.toBeDisabled();
+    });
+
+    it("shows loading state on Search button when searching", () => {
+      render(() => <PatternControls {...defaultProps} isSearching={true} canSearch={true} />);
+
+      const searchBtn = screen.getByText("Search").closest("button");
+      expect(searchBtn).toHaveClass("loading");
+    });
+
+    it("shows warning when pattern entered but no folder selected", () => {
+      render(() => (
+        <PatternControls {...defaultProps} pattern="test" basePath="" />
+      ));
+
+      expect(screen.getByText("Select a folder first to search")).toBeInTheDocument();
+    });
+  });
+
+  describe("Regex Cheat Sheet", () => {
+    it("shows regex cheat sheet toggle when in regex mode", () => {
+      render(() => <PatternControls {...defaultProps} patternType="regex" />);
+
+      expect(screen.getByText("Regex Quick Reference")).toBeInTheDocument();
+    });
+
+    it("does not show regex cheat sheet when not in regex mode", () => {
+      render(() => <PatternControls {...defaultProps} patternType="simple" />);
+
+      expect(screen.queryByText("Regex Quick Reference")).not.toBeInTheDocument();
+    });
+  });
+});
