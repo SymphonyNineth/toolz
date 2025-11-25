@@ -110,14 +110,15 @@ describe("FileRemoverList", () => {
   });
 
   describe("Selection interactions", () => {
-    it("calls onToggleSelect when checkbox clicked", async () => {
+    it("calls onToggleSelect when row is clicked", async () => {
       const onToggleSelect = vi.fn();
       render(() => (
         <FileRemoverList {...defaultProps} onToggleSelect={onToggleSelect} />
       ));
 
-      const checkboxes = screen.getAllByRole("checkbox");
-      await fireEvent.click(checkboxes[0]);
+      // Rows are listitems and can be clicked to toggle selection
+      const rows = screen.getAllByRole("listitem");
+      await fireEvent.click(rows[0]);
       expect(onToggleSelect).toHaveBeenCalledWith("/test/file1.txt");
     });
 

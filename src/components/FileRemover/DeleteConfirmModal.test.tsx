@@ -21,6 +21,8 @@ describe("DeleteConfirmModal", () => {
     onConfirm: vi.fn(),
     files: createMockFiles(1),
     isDeleting: false,
+    dangerWarning: undefined as string | undefined,
+    progress: null,
   };
 
   beforeEach(() => {
@@ -139,8 +141,10 @@ describe("DeleteConfirmModal", () => {
     it("shows loading state on Delete button when deleting", () => {
       render(() => <DeleteConfirmModal {...defaultProps} isDeleting={true} />);
 
-      const deleteBtn = screen.getByText("Delete Files").closest("button");
+      // Button text changes to "Deleting..." when in loading state
+      const deleteBtn = screen.getByText("Deleting...").closest("button");
       expect(deleteBtn).toHaveClass("loading");
+      expect(deleteBtn).toBeDisabled();
     });
   });
 
@@ -203,6 +207,114 @@ describe("DeleteConfirmModal", () => {
       render(() => <DeleteConfirmModal {...defaultProps} files={files} />);
 
       expect(screen.getByText(longPath)).toBeInTheDocument();
+    });
+  });
+
+  describe("Danger warning", () => {
+    it("shows danger warning when provided", () => {
+      const dangerWarning = "Warning: You are deleting files from a system directory!";
+      render(() => (
+        <DeleteConfirmModal {...defaultProps} dangerWarning={dangerWarning} />
+      ));
+
+      expect(screen.getByText(dangerWarning)).toBeInTheDocument();
+    });
+
+    it("does not show danger alert when no warning", () => {
+      const { container } = render(() => <DeleteConfirmModal {...defaultProps} />);
+
+      // Should only have the standard warning alert (alert-warning), not the error alert (alert-error)
+      const warningAlerts = container.querySelectorAll(".alert-warning");
+      const errorAlerts = container.querySelectorAll(".alert-error");
+      expect(warningAlerts).toHaveLength(1);
+      expect(errorAlerts).toHaveLength(0);
+    });
+
+    it("shows both danger and standard warnings when danger warning is set", () => {
+      const { container } = render(() => (
+        <DeleteConfirmModal
+          {...defaultProps}
+          dangerWarning="This is dangerous!"
+        />
+      ));
+
+      const warningAlerts = container.querySelectorAll(".alert-warning");
+      const errorAlerts = container.querySelectorAll(".alert-error");
+      expect(warningAlerts).toHaveLength(1);
+      expect(errorAlerts).toHaveLength(1);
+    });
+  });
+
+  describe("Progress indication", () => {
+    it("shows progress bar when progress is provided", () => {
+      render(() => (
+        <DeleteConfirmModal
+          {...defaultProps}
+          isDeleting={true}
+          progress={{ current: 25, total: 100 }}
+        />
+      ));
+
+      expect(screen.getByText("Deleting files...")).toBeInTheDocument();
+      expect(screen.getByText(/25 \/ 100/)).toBeInTheDocument();
+      expect(screen.getByText(/25%/)).toBeInTheDocument();
+    });
+
+    it("hides file preview when progress is shown", () => {
+      render(() => (
+        <DeleteConfirmModal
+          {...defaultProps}
+          isDeleting={true}
+          progress={{ current: 25, total: 100 }}
+        />
+      ));
+
+      expect(screen.queryByText("Files to be deleted:")).not.toBeInTheDocument();
+    });
+
+    it("shows progress at 0%", () => {
+      render(() => (
+        <DeleteConfirmModal
+          {...defaultProps}
+          isDeleting={true}
+          progress={{ current: 0, total: 100 }}
+        />
+      ));
+
+      expect(screen.getByText(/0 \/ 100/)).toBeInTheDocument();
+      expect(screen.getByText(/0%/)).toBeInTheDocument();
+    });
+
+    it("shows progress at 100%", () => {
+      render(() => (
+        <DeleteConfirmModal
+          {...defaultProps}
+          isDeleting={true}
+          progress={{ current: 100, total: 100 }}
+        />
+      ));
+
+      expect(screen.getByText(/100 \/ 100/)).toBeInTheDocument();
+      expect(screen.getByText(/100%/)).toBeInTheDocument();
+    });
+
+    it("shows file preview when no progress", () => {
+      render(() => <DeleteConfirmModal {...defaultProps} progress={null} />);
+
+      expect(screen.getByText("Files to be deleted:")).toBeInTheDocument();
+    });
+
+    it("changes button text to Deleting when in progress", () => {
+      render(() => (
+        <DeleteConfirmModal
+          {...defaultProps}
+          isDeleting={true}
+          progress={{ current: 50, total: 100 }}
+        />
+      ));
+
+      expect(screen.getByText("Deleting...")).toBeInTheDocument();
+      expect(screen.queryByText("Delete Files")).not.toBeInTheDocument();
     });
   });
 });

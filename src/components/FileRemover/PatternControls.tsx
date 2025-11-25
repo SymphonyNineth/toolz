@@ -52,7 +52,7 @@ const PatternControls: Component<PatternControlsProps> = (props) => {
           <label class="label">
             <span class="label-text font-medium">Pattern Type</span>
           </label>
-          <div class="join">
+          <div class="join flex gap-2">
             <button
               class={`btn join-item ${props.patternType === "simple" ? "btn-active" : ""}`}
               onClick={() => props.setPatternType("simple")}

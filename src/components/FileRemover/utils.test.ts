@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { formatFileSize, buildHighlightedSegments } from "./utils";
+import {
+  formatFileSize,
+  buildHighlightedSegments,
+  validatePattern,
+  checkDangerousOperation,
+} from "./utils";
+import { FileMatchItem } from "./types";
 
 describe("utils", () => {
   describe("formatFileSize", () => {
@@ -125,6 +131,146 @@ describe("utils", () => {
         { text: "", isMatch: true },
         { text: "hello", isMatch: false },
       ]);
+    });
+  });
+
+  describe("validatePattern", () => {
+    it("returns error for empty pattern", () => {
+      expect(validatePattern("", "simple")).toBe("Pattern cannot be empty");
+      expect(validatePattern("   ", "simple")).toBe("Pattern cannot be empty");
+    });
+
+    it("validates simple patterns (always valid if non-empty)", () => {
+      expect(validatePattern("test", "simple")).toBeUndefined();
+      expect(validatePattern("file*.txt", "simple")).toBeUndefined();
+    });
+
+    it("validates valid regex patterns", () => {
+      expect(validatePattern(".*\\.txt$", "regex")).toBeUndefined();
+      expect(validatePattern("file\\d+", "regex")).toBeUndefined();
+      expect(validatePattern("[a-z]+", "regex")).toBeUndefined();
+    });
+
+    it("returns error for invalid regex patterns", () => {
+      const result = validatePattern("[invalid", "regex");
+      expect(result).toContain("Invalid regex:");
+    });
+
+    it("returns error for unclosed group in regex", () => {
+      const result = validatePattern("(unclosed", "regex");
+      expect(result).toContain("Invalid regex:");
+    });
+
+    it("validates valid extension patterns", () => {
+      expect(validatePattern(".txt", "extension")).toBeUndefined();
+      expect(validatePattern("txt", "extension")).toBeUndefined();
+      expect(validatePattern(".txt, .log, .tmp", "extension")).toBeUndefined();
+      expect(validatePattern("txt,log,tmp", "extension")).toBeUndefined();
+    });
+
+    it("returns error for empty extension in list", () => {
+      expect(validatePattern(".txt,,log", "extension")).toBe(
+        "Invalid extension format: empty extension found"
+      );
+      expect(validatePattern(",txt", "extension")).toBe(
+        "Invalid extension format: empty extension found"
+      );
+    });
+
+    it("returns error for extensions with invalid characters", () => {
+      const result = validatePattern(".tx/t", "extension");
+      expect(result).toContain("Invalid extension:");
+    });
+
+    it("returns error for extension with only dot", () => {
+      const result = validatePattern(".", "extension");
+      expect(result).toContain("Invalid extension:");
+    });
+  });
+
+  describe("checkDangerousOperation", () => {
+    const createMockFile = (path: string, size = 1000): FileMatchItem => ({
+      path,
+      name: path.split("/").pop() || "",
+      matchRanges: [],
+      size,
+      isDirectory: false,
+      selected: true,
+    });
+
+    it("returns undefined for safe operations", () => {
+      const files = [createMockFile("/home/user/projects/file.txt")];
+      expect(checkDangerousOperation(files, "/home/user/projects")).toBeUndefined();
+    });
+
+    it("warns when deleting more than 100 files", () => {
+      const files = Array.from({ length: 101 }, (_, i) =>
+        createMockFile(`/home/user/file${i}.txt`)
+      );
+      const result = checkDangerousOperation(files, "/home/user");
+      expect(result).toContain("101 files");
+    });
+
+    it("does not warn when deleting exactly 100 files", () => {
+      const files = Array.from({ length: 100 }, (_, i) =>
+        createMockFile(`/home/user/file${i}.txt`)
+      );
+      expect(checkDangerousOperation(files, "/home/user/projects")).toBeUndefined();
+    });
+
+    it("warns when deleting from /usr", () => {
+      const files = [createMockFile("/usr/local/bin/myapp")];
+      const result = checkDangerousOperation(files, "/usr/local/bin");
+      expect(result).toContain("system directory");
+    });
+
+    it("warns when deleting from /bin", () => {
+      const files = [createMockFile("/bin/myapp")];
+      const result = checkDangerousOperation(files, "/bin");
+      expect(result).toContain("system directory");
+    });
+
+    it("warns when deleting from /etc", () => {
+      const files = [createMockFile("/etc/config")];
+      const result = checkDangerousOperation(files, "/etc");
+      expect(result).toContain("system directory");
+    });
+
+    it("warns when deleting from /home root", () => {
+      const files = [createMockFile("/home/somefile")];
+      const result = checkDangerousOperation(files, "/home");
+      expect(result).toContain("root user directory");
+    });
+
+    it("does not warn for subdirectories of /home", () => {
+      const files = [createMockFile("/home/user/file.txt")];
+      expect(checkDangerousOperation(files, "/home/user")).toBeUndefined();
+    });
+
+    it("warns when deleting more than 1GB of data", () => {
+      const files = [
+        createMockFile("/home/user/large1.bin", 600 * 1024 * 1024),
+        createMockFile("/home/user/large2.bin", 600 * 1024 * 1024),
+      ];
+      const result = checkDangerousOperation(files, "/home/user");
+      expect(result).toContain("GB of data");
+    });
+
+    it("does not warn for less than 1GB", () => {
+      const files = [createMockFile("/home/user/file.bin", 500 * 1024 * 1024)];
+      expect(checkDangerousOperation(files, "/home/user")).toBeUndefined();
+    });
+
+    it("warns for Windows system paths", () => {
+      const files = [createMockFile("C:\\Windows\\System32\\file.dll")];
+      const result = checkDangerousOperation(files, "C:\\Windows\\System32");
+      expect(result).toContain("Windows system directory");
+    });
+
+    it("warns for Windows Program Files", () => {
+      const files = [createMockFile("C:\\Program Files\\App\\file.exe")];
+      const result = checkDangerousOperation(files, "C:\\Program Files\\App");
+      expect(result).toContain("Windows system directory");
     });
   });
 });

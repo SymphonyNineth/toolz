@@ -71,6 +71,7 @@ const FileRemoverList: Component<FileRemoverListProps> = (props) => {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                aria-hidden="true"
               >
                 <path
                   stroke-linecap="round"
@@ -86,7 +87,11 @@ const FileRemoverList: Component<FileRemoverListProps> = (props) => {
             </div>
           }
         >
-          <div class="max-h-[500px] overflow-y-auto divide-y divide-base-200">
+          <div
+            role="list"
+            aria-label="Files to be deleted"
+            class="max-h-[500px] overflow-y-auto divide-y divide-base-200"
+          >
             <For each={props.files}>
               {(file) => (
                 <FileRemoverRow

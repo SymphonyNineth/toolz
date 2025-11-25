@@ -28,3 +28,8 @@ export interface DeleteResult {
   deletedDirs: string[];
 }
 
+export interface DeleteProgress {
+  current: number;
+  total: number;
+}
+

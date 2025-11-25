@@ -50,23 +50,46 @@ describe("FileRemoverRow", () => {
 
     it("renders checkbox", () => {
       const file = createMockFile();
-      render(() => <FileRemoverRow file={file} onToggleSelect={vi.fn()} />);
+      const { container } = render(() => (
+        <FileRemoverRow file={file} onToggleSelect={vi.fn()} />
+      ));
 
-      expect(screen.getByRole("checkbox")).toBeInTheDocument();
+      // Checkbox is aria-hidden for accessibility (row is the interactive element)
+      const checkbox = container.querySelector('input[type="checkbox"]');
+      expect(checkbox).toBeInTheDocument();
     });
 
     it("checkbox reflects selected state - unchecked", () => {
       const file = createMockFile({ selected: false });
-      render(() => <FileRemoverRow file={file} onToggleSelect={vi.fn()} />);
+      const { container } = render(() => (
+        <FileRemoverRow file={file} onToggleSelect={vi.fn()} />
+      ));
 
-      expect(screen.getByRole("checkbox")).not.toBeChecked();
+      const checkbox = container.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement;
+      expect(checkbox?.checked).toBe(false);
     });
 
     it("checkbox reflects selected state - checked", () => {
       const file = createMockFile({ selected: true });
+      const { container } = render(() => (
+        <FileRemoverRow file={file} onToggleSelect={vi.fn()} />
+      ));
+
+      const checkbox = container.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement;
+      expect(checkbox?.checked).toBe(true);
+    });
+
+    it("renders as listitem with correct aria attributes", () => {
+      const file = createMockFile({ selected: true, name: "test.txt", size: 1024 });
       render(() => <FileRemoverRow file={file} onToggleSelect={vi.fn()} />);
 
-      expect(screen.getByRole("checkbox")).toBeChecked();
+      const row = screen.getByRole("listitem");
+      expect(row).toHaveAttribute("aria-selected", "true");
+      expect(row).toHaveAttribute("tabindex", "0");
     });
   });
 
@@ -166,15 +189,15 @@ describe("FileRemoverRow", () => {
   });
 
   describe("Interactions", () => {
-    it("calls onToggleSelect when checkbox is clicked", async () => {
+    it("calls onToggleSelect when row is clicked", async () => {
       const onToggleSelect = vi.fn();
       const file = createMockFile({ path: "/test/example.txt" });
       render(() => (
         <FileRemoverRow file={file} onToggleSelect={onToggleSelect} />
       ));
 
-      const checkbox = screen.getByRole("checkbox");
-      await fireEvent.click(checkbox);
+      const row = screen.getByRole("listitem");
+      await fireEvent.click(row);
 
       expect(onToggleSelect).toHaveBeenCalledWith("/test/example.txt");
       expect(onToggleSelect).toHaveBeenCalledTimes(1);
@@ -187,9 +210,49 @@ describe("FileRemoverRow", () => {
         <FileRemoverRow file={file} onToggleSelect={onToggleSelect} />
       ));
 
-      await fireEvent.click(screen.getByRole("checkbox"));
+      await fireEvent.click(screen.getByRole("listitem"));
 
       expect(onToggleSelect).toHaveBeenCalledWith("/unique/path/to/file.txt");
+    });
+
+    it("calls onToggleSelect on Enter key press", async () => {
+      const onToggleSelect = vi.fn();
+      const file = createMockFile({ path: "/test/keypress.txt" });
+      render(() => (
+        <FileRemoverRow file={file} onToggleSelect={onToggleSelect} />
+      ));
+
+      const row = screen.getByRole("listitem");
+      await fireEvent.keyDown(row, { key: "Enter" });
+
+      expect(onToggleSelect).toHaveBeenCalledWith("/test/keypress.txt");
+    });
+
+    it("calls onToggleSelect on Space key press", async () => {
+      const onToggleSelect = vi.fn();
+      const file = createMockFile({ path: "/test/space.txt" });
+      render(() => (
+        <FileRemoverRow file={file} onToggleSelect={onToggleSelect} />
+      ));
+
+      const row = screen.getByRole("listitem");
+      await fireEvent.keyDown(row, { key: " " });
+
+      expect(onToggleSelect).toHaveBeenCalledWith("/test/space.txt");
+    });
+
+    it("does not call onToggleSelect on other key presses", async () => {
+      const onToggleSelect = vi.fn();
+      const file = createMockFile({ path: "/test/other.txt" });
+      render(() => (
+        <FileRemoverRow file={file} onToggleSelect={onToggleSelect} />
+      ));
+
+      const row = screen.getByRole("listitem");
+      await fireEvent.keyDown(row, { key: "a" });
+      await fireEvent.keyDown(row, { key: "Escape" });
+
+      expect(onToggleSelect).not.toHaveBeenCalled();
     });
   });
 

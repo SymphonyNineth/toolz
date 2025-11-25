@@ -10,7 +10,8 @@ interface FileRemoverRowProps {
 }
 
 /**
- * Renders a single file row with match highlighting
+ * Renders a single file row with match highlighting.
+ * Supports keyboard navigation for accessibility.
  */
 const FileRemoverRow: Component<FileRemoverRowProps> = (props) => {
   // Build highlighted name segments
@@ -18,18 +19,38 @@ const FileRemoverRow: Component<FileRemoverRowProps> = (props) => {
     return buildHighlightedSegments(props.file.name, props.file.matchRanges);
   };
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      props.onToggleSelect(props.file.path);
+    }
+  };
+
+  const handleClick = () => {
+    props.onToggleSelect(props.file.path);
+  };
+
   return (
     <div
-      class={`flex items-center gap-3 px-4 py-2 hover:bg-base-200 transition-colors ${
-        props.file.selected ? "bg-error/5" : ""
-      }`}
+      role="listitem"
+      tabIndex={0}
+      aria-selected={props.file.selected}
+      aria-label={`${props.file.name}, ${formatFileSize(props.file.size)}, ${props.file.selected ? "selected" : "not selected"}`}
+      onKeyDown={handleKeyDown}
+      onClick={handleClick}
+      class={`file-remover-row flex items-center gap-3 px-4 py-2 cursor-pointer
+        transition-all duration-150 ease-in-out
+        hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-inset
+        ${props.file.selected ? "file-remover-row-selected bg-error/5 border-l-3 border-error" : ""}`}
     >
       <Checkbox
         checked={props.file.selected}
         onChange={() => props.onToggleSelect(props.file.path)}
+        aria-hidden="true"
+        tabIndex={-1}
       />
 
-      <div class="flex-shrink-0 text-base-content/50">
+      <div class="flex-shrink-0 text-base-content/50" aria-hidden="true">
         <Show when={props.file.isDirectory} fallback={<FilesIcon size="sm" />}>
           <FolderIcon size="sm" />
         </Show>
@@ -42,7 +63,7 @@ const FileRemoverRow: Component<FileRemoverRowProps> = (props) => {
               <span
                 class={
                   segment.isMatch
-                    ? "bg-warning/30 text-warning-content rounded px-0.5"
+                    ? "match-highlight bg-warning/30 text-warning-content rounded px-0.5"
                     : ""
                 }
               >
