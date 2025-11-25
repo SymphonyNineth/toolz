@@ -2,6 +2,7 @@ import { createSignal, createMemo } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import RenamerControls from "./RenamerControls";
+import NumberingControls from "./NumberingControls";
 import FileList, { FileItem } from "./FileList";
 import Header from "./Header";
 import ActionButtons from "./ActionButtons";
@@ -9,6 +10,9 @@ import {
   calculateNewName,
   getRegexMatches,
   getReplacementSegments,
+  applyNumbering,
+  NumberingOptions,
+  DEFAULT_NUMBERING_OPTIONS,
 } from "./renamingUtils";
 import { getFileName, getDirectory, joinPath } from "../../utils/path";
 
@@ -25,6 +29,9 @@ export default function BatchRenamer() {
   const [statusMap, setStatusMap] = createSignal<
     Record<string, "idle" | "success" | "error">
   >({});
+  const [numberingOptions, setNumberingOptions] =
+    createSignal<NumberingOptions>(DEFAULT_NUMBERING_OPTIONS);
+  const [numberingExpanded, setNumberingExpanded] = createSignal(false);
 
   // Reset status when controls change
   const updateFindText = (text: string) => {
@@ -54,12 +61,18 @@ export default function BatchRenamer() {
     setStatusMap({});
   };
 
+  const updateNumberingOptions = (options: NumberingOptions) => {
+    setNumberingOptions(options);
+    setStatusMap({});
+  };
+
   const fileItems = createMemo(() => {
     const paths = selectedPaths();
     const currentStatus = statusMap();
+    const numOptions = numberingOptions();
 
     // First pass: calculate new names
-    const items = paths.map((path) => {
+    const items = paths.map((path, index) => {
       const name = getFileName(path);
       let newName = name;
 
@@ -83,6 +96,9 @@ export default function BatchRenamer() {
         setRegexError(undefined);
       }
 
+      // Apply numbering after find/replace
+      newName = applyNumbering(newName, index, numOptions);
+
       let regexMatches;
       let newNameRegexMatches;
       if (!result.error && regexMode() && findText()) {
@@ -92,8 +108,8 @@ export default function BatchRenamer() {
               ? ""
               : "g"
             : replaceFirstOnly()
-              ? "i"
-              : "gi";
+            ? "i"
+            : "gi";
           const regex = new RegExp(findText(), flags);
           regexMatches = getRegexMatches(name, regex);
           const replacementResult = getReplacementSegments(
@@ -215,8 +231,8 @@ export default function BatchRenamer() {
     }
   }
 
-  const filesToRenameCount = createMemo(() =>
-    fileItems().filter((f) => f.name !== f.newName).length
+  const filesToRenameCount = createMemo(
+    () => fileItems().filter((f) => f.name !== f.newName).length
   );
 
   const renameDisabledReason = createMemo(() => {
@@ -269,6 +285,15 @@ export default function BatchRenamer() {
           replaceFirstOnly={replaceFirstOnly()}
           setReplaceFirstOnly={updateReplaceFirstOnly}
         />
+
+        <div class="w-full max-w-4xl mx-auto mt-4">
+          <NumberingControls
+            options={numberingOptions()}
+            onOptionsChange={updateNumberingOptions}
+            isExpanded={numberingExpanded()}
+            onToggle={() => setNumberingExpanded(!numberingExpanded())}
+          />
+        </div>
 
         <ActionButtons
           onSelectFiles={selectFiles}

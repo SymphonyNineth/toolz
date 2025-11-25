@@ -32,14 +32,20 @@ Implement advanced renaming capabilities and improve user confidence with better
   - At the original name instead of showing all red, color code the groups
   - When showing the value of each group, show it in the new same color
 
-- [ ] **Numbering & Sequencing**
+- [x] **Numbering & Sequencing**
 
   - Add a feature to append or prepend numbers to filenames.
   - Options for:
     - Start number (e.g., 1, 001).
     - Increment step.
     - Separator (e.g., "-", "\_", " ").
-    - Position (Start or End of filename).
+    - Position (Start or End or Index of filename).
+  - Implementation details:
+    - `NumberingControls.tsx` - Collapsible UI panel with all numbering options
+    - `renamingUtils.ts` - `formatNumber()` and `applyNumbering()` utility functions
+    - Numbering is applied after find/replace operations
+    - Preview shows the sequence (e.g., "001, 002, ...")
+    - Full test coverage in `NumberingControls.test.tsx` and `renamingUtils.test.ts`
 
 - [ ] **Undo Functionality**
   - Store the history of rename operations (map of new path -> old path).

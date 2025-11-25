@@ -14,6 +14,7 @@ src/
 │   │   ├── FileList.tsx        # File list table with selection
 │   │   ├── FileRow.tsx         # Individual file row component
 │   │   ├── Header.tsx          # Page header with theme toggle
+│   │   ├── NumberingControls.tsx # Numbering & sequencing options panel
 │   │   ├── RegexCheatSheet.tsx # Regex reference modal (legacy)
 │   │   ├── RegexCheatSheetInline.tsx # Inline collapsible regex reference
 │   │   ├── RegexHighlightText.tsx # Regex match highlighting
@@ -52,6 +53,11 @@ App
     │   └── RegexCheatSheetInline (when regex mode enabled)
     │       ├── ChevronDownIcon / ChevronRightIcon
     │       └── Collapsible content panel
+    ├── NumberingControls
+    │   ├── ChevronDownIcon / ChevronRightIcon
+    │   ├── Checkbox (enable toggle)
+    │   ├── Input (x4: start, increment, padding, separator)
+    │   └── Radio buttons (position: start/end/index)
     ├── ActionButtons
     │   ├── Button (x3) with icons (FilesIcon, FolderOpenIcon, RefreshIcon)
     │   ├── Tooltip

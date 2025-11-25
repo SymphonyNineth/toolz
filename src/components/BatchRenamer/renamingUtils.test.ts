@@ -3,6 +3,10 @@ import {
   calculateNewName,
   getRegexMatches,
   getReplacementSegments,
+  formatNumber,
+  applyNumbering,
+  NumberingOptions,
+  DEFAULT_NUMBERING_OPTIONS,
 } from "./renamingUtils";
 
 describe("calculateNewName", () => {
@@ -490,7 +494,9 @@ describe("getReplacementSegments", () => {
 
     // Segments in order: "[", "file", "]-[", "123", "]"
     // Note: consecutive literals between tokens are combined
-    const sortedSegments = [...result.segments].sort((a, b) => a.start - b.start);
+    const sortedSegments = [...result.segments].sort(
+      (a, b) => a.start - b.start
+    );
 
     expect(sortedSegments).toHaveLength(5);
 
@@ -598,14 +604,20 @@ describe("getReplacementSegments", () => {
       const result = getReplacementSegments("hello", /^/g, "START-");
       expect(result.newName).toBe("START-hello");
       // "START-" is literal
-      expect(result.segments.some((s) => s.groupIndex === -1 && s.content === "START-")).toBe(true);
+      expect(
+        result.segments.some(
+          (s) => s.groupIndex === -1 && s.content === "START-"
+        )
+      ).toBe(true);
     });
 
     it("should handle $ anchor without infinite loop", () => {
       const result = getReplacementSegments("hello", /$/g, "-END");
       expect(result.newName).toBe("hello-END");
       // "-END" is literal
-      expect(result.segments.some((s) => s.groupIndex === -1 && s.content === "-END")).toBe(true);
+      expect(
+        result.segments.some((s) => s.groupIndex === -1 && s.content === "-END")
+      ).toBe(true);
     });
 
     it("should handle a* regex (zero or more) without infinite loop", () => {
@@ -623,6 +635,235 @@ describe("getReplacementSegments", () => {
     it("should handle empty pattern without infinite loop", () => {
       const result = getReplacementSegments("ab", new RegExp("", "g"), "-");
       expect(result.newName).toBeDefined();
+    });
+  });
+});
+
+describe("formatNumber", () => {
+  it("should format number without padding when padding is 1", () => {
+    expect(formatNumber(1, 1)).toBe("1");
+    expect(formatNumber(9, 1)).toBe("9");
+    expect(formatNumber(10, 1)).toBe("10");
+    expect(formatNumber(100, 1)).toBe("100");
+  });
+
+  it("should add leading zeros based on padding", () => {
+    expect(formatNumber(1, 2)).toBe("01");
+    expect(formatNumber(1, 3)).toBe("001");
+    expect(formatNumber(1, 4)).toBe("0001");
+  });
+
+  it("should not truncate numbers larger than padding", () => {
+    expect(formatNumber(100, 2)).toBe("100");
+    expect(formatNumber(1000, 3)).toBe("1000");
+  });
+
+  it("should handle zero correctly", () => {
+    expect(formatNumber(0, 1)).toBe("0");
+    expect(formatNumber(0, 3)).toBe("000");
+  });
+});
+
+describe("applyNumbering", () => {
+  const createOptions = (
+    overrides: Partial<NumberingOptions> = {}
+  ): NumberingOptions => ({
+    ...DEFAULT_NUMBERING_OPTIONS,
+    enabled: true,
+    ...overrides,
+  });
+
+  describe("when disabled", () => {
+    it("should return original name when numbering is disabled", () => {
+      const options = createOptions({ enabled: false });
+      expect(applyNumbering("file.txt", 0, options)).toBe("file.txt");
+      expect(applyNumbering("file.txt", 5, options)).toBe("file.txt");
+    });
+  });
+
+  describe("position: start", () => {
+    it("should prepend number with separator at the start", () => {
+      const options = createOptions({ position: "start", separator: "-" });
+      expect(applyNumbering("file.txt", 0, options)).toBe("1-file.txt");
+      expect(applyNumbering("file.txt", 1, options)).toBe("2-file.txt");
+    });
+
+    it("should respect padding", () => {
+      const options = createOptions({
+        position: "start",
+        separator: "-",
+        padding: 3,
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("001-file.txt");
+      expect(applyNumbering("file.txt", 9, options)).toBe("010-file.txt");
+    });
+
+    it("should respect start number", () => {
+      const options = createOptions({
+        position: "start",
+        separator: "_",
+        startNumber: 100,
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("100_file.txt");
+      expect(applyNumbering("file.txt", 1, options)).toBe("101_file.txt");
+    });
+
+    it("should respect increment", () => {
+      const options = createOptions({
+        position: "start",
+        separator: "-",
+        startNumber: 10,
+        increment: 5,
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("10-file.txt");
+      expect(applyNumbering("file.txt", 1, options)).toBe("15-file.txt");
+      expect(applyNumbering("file.txt", 2, options)).toBe("20-file.txt");
+    });
+
+    it("should work with empty separator", () => {
+      const options = createOptions({ position: "start", separator: "" });
+      expect(applyNumbering("file.txt", 0, options)).toBe("1file.txt");
+    });
+
+    it("should work with space separator", () => {
+      const options = createOptions({ position: "start", separator: " " });
+      expect(applyNumbering("file.txt", 0, options)).toBe("1 file.txt");
+    });
+  });
+
+  describe("position: end", () => {
+    it("should append number with separator at the end (before extension)", () => {
+      const options = createOptions({ position: "end", separator: "-" });
+      expect(applyNumbering("file.txt", 0, options)).toBe("file-1.txt");
+      expect(applyNumbering("file.txt", 4, options)).toBe("file-5.txt");
+    });
+
+    it("should respect padding", () => {
+      const options = createOptions({
+        position: "end",
+        separator: "_",
+        padding: 2,
+      });
+      expect(applyNumbering("document.pdf", 0, options)).toBe(
+        "document_01.pdf"
+      );
+      expect(applyNumbering("document.pdf", 9, options)).toBe(
+        "document_10.pdf"
+      );
+    });
+
+    it("should handle files without extension", () => {
+      const options = createOptions({ position: "end", separator: "-" });
+      expect(applyNumbering("README", 0, options)).toBe("README-1");
+      expect(applyNumbering("Makefile", 2, options)).toBe("Makefile-3");
+    });
+
+    it("should handle files with multiple dots", () => {
+      const options = createOptions({ position: "end", separator: "-" });
+      expect(applyNumbering("file.backup.tar.gz", 0, options)).toBe(
+        "file.backup.tar-1.gz"
+      );
+    });
+  });
+
+  describe("position: index", () => {
+    it("should insert number at specified index", () => {
+      const options = createOptions({
+        position: "index",
+        separator: "-",
+        insertIndex: 4,
+      });
+      // "file.txt" -> insert at index 4 -> "file" + "-1-" + "" + ".txt"
+      expect(applyNumbering("file.txt", 0, options)).toBe("file-1.txt");
+    });
+
+    it("should insert at beginning when index is 0", () => {
+      const options = createOptions({
+        position: "index",
+        separator: "-",
+        insertIndex: 0,
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("1-file.txt");
+    });
+
+    it("should insert at end of basename when index equals basename length", () => {
+      const options = createOptions({
+        position: "index",
+        separator: "_",
+        insertIndex: 4, // "file" has 4 characters
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("file_1.txt");
+    });
+
+    it("should clamp index to basename length", () => {
+      const options = createOptions({
+        position: "index",
+        separator: "-",
+        insertIndex: 100, // Way beyond "file"
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("file-1.txt");
+    });
+
+    it("should handle negative index by clamping to 0", () => {
+      const options = createOptions({
+        position: "index",
+        separator: "-",
+        insertIndex: -5,
+      });
+      expect(applyNumbering("file.txt", 0, options)).toBe("1-file.txt");
+    });
+
+    it("should insert in the middle of filename", () => {
+      const options = createOptions({
+        position: "index",
+        separator: "_",
+        insertIndex: 2,
+      });
+      // "document" (8 chars) -> "do" + "_1_" + "cument" + ".pdf"
+      expect(applyNumbering("document.pdf", 0, options)).toBe(
+        "do_1_cument.pdf"
+      );
+    });
+  });
+
+  describe("combined options", () => {
+    it("should apply all options together", () => {
+      const options = createOptions({
+        startNumber: 100,
+        increment: 10,
+        padding: 4,
+        separator: "_",
+        position: "start",
+      });
+      expect(applyNumbering("photo.jpg", 0, options)).toBe("0100_photo.jpg");
+      expect(applyNumbering("photo.jpg", 1, options)).toBe("0110_photo.jpg");
+      expect(applyNumbering("photo.jpg", 5, options)).toBe("0150_photo.jpg");
+    });
+  });
+
+  describe("edge cases", () => {
+    it("should handle empty filename", () => {
+      const options = createOptions({ position: "start", separator: "-" });
+      expect(applyNumbering("", 0, options)).toBe("1-");
+    });
+
+    it("should handle files starting with dot", () => {
+      const options = createOptions({ position: "end", separator: "-" });
+      // ".gitignore" - the dot is at index 0, lastIndexOf('.') returns 0
+      // Since lastDotIndex is 0 (not > 0), it's treated as no extension
+      expect(applyNumbering(".gitignore", 0, options)).toBe(".gitignore-1");
+    });
+
+    it("should handle extension only", () => {
+      const options = createOptions({ position: "start", separator: "-" });
+      expect(applyNumbering(".txt", 0, options)).toBe("1-.txt");
+    });
+
+    it("should handle very long filenames", () => {
+      const options = createOptions({ position: "end", separator: "-" });
+      const longName = "a".repeat(200) + ".txt";
+      const result = applyNumbering(longName, 0, options);
+      expect(result).toBe("a".repeat(200) + "-1.txt");
     });
   });
 });
