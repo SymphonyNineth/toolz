@@ -1,3 +1,1 @@
-- [x] **Add Dependencies**
-  - Add `tauri-plugin-dialog` to `src-tauri/Cargo.toml`.
-  - Run `cargo build` to ensure dependencies are downloaded.
+- [ ] **Add tooltip on hover on preview file names similar to the original file name**
