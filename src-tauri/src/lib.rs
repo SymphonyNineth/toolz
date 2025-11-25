@@ -7,7 +7,8 @@ mod remove;
 mod rename;
 
 // Re-export types for external use
-pub use remove::{DeleteResult, FileMatchResult, PatternType};
+pub use remove::{DeleteProgress, DeleteResult, FileMatchResult, PatternType, SearchProgress};
+pub use rename::{ListProgress, RenameProgress};
 
 /// Initializes and runs the Tauri application.
 ///
@@ -24,9 +25,13 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             rename::batch_rename,
+            rename::batch_rename_with_progress,
             rename::list_files_recursively,
+            rename::list_files_with_progress,
             remove::search_files_by_pattern,
+            remove::search_files_with_progress,
             remove::batch_delete,
+            remove::batch_delete_with_progress,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
