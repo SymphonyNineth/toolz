@@ -45,6 +45,7 @@ Implement advanced renaming capabilities and improve user confidence with better
     - `renamingUtils.ts` - `formatNumber()` and `applyNumbering()` utility functions
     - Numbering is applied after find/replace operations
     - Preview shows the sequence (e.g., "001, 002, ...")
+    - Checkbox and panel expansion are synchronized: checking opens the panel, unchecking closes it
     - Full test coverage in `NumberingControls.test.tsx` and `renamingUtils.test.ts`
 
 - [ ] **Undo Functionality**

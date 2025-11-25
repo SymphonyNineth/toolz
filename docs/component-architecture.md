@@ -55,7 +55,7 @@ App
     │       └── Collapsible content panel
     ├── NumberingControls
     │   ├── ChevronDownIcon / ChevronRightIcon
-    │   ├── Checkbox (enable toggle)
+    │   ├── Checkbox (enable toggle - synced with expansion)
     │   ├── Input (x4: start, increment, padding, separator)
     │   └── Radio buttons (position: start/end/index)
     ├── ActionButtons

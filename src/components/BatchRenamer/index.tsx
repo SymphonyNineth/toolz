@@ -142,8 +142,8 @@ export default function BatchRenamer() {
               ? ""
               : "g"
             : replaceFirstOnly()
-            ? "i"
-            : "gi";
+              ? "i"
+              : "gi";
           const regex = new RegExp(findText(), flags);
 
           let targetText = name;
@@ -229,7 +229,7 @@ export default function BatchRenamer() {
         for (const folder of folders) {
           // Create a channel for receiving progress events
           const progressChannel = new Channel<ListProgressEvent>();
-          
+
           progressChannel.onmessage = (event: ListProgressEvent) => {
             switch (event.type) {
               case "started":
@@ -297,9 +297,9 @@ export default function BatchRenamer() {
       // Use streaming progress for larger rename operations
       if (filesToRename.length > 10) {
         setRenameProgress({ phase: "renaming", current: 0, total: filesToRename.length });
-        
+
         const progressChannel = new Channel<RenameProgressEvent>();
-        
+
         progressChannel.onmessage = (event: RenameProgressEvent) => {
           switch (event.type) {
             case "started":

@@ -1,7 +1,6 @@
 import { Component, Show, createMemo, For } from "solid-js";
 import Input from "../ui/Input";
-import Checkbox from "../ui/Checkbox";
-import { ChevronDownIcon, ChevronRightIcon } from "../ui/icons";
+import Toggle from "../ui/Toggle";
 import { NumberingOptions, NumberingPosition } from "./renamingUtils";
 
 /** Helper component to render a number with color-coded parts */
@@ -47,8 +46,8 @@ const ColorCodedNumber: Component<ColorCodedNumberProps> = (props) => {
             part.type === "padding"
               ? "seq-padding"
               : part.type === "increment"
-              ? "seq-increment"
-              : "seq-start-number"
+                ? "seq-increment"
+                : "seq-start-number"
           }
         >
           {part.char}
@@ -71,8 +70,6 @@ const POSITION_OPTIONS: { value: NumberingPosition; label: string }[] = [
   { value: "index", label: "At Index" },
 ];
 
-const SEPARATOR_PRESETS = ["-", "_", " ", ".", ""];
-
 const NumberingControls: Component<NumberingControlsProps> = (props) => {
   const updateOption = <K extends keyof NumberingOptions>(
     key: K,
@@ -84,38 +81,43 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
     });
   };
 
+  // Handle checkbox change - sync with expansion state
+  const handleCheckboxChange = (checked: boolean) => {
+    updateOption("enabled", checked);
+    // Expand when enabling, collapse when disabling
+    if (checked && !props.isExpanded) {
+      props.onToggle();
+    } else if (!checked && props.isExpanded) {
+      props.onToggle();
+    }
+  };
+
+  // Handle header click - toggle both enabled and expanded
+  const handleHeaderClick = () => {
+    // Toggle enabled state
+    updateOption("enabled", !props.options.enabled);
+    // Toggle expansion
+    props.onToggle();
+  };
+
   return (
-    <div class="bg-base-200 rounded-box shadow-lg overflow-hidden h-full">
+    <div class="bg-base-200 rounded-box shadow-lg overflow-hidden h-full min-h-80">
       {/* Header */}
-      <button
-        type="button"
-        class="w-full px-6 py-4 flex items-center justify-between hover:bg-base-300 transition-colors"
-        onClick={props.onToggle}
+      <div
+        class="w-full px-6 py-4 flex items-center justify-between hover:bg-base-300 transition-colors cursor-pointer"
+        onClick={handleHeaderClick}
       >
         <div class="flex items-center gap-3">
-          <span class="text-base-content/70">
-            {props.isExpanded ? (
-              <ChevronDownIcon size="sm" />
-            ) : (
-              <ChevronRightIcon size="sm" />
-            )}
-          </span>
-          <span class="font-semibold">Numbering & Sequencing</span>
-          <Show when={props.options.enabled}>
-            <span class="badge badge-primary badge-sm">Active</span>
-          </Show>
+          <span class="font-semibold text-lg">Numbering & Sequencing</span>
         </div>
-        <div
-          class="flex items-center gap-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Checkbox
+        <div onClick={(e) => e.stopPropagation()}>
+          <Toggle
             checked={props.options.enabled}
-            onChange={(e) => updateOption("enabled", e.currentTarget.checked)}
-            size="sm"
+            onChange={(e) => handleCheckboxChange(e.currentTarget.checked)}
+            size="md"
           />
         </div>
-      </button>
+      </div>
 
       {/* Content */}
       <Show when={props.isExpanded}>
@@ -252,36 +254,6 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
                   disabled={!props.options.enabled}
                   maxLength={5}
                 />
-                <div class="dropdown dropdown-end">
-                  <button
-                    type="button"
-                    tabIndex={0}
-                    class="btn btn-square btn-outline"
-                    disabled={!props.options.enabled}
-                  >
-                    ⌄
-                  </button>
-                  <ul
-                    tabIndex={0}
-                    class="dropdown-content menu bg-base-100 rounded-box z-10 w-32 p-2 shadow"
-                  >
-                    {SEPARATOR_PRESETS.map((sep) => (
-                      <li>
-                        <button
-                          type="button"
-                          onClick={() => updateOption("separator", sep)}
-                          class="font-mono"
-                        >
-                          {sep === ""
-                            ? "(none)"
-                            : sep === " "
-                            ? "space"
-                            : `"${sep}"`}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
             </div>
           </div>

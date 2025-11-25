@@ -41,5 +41,6 @@
 
 ## Misc
 
+- Always use bun instead of npm
 - Always use `bun run test` instead of just `bun test`
 - When creating documents and plans, do not include code there

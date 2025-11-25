@@ -21,44 +21,94 @@ describe("NumberingControls", () => {
       expect(screen.getByText("Numbering & Sequencing")).toBeTruthy();
     });
 
-    it("should show Active badge when numbering is enabled", () => {
-      renderComponent({
-        options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: true },
-      });
-      expect(screen.getByText("Active")).toBeTruthy();
-    });
+    // Active badge tests removed as the badge was removed in redesign
 
-    it("should not show Active badge when numbering is disabled", () => {
-      renderComponent({
-        options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: false },
-      });
-      expect(screen.queryByText("Active")).toBeNull();
-    });
-
-    it("should call onToggle when header is clicked", () => {
+    it("should toggle both enabled state and expansion when header is clicked", () => {
       const onToggle = vi.fn();
-      renderComponent({ onToggle });
-
-      fireEvent.click(screen.getByText("Numbering & Sequencing"));
-      expect(onToggle).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("Enable checkbox", () => {
-    it("should toggle enabled state when checkbox is clicked", () => {
       const onOptionsChange = vi.fn();
       renderComponent({
         options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: false },
+        onToggle,
         onOptionsChange,
-        isExpanded: true,
       });
 
-      const checkbox = screen.getAllByRole("checkbox")[0];
-      fireEvent.click(checkbox);
+      fireEvent.click(screen.getByText("Numbering & Sequencing"));
+      expect(onToggle).toHaveBeenCalledTimes(1);
+      expect(onOptionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: true })
+      );
+    });
+  });
+
+  describe("Enable toggle", () => {
+    it("should toggle enabled state and expand when toggle is clicked from disabled", () => {
+      const onOptionsChange = vi.fn();
+      const onToggle = vi.fn();
+      renderComponent({
+        options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: false },
+        onOptionsChange,
+        onToggle,
+        isExpanded: false,
+      });
+
+      const toggle = screen.getAllByRole("checkbox")[0];
+      fireEvent.click(toggle);
 
       expect(onOptionsChange).toHaveBeenCalledWith(
         expect.objectContaining({ enabled: true })
       );
+      expect(onToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it("should toggle enabled state and collapse when toggle is clicked from enabled", () => {
+      const onOptionsChange = vi.fn();
+      const onToggle = vi.fn();
+      renderComponent({
+        options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: true },
+        onOptionsChange,
+        onToggle,
+        isExpanded: true,
+      });
+
+      const toggle = screen.getAllByRole("checkbox")[0];
+      fireEvent.click(toggle);
+
+      expect(onOptionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+      expect(onToggle).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not call onToggle if already in correct expanded state", () => {
+      const onOptionsChange = vi.fn();
+      const onToggle = vi.fn();
+      renderComponent({
+        options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: false },
+        onOptionsChange,
+        onToggle,
+        isExpanded: false,
+      });
+
+      const toggle = screen.getAllByRole("checkbox")[0];
+      // Enable when already collapsed - should expand
+      fireEvent.click(toggle);
+      expect(onToggle).toHaveBeenCalledTimes(1);
+
+      // Reset mocks
+      vi.clearAllMocks();
+
+      // Now test enabling when already expanded
+      renderComponent({
+        options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: false },
+        onOptionsChange,
+        onToggle,
+        isExpanded: true,
+      });
+
+      const toggle2 = screen.getAllByRole("checkbox")[0];
+      fireEvent.click(toggle2);
+      // Should not toggle since already expanded
+      expect(onToggle).not.toHaveBeenCalled();
     });
   });
 
