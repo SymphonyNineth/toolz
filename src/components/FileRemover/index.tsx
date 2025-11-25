@@ -3,10 +3,10 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import Header from "./Header";
 import PatternControls from "./PatternControls";
-import { PatternType, FileMatchItem } from "./types";
-// import ActionButtons from "./ActionButtons";
-// import FileRemoverList from "./FileRemoverList";
-// import DeleteConfirmModal from "./DeleteConfirmModal";
+import ActionButtons from "./ActionButtons";
+import FileRemoverList from "./FileRemoverList";
+import DeleteConfirmModal from "./DeleteConfirmModal";
+import { PatternType, FileMatchItem, DeleteResult } from "./types";
 
 export default function FileRemover() {
   // Pattern state
@@ -21,17 +21,15 @@ export default function FileRemover() {
   const [files, setFiles] = createSignal<FileMatchItem[]>([]);
   const [basePath, setBasePath] = createSignal<string>("");
   const [isSearching, setIsSearching] = createSignal(false);
-  const [_isDeleting, setIsDeleting] = createSignal(false);
+  const [isDeleting, setIsDeleting] = createSignal(false);
 
   // Modal state
-  const [_showDeleteModal, setShowDeleteModal] = createSignal(false);
+  const [showDeleteModal, setShowDeleteModal] = createSignal(false);
 
   // Computed
   const selectedFiles = createMemo(() => files().filter((f) => f.selected));
   const selectedCount = createMemo(() => selectedFiles().length);
-  const totalSize = createMemo(() =>
-    selectedFiles().reduce((sum, f) => sum + f.size, 0)
-  );
+  const canSearch = createMemo(() => !!basePath() && !!pattern().trim());
 
   // Actions
   async function selectFolder() {
@@ -42,14 +40,11 @@ export default function FileRemover() {
 
     if (selected && typeof selected === "string") {
       setBasePath(selected);
-      if (pattern()) {
-        await searchFiles();
-      }
     }
   }
 
   async function searchFiles() {
-    if (!basePath() || !pattern()) return;
+    if (!canSearch()) return;
 
     setIsSearching(true);
     setPatternError(undefined);
@@ -70,7 +65,7 @@ export default function FileRemover() {
           matchRanges: r.match_ranges,
           size: r.size,
           isDirectory: r.is_directory,
-          selected: true, // Select all by default
+          selected: true,
         }))
       );
     } catch (error) {
@@ -81,59 +76,68 @@ export default function FileRemover() {
     }
   }
 
-  // Toggle selection for a single file
-  function toggleFileSelection(path: string) {
+  function toggleSelect(path: string) {
     setFiles((prev) =>
       prev.map((f) => (f.path === path ? { ...f, selected: !f.selected } : f))
     );
   }
 
-  // Select/deselect all files
-  function toggleAllFiles(selected: boolean) {
-    setFiles((prev) => prev.map((f) => ({ ...f, selected })));
+  function selectAll() {
+    setFiles((prev) => prev.map((f) => ({ ...f, selected: true })));
   }
 
-  // Delete selected files
-  async function deleteSelectedFiles() {
+  function deselectAll() {
+    setFiles((prev) => prev.map((f) => ({ ...f, selected: false })));
+  }
+
+  function invertSelection() {
+    setFiles((prev) => prev.map((f) => ({ ...f, selected: !f.selected })));
+  }
+
+  function removeFromList(paths: string[]) {
+    const pathSet = new Set(paths);
+    setFiles((prev) => prev.filter((f) => !pathSet.has(f.path)));
+  }
+
+  function clearList() {
+    setFiles([]);
+  }
+
+  async function handleDelete() {
     const filesToDelete = selectedFiles().map((f) => f.path);
     if (filesToDelete.length === 0) return;
 
     setIsDeleting(true);
 
     try {
-      await invoke("delete_files", {
+      const result = await invoke<DeleteResult>("batch_delete", {
         files: filesToDelete,
         deleteEmptyDirs: deleteEmptyDirs(),
       });
 
-      // Remove deleted files from list
-      const deletedPaths = new Set(filesToDelete);
-      setFiles((prev) => prev.filter((f) => !deletedPaths.has(f.path)));
+      // Remove successfully deleted files from the list
+      const successSet = new Set(result.successful);
+      setFiles((prev) => prev.filter((f) => !successSet.has(f.path)));
+
+      // Show results
+      if (result.failed.length > 0) {
+        const failedMsg = result.failed
+          .slice(0, 3)
+          .map(([path, err]) => `${path}: ${err}`)
+          .join("\n");
+        alert(
+          `Deleted ${result.successful.length} files.\n` +
+            `Failed to delete ${result.failed.length} files:\n${failedMsg}`
+        );
+      }
+
       setShowDeleteModal(false);
     } catch (error) {
-      console.error("Delete failed:", error);
-      setPatternError(`Delete failed: ${String(error)}`);
+      alert(`Delete failed: ${error}`);
     } finally {
       setIsDeleting(false);
     }
   }
-
-  // Expose these for future components
-  const _actions = {
-    selectFolder,
-    searchFiles,
-    toggleFileSelection,
-    toggleAllFiles,
-    deleteSelectedFiles,
-  };
-
-  const _state = {
-    files,
-    basePath,
-    isSearching,
-    selectedCount,
-    totalSize,
-  };
 
   return (
     <div class="min-h-screen bg-base-300 p-8">
@@ -155,12 +159,36 @@ export default function FileRemover() {
             patternError={patternError()}
           />
 
-          {/* TODO: ActionButtons */}
-          {/* TODO: FileRemoverList */}
-          {/* TODO: DeleteConfirmModal */}
+          <ActionButtons
+            basePath={basePath()}
+            onSelectFolder={selectFolder}
+            onSearch={searchFiles}
+            onDelete={() => setShowDeleteModal(true)}
+            onClearList={clearList}
+            isSearching={isSearching()}
+            selectedCount={selectedCount()}
+            totalCount={files().length}
+            canSearch={canSearch()}
+          />
+
+          <FileRemoverList
+            files={files()}
+            onToggleSelect={toggleSelect}
+            onSelectAll={selectAll}
+            onDeselectAll={deselectAll}
+            onInvertSelection={invertSelection}
+            onRemoveFromList={removeFromList}
+          />
         </div>
+
+        <DeleteConfirmModal
+          isOpen={showDeleteModal()}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDelete}
+          files={selectedFiles()}
+          isDeleting={isDeleting()}
+        />
       </div>
     </div>
   );
 }
-
