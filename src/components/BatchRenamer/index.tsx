@@ -215,6 +215,10 @@ export default function BatchRenamer() {
     }
   }
 
+  const filesToRenameCount = createMemo(() =>
+    fileItems().filter((f) => f.name !== f.newName).length
+  );
+
   const renameDisabledReason = createMemo(() => {
     const items = fileItems();
 
@@ -271,6 +275,8 @@ export default function BatchRenamer() {
           onSelectFolders={selectFolders}
           onRename={handleRename}
           renameDisabledReason={renameDisabledReason()}
+          filesToRenameCount={filesToRenameCount()}
+          totalFilesCount={selectedPaths().length}
         />
 
         <FileList files={fileItems()} onRemoveFiles={handleRemoveFiles} />

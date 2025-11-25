@@ -95,8 +95,24 @@ const FileList: Component<FileListProps> = (props) => {
               each={props.files}
               fallback={
                 <tr>
-                  <td colspan="5" class="text-center py-8 text-base-content/60">
-                    No files selected
+                  <td colspan="5" class="text-center py-12">
+                    <div class="flex flex-col items-center gap-3 text-base-content/50">
+                      <svg
+                        class="w-12 h-12"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <p class="text-sm">No files selected</p>
+                      <p class="text-xs">Use the buttons above to select files or folders</p>
+                    </div>
                   </td>
                 </tr>
               }

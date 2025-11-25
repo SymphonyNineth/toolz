@@ -113,13 +113,13 @@ describe("RenamerControls", () => {
         />
       ));
 
-      expect(screen.getByText("⚠️ Invalid regex: Invalid group")).toBeInTheDocument();
+      expect(screen.getByText(/Invalid regex: Invalid group/)).toBeInTheDocument();
     });
 
     it("should not display error message when regexError is undefined", () => {
       render(() => <RenamerControls {...defaultProps} />);
 
-      const errorMsg = screen.queryByText(/⚠️ Invalid regex:/);
+      const errorMsg = screen.queryByText(/Invalid regex:/);
       expect(errorMsg).not.toBeInTheDocument();
     });
 
@@ -131,7 +131,7 @@ describe("RenamerControls", () => {
         />
       ));
 
-      expect(screen.getByText("⚠️ Invalid regex: Unterminated group")).toBeInTheDocument();
+      expect(screen.getByText(/Invalid regex: Unterminated group/)).toBeInTheDocument();
 
       unmount();
 
@@ -142,12 +142,12 @@ describe("RenamerControls", () => {
         />
       ));
 
-      expect(screen.getByText("⚠️ Invalid regex: Invalid escape sequence")).toBeInTheDocument();
+      expect(screen.getByText(/Invalid regex: Invalid escape sequence/)).toBeInTheDocument();
     });
   });
 
   describe("Regex Mode Features", () => {
-    it("should show regex cheat sheet button when regex mode is enabled", () => {
+    it("should show regex quick reference panel when regex mode is enabled", () => {
       render(() => (
         <RenamerControls
           {...defaultProps}
@@ -155,13 +155,13 @@ describe("RenamerControls", () => {
         />
       ));
 
-      expect(screen.getByText("📖 Regex Cheat Sheet")).toBeInTheDocument();
+      expect(screen.getByText("Regex Quick Reference")).toBeInTheDocument();
     });
 
-    it("should not show regex cheat sheet button when regex mode is disabled", () => {
+    it("should not show regex quick reference panel when regex mode is disabled", () => {
       render(() => <RenamerControls {...defaultProps} regexMode={false} />);
 
-      expect(screen.queryByText("📖 Regex Cheat Sheet")).not.toBeInTheDocument();
+      expect(screen.queryByText("Regex Quick Reference")).not.toBeInTheDocument();
     });
 
     it("should show regex-specific placeholder in Find input when regex mode enabled", () => {

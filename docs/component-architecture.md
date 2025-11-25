@@ -14,7 +14,8 @@ src/
 │   │   ├── FileList.tsx        # File list table with selection
 │   │   ├── FileRow.tsx         # Individual file row component
 │   │   ├── Header.tsx          # Page header with theme toggle
-│   │   ├── RegexCheatSheet.tsx # Regex reference modal
+│   │   ├── RegexCheatSheet.tsx # Regex reference modal (legacy)
+│   │   ├── RegexCheatSheetInline.tsx # Inline collapsible regex reference
 │   │   ├── RegexHighlightText.tsx # Regex match highlighting
 │   │   ├── RenamerControls.tsx # Find/replace input controls
 │   │   ├── StatusIcon.tsx      # Success/error status icons
@@ -48,11 +49,13 @@ App
     ├── RenamerControls
     │   ├── Input (x2)
     │   ├── Checkbox (x3)
-    │   └── RegexCheatSheet
-    │       └── Modal
+    │   └── RegexCheatSheetInline (when regex mode enabled)
+    │       ├── ChevronDownIcon / ChevronRightIcon
+    │       └── Collapsible content panel
     ├── ActionButtons
-    │   ├── Button (x3)
-    │   └── Tooltip
+    │   ├── Button (x3) with icons (FilesIcon, FolderOpenIcon, RefreshIcon)
+    │   ├── Tooltip
+    │   └── Summary bar (file counts)
     └── FileList
         └── FileRow (foreach file)
             ├── StatusIcon
@@ -73,17 +76,23 @@ All SVG icons are centralized with consistent sizing and styling:
 - `ErrorIcon` - X icon for errors
 - `WarningIcon` - Triangle warning for collisions
 - `FolderIcon` - Folder for "show in finder" action
+- `FolderOpenIcon` - Open folder for select folders button
+- `FilesIcon` - Document icon for select files button
+- `RefreshIcon` - Refresh arrows for rename button
 - `SunIcon` - Light theme indicator
 - `MoonIcon` - Dark theme indicator
 - `CloseIcon` - Modal close button
+- `ChevronDownIcon` - Expanded state indicator
+- `ChevronRightIcon` - Collapsed state indicator
 
 Usage:
 
 ```tsx
-import { SuccessIcon, ErrorIcon } from "../ui/icons";
+import { SuccessIcon, ErrorIcon, ChevronDownIcon } from "../ui/icons";
 
 <SuccessIcon size="md" class="text-success" />
 <ErrorIcon size="lg" class="text-error" />
+<ChevronDownIcon size="sm" />
 ```
 
 Sizes: `xs`, `sm`, `md` (default), `lg`, `xl`

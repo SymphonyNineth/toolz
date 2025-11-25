@@ -1,7 +1,7 @@
-import { Component, Show, createSignal } from "solid-js";
+import { Component, Show, createSignal, createEffect } from "solid-js";
 import Input from "../ui/Input";
 import Checkbox from "../ui/Checkbox";
-import RegexCheatSheet from "./RegexCheatSheet";
+import RegexCheatSheetInline from "./RegexCheatSheetInline";
 
 interface RenamerControlsProps {
   findText: string;
@@ -18,11 +18,18 @@ interface RenamerControlsProps {
 }
 
 const RenamerControls: Component<RenamerControlsProps> = (props) => {
-  const [showCheatSheet, setShowCheatSheet] = createSignal(false);
+  const [cheatSheetExpanded, setCheatSheetExpanded] = createSignal(false);
+
+  // Auto-collapse cheat sheet when regex mode is disabled
+  createEffect(() => {
+    if (!props.regexMode) {
+      setCheatSheetExpanded(false);
+    }
+  });
 
   return (
-    <>
-      <div class="w-full max-w-4xl mx-auto p-6 bg-base-200 rounded-box shadow-lg">
+    <div class="w-full max-w-4xl mx-auto">
+      <div class="p-6 bg-base-200 rounded-box shadow-lg">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <Input
@@ -33,8 +40,9 @@ const RenamerControls: Component<RenamerControlsProps> = (props) => {
               placeholder={props.regexMode ? "Regex pattern..." : "Text to find..."}
             />
             <Show when={props.regexError}>
-              <div class="mt-2 text-sm text-error">
-                ⚠️ Invalid regex: {props.regexError}
+              <div class="mt-2 text-sm text-error flex items-center gap-1">
+                <span>⚠️</span>
+                <span>Invalid regex: {props.regexError}</span>
               </div>
             </Show>
           </div>
@@ -64,22 +72,19 @@ const RenamerControls: Component<RenamerControlsProps> = (props) => {
             checked={props.replaceFirstOnly}
             onChange={(e) => props.setReplaceFirstOnly(e.currentTarget.checked)}
           />
-          <Show when={props.regexMode}>
-            <button
-              onClick={() => setShowCheatSheet(true)}
-              class="btn btn-sm btn-outline btn-info"
-            >
-              📖 Regex Cheat Sheet
-            </button>
-          </Show>
         </div>
       </div>
 
-      <RegexCheatSheet
-        isOpen={showCheatSheet()}
-        onClose={() => setShowCheatSheet(false)}
-      />
-    </>
+      {/* Inline Regex Cheat Sheet - visible when regex mode is enabled */}
+      <Show when={props.regexMode}>
+        <div class="mt-4">
+          <RegexCheatSheetInline
+            isExpanded={cheatSheetExpanded()}
+            onToggle={() => setCheatSheetExpanded(!cheatSheetExpanded())}
+          />
+        </div>
+      </Show>
+    </div>
   );
 };
 
