@@ -3,9 +3,14 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import RenamerControls from "./RenamerControls";
 import FileList, { FileItem } from "./FileList";
-import Button from "../ui/Button";
-import ThemeToggle from "../ui/ThemeToggle";
-import { calculateNewName, getRegexMatches, getReplacementSegments } from "./renamingUtils";
+import Header from "./Header";
+import ActionButtons from "./ActionButtons";
+import {
+  calculateNewName,
+  getRegexMatches,
+  getReplacementSegments,
+} from "./renamingUtils";
+import { getFileName, getDirectory, joinPath } from "../../utils/path";
 
 export default function BatchRenamer() {
   const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
@@ -14,8 +19,12 @@ export default function BatchRenamer() {
   const [caseSensitive, setCaseSensitive] = createSignal(false);
   const [regexMode, setRegexMode] = createSignal(false);
   const [replaceFirstOnly, setReplaceFirstOnly] = createSignal(false);
-  const [regexError, setRegexError] = createSignal<string | undefined>(undefined);
-  const [statusMap, setStatusMap] = createSignal<Record<string, 'idle' | 'success' | 'error'>>({});
+  const [regexError, setRegexError] = createSignal<string | undefined>(
+    undefined
+  );
+  const [statusMap, setStatusMap] = createSignal<
+    Record<string, "idle" | "success" | "error">
+  >({});
 
   // Reset status when controls change
   const updateFindText = (text: string) => {
@@ -23,25 +32,26 @@ export default function BatchRenamer() {
     setStatusMap({});
     setRegexError(undefined);
   };
-  const updateReplaceText = (text: string) => { setReplaceText(text); setStatusMap({}); };
-  const updateCaseSensitive = (val: boolean) => { setCaseSensitive(val); setStatusMap({}); };
+
+  const updateReplaceText = (text: string) => {
+    setReplaceText(text);
+    setStatusMap({});
+  };
+
+  const updateCaseSensitive = (val: boolean) => {
+    setCaseSensitive(val);
+    setStatusMap({});
+  };
+
   const updateRegexMode = (val: boolean) => {
     setRegexMode(val);
     setStatusMap({});
     setRegexError(undefined);
   };
-  const updateReplaceFirstOnly = (val: boolean) => { setReplaceFirstOnly(val); setStatusMap({}); };
 
-  // Helper to extract filename from path
-  const getFileName = (path: string) => {
-    // Handle both Windows and Unix separators
-    return path.split(/[/\\]/).pop() || path;
-  };
-
-  // Helper to get directory from path
-  const getDirectory = (path: string) => {
-    const separator = path.includes("\\") ? "\\" : "/";
-    return path.substring(0, path.lastIndexOf(separator));
+  const updateReplaceFirstOnly = (val: boolean) => {
+    setReplaceFirstOnly(val);
+    setStatusMap({});
   };
 
   const fileItems = createMemo(() => {
@@ -77,19 +87,22 @@ export default function BatchRenamer() {
       let newNameRegexMatches;
       if (!result.error && regexMode() && findText()) {
         try {
-          const flags = caseSensitive() ? (replaceFirstOnly() ? "" : "g") : (replaceFirstOnly() ? "i" : "gi");
+          const flags = caseSensitive()
+            ? replaceFirstOnly()
+              ? ""
+              : "g"
+            : replaceFirstOnly()
+              ? "i"
+              : "gi";
           const regex = new RegExp(findText(), flags);
           regexMatches = getRegexMatches(name, regex);
-
-          // Calculate replacement segments
-          const replacementResult = getReplacementSegments(name, regex, replaceText());
-          // We use the newName from replacementResult to ensure consistency, 
-          // although it should match calculateNewName's result.
-          // Actually, let's trust calculateNewName for the name, and just use segments.
-          // But getReplacementSegments might have slightly different logic if I messed up.
-          // Let's use the segments.
+          const replacementResult = getReplacementSegments(
+            name,
+            regex,
+            replaceText()
+          );
           newNameRegexMatches = replacementResult.segments;
-        } catch (e) {
+        } catch {
           // Ignore errors, they are handled above
         }
       }
@@ -99,19 +112,19 @@ export default function BatchRenamer() {
 
     // Check for collisions
     const newNameCounts = new Map<string, number>();
-    items.forEach(item => {
+    items.forEach((item) => {
       const fullNewPath = item.path.replace(item.name, item.newName);
       newNameCounts.set(fullNewPath, (newNameCounts.get(fullNewPath) || 0) + 1);
     });
 
-    return items.map(item => {
+    return items.map((item) => {
       const fullNewPath = item.path.replace(item.name, item.newName);
       const hasCollision = newNameCounts.get(fullNewPath)! > 1;
 
       return {
         ...item,
-        status: currentStatus[item.path] || 'idle',
-        hasCollision
+        status: currentStatus[item.path] || "idle",
+        hasCollision,
       } as FileItem & { hasCollision: boolean };
     });
   });
@@ -123,7 +136,6 @@ export default function BatchRenamer() {
     });
 
     if (selected) {
-      // Merge with existing paths and remove duplicates
       const newPaths = Array.isArray(selected) ? selected : [selected];
       const allPaths = [...selectedPaths(), ...newPaths];
       const uniquePaths = Array.from(new Set(allPaths));
@@ -143,13 +155,13 @@ export default function BatchRenamer() {
         const folders = Array.isArray(selected) ? selected : [selected];
         const allFiles: string[] = [];
 
-        // For each selected folder, get all files recursively
         for (const folder of folders) {
-          const files = await invoke<string[]>("list_files_recursively", { dirPath: folder });
+          const files = await invoke<string[]>("list_files_recursively", {
+            dirPath: folder,
+          });
           allFiles.push(...files);
         }
 
-        // Merge with existing paths and remove duplicates
         const allPaths = [...selectedPaths(), ...allFiles];
         const uniquePaths = Array.from(new Set(allPaths));
         setSelectedPaths(uniquePaths);
@@ -166,24 +178,25 @@ export default function BatchRenamer() {
       .filter((f) => f.name !== f.newName)
       .map((f) => {
         const dir = getDirectory(f.path);
-        const separator = f.path.includes("\\") ? "\\" : "/";
-        const newPath = `${dir}${separator}${f.newName}`;
+        const newPath = joinPath(dir, f.newName);
         return [f.path, newPath] as [string, string];
       });
 
     if (filesToRename.length === 0) return;
 
     try {
-      const result = await invoke<string[]>("batch_rename", { files: filesToRename });
+      const result = await invoke<string[]>("batch_rename", {
+        files: filesToRename,
+      });
       console.log("Renamed files:", result);
 
       const newPathsMap = new Map(filesToRename);
-      const newStatusMap: Record<string, 'idle' | 'success' | 'error'> = {};
+      const newStatusMap: Record<string, "idle" | "success" | "error"> = {};
 
-      const updatedPaths = selectedPaths().map(path => {
+      const updatedPaths = selectedPaths().map((path) => {
         const newPath = newPathsMap.get(path);
         if (newPath) {
-          newStatusMap[newPath] = 'success';
+          newStatusMap[newPath] = "success";
           return newPath;
         }
         return path;
@@ -191,36 +204,30 @@ export default function BatchRenamer() {
 
       setSelectedPaths(updatedPaths);
       setStatusMap(newStatusMap);
-
     } catch (error) {
       console.error("Rename failed:", error);
-      // Mark attempted files as error
-      const errorStatusMap: Record<string, 'idle' | 'success' | 'error'> = {};
+      const errorStatusMap: Record<string, "idle" | "success" | "error"> = {};
       filesToRename.forEach(([oldPath]) => {
-        errorStatusMap[oldPath] = 'error';
+        errorStatusMap[oldPath] = "error";
       });
       setStatusMap(errorStatusMap);
       alert(`Rename failed: ${error}`);
     }
   }
 
-  // Check if rename button should be disabled and why
   const renameDisabledReason = createMemo(() => {
     const items = fileItems();
 
-    // Check for regex errors
     if (regexError()) {
       return `Invalid regex: ${regexError()}`;
     }
 
-    // Check if there are any changes
-    const hasChanges = items.some(f => f.name !== f.newName);
+    const hasChanges = items.some((f) => f.name !== f.newName);
     if (!hasChanges) {
       return "No changes to apply";
     }
 
-    // Check for collisions
-    const hasCollisions = items.some(f => f.hasCollision);
+    const hasCollisions = items.some((f) => f.hasCollision);
     if (hasCollisions) {
       return "Cannot rename: duplicate file names detected";
     }
@@ -230,12 +237,11 @@ export default function BatchRenamer() {
 
   const handleRemoveFiles = (pathsToRemove: string[]) => {
     const pathsSet = new Set(pathsToRemove);
-    const newPaths = selectedPaths().filter(path => !pathsSet.has(path));
+    const newPaths = selectedPaths().filter((path) => !pathsSet.has(path));
     setSelectedPaths(newPaths);
 
-    // Clear status for removed files
     const newStatusMap = { ...statusMap() };
-    pathsToRemove.forEach(path => {
+    pathsToRemove.forEach((path) => {
       delete newStatusMap[path];
     });
     setStatusMap(newStatusMap);
@@ -244,10 +250,7 @@ export default function BatchRenamer() {
   return (
     <div class="min-h-screen bg-base-300 p-8">
       <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-          <h2 class="text-3xl font-bold text-primary">Batch File Renamer</h2>
-          <ThemeToggle />
-        </div>
+        <Header />
 
         <RenamerControls
           findText={findText()}
@@ -263,35 +266,12 @@ export default function BatchRenamer() {
           setReplaceFirstOnly={updateReplaceFirstOnly}
         />
 
-        <div class="flex justify-center gap-4 mt-8">
-          <Button
-            onClick={selectFiles}
-            variant="secondary"
-          >
-            Select Files
-          </Button>
-          <Button
-            onClick={selectFolders}
-            variant="secondary"
-          >
-            Select Folders
-          </Button>
-          <div class="relative inline-block group">
-            <Button
-              onClick={handleRename}
-              disabled={!!renameDisabledReason()}
-              variant="primary"
-            >
-              Rename Files
-            </Button>
-            {renameDisabledReason() && (
-              <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-base-100 text-base-content text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-base-300 z-10">
-                {renameDisabledReason()}
-                <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-base-100"></div>
-              </div>
-            )}
-          </div>
-        </div>
+        <ActionButtons
+          onSelectFiles={selectFiles}
+          onSelectFolders={selectFolders}
+          onRename={handleRename}
+          renameDisabledReason={renameDisabledReason()}
+        />
 
         <FileList files={fileItems()} onRemoveFiles={handleRemoveFiles} />
       </div>
