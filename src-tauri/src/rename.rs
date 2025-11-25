@@ -120,6 +120,10 @@ pub fn batch_rename(files: Vec<(String, String)>) -> Result<Vec<String>, String>
 /// This is the streaming variant of `batch_rename` that sends progress updates
 /// via a Tauri Channel. Use this for renaming many files to show progress.
 ///
+/// This command runs asynchronously on a background thread, allowing the
+/// main Tauri thread to remain responsive and deliver progress events
+/// to the frontend in real-time.
+///
 /// # Arguments
 ///
 /// * `files` - A vector of tuples where each tuple contains:
@@ -132,43 +136,48 @@ pub fn batch_rename(files: Vec<(String, String)>) -> Result<Vec<String>, String>
 /// * `Ok(Vec<String>)` - A vector of successfully renamed file paths (new paths)
 /// * `Err(String)` - A newline-separated string of all errors that occurred
 #[tauri::command]
-pub fn batch_rename_with_progress(
+pub async fn batch_rename_with_progress(
     files: Vec<(String, String)>,
     on_progress: Channel<RenameProgress>,
 ) -> Result<Vec<String>, String> {
-    let total = files.len();
+    // Run the heavy work in a blocking thread to keep the main thread responsive
+    tokio::task::spawn_blocking(move || {
+        let total = files.len();
 
-    // Send started event
-    let _ = on_progress.send(RenameProgress::Started { total_files: total });
+        // Send started event
+        let _ = on_progress.send(RenameProgress::Started { total_files: total });
 
-    let mut renamed_files = Vec::new();
-    let mut errors = Vec::new();
+        let mut renamed_files = Vec::new();
+        let mut errors = Vec::new();
 
-    for (index, (old_path, new_path)) in files.into_iter().enumerate() {
-        match fs::rename(&old_path, &new_path) {
-            Ok(_) => renamed_files.push(new_path.clone()),
-            Err(e) => errors.push(format!("Failed to rename {}: {}", old_path, e)),
+        for (index, (old_path, new_path)) in files.into_iter().enumerate() {
+            match fs::rename(&old_path, &new_path) {
+                Ok(_) => renamed_files.push(new_path.clone()),
+                Err(e) => errors.push(format!("Failed to rename {}: {}", old_path, e)),
+            }
+
+            // Send progress update
+            let _ = on_progress.send(RenameProgress::Progress {
+                current: index + 1,
+                total,
+                current_path: new_path,
+            });
         }
 
-        // Send progress update
-        let _ = on_progress.send(RenameProgress::Progress {
-            current: index + 1,
-            total,
-            current_path: new_path,
+        // Send completed event
+        let _ = on_progress.send(RenameProgress::Completed {
+            successful: renamed_files.len(),
+            failed: errors.len(),
         });
-    }
 
-    // Send completed event
-    let _ = on_progress.send(RenameProgress::Completed {
-        successful: renamed_files.len(),
-        failed: errors.len(),
-    });
-
-    if errors.is_empty() {
-        Ok(renamed_files)
-    } else {
-        Err(errors.join("\n"))
-    }
+        if errors.is_empty() {
+            Ok(renamed_files)
+        } else {
+            Err(errors.join("\n"))
+        }
+    })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?
 }
 
 /// Lists all files recursively within a directory.
@@ -228,6 +237,10 @@ pub fn list_files_recursively(dir_path: String) -> Result<Vec<String>, String> {
 /// progress updates via a Tauri Channel. Use this for large directories
 /// to prevent UI freezing.
 ///
+/// This command runs asynchronously on a background thread, allowing the
+/// main Tauri thread to remain responsive and deliver progress events
+/// to the frontend in real-time.
+///
 /// # Arguments
 ///
 /// * `dir_path` - The path to the directory to scan
@@ -239,7 +252,7 @@ pub fn list_files_recursively(dir_path: String) -> Result<Vec<String>, String> {
 /// * `Err(String)` - An error message if the path doesn't exist, isn't a directory,
 ///   or if there was an error reading the directory
 #[tauri::command]
-pub fn list_files_with_progress(
+pub async fn list_files_with_progress(
     dir_path: String,
     on_progress: Channel<ListProgress>,
 ) -> Result<Vec<String>, String> {
@@ -253,46 +266,53 @@ pub fn list_files_with_progress(
         return Err(format!("Path is not a directory: {}", dir_path));
     }
 
-    // Send started event
-    let _ = on_progress.send(ListProgress::Started {
-        base_path: dir_path.clone(),
-    });
+    let dir_path_clone = dir_path.clone();
 
-    let mut files = Vec::new();
-    let mut last_progress_dir = String::new();
-    let progress_interval = 50; // Send progress every 50 files
+    // Run the heavy work in a blocking thread to keep the main thread responsive
+    tokio::task::spawn_blocking(move || {
+        // Send started event
+        let _ = on_progress.send(ListProgress::Started {
+            base_path: dir_path_clone.clone(),
+        });
 
-    // Use WalkDir for efficient directory traversal
-    for entry in WalkDir::new(&path)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.path().is_file())
-    {
-        if let Some(path_str) = entry.path().to_str() {
-            files.push(path_str.to_string());
+        let mut files = Vec::new();
+        let mut last_progress_dir = String::new();
+        let progress_interval = 50; // Send progress every 50 files
 
-            // Send scanning progress periodically
-            if files.len() % progress_interval == 0 {
-                if let Some(parent) = entry.path().parent() {
-                    let current_dir = parent.to_string_lossy().to_string();
-                    if current_dir != last_progress_dir {
-                        last_progress_dir = current_dir.clone();
-                        let _ = on_progress.send(ListProgress::Scanning {
-                            current_dir,
-                            files_found: files.len(),
-                        });
+        // Use WalkDir for efficient directory traversal
+        for entry in WalkDir::new(&dir_path_clone)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().is_file())
+        {
+            if let Some(path_str) = entry.path().to_str() {
+                files.push(path_str.to_string());
+
+                // Send scanning progress periodically
+                if files.len() % progress_interval == 0 {
+                    if let Some(parent) = entry.path().parent() {
+                        let current_dir = parent.to_string_lossy().to_string();
+                        if current_dir != last_progress_dir {
+                            last_progress_dir = current_dir.clone();
+                            let _ = on_progress.send(ListProgress::Scanning {
+                                current_dir,
+                                files_found: files.len(),
+                            });
+                        }
                     }
                 }
             }
         }
-    }
 
-    // Send completed event
-    let _ = on_progress.send(ListProgress::Completed {
-        total_files: files.len(),
-    });
+        // Send completed event
+        let _ = on_progress.send(ListProgress::Completed {
+            total_files: files.len(),
+        });
 
-    Ok(files)
+        Ok(files)
+    })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?
 }
 
 /// Recursively collects file paths from a directory and its subdirectories.

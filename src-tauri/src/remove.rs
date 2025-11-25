@@ -327,6 +327,10 @@ pub fn search_files_by_pattern(
 /// progress updates via a Tauri Channel. Use this for large directories
 /// to prevent UI freezing.
 ///
+/// This command runs asynchronously on a background thread, allowing the
+/// main Tauri thread to remain responsive and deliver progress events
+/// to the frontend in real-time.
+///
 /// # Arguments
 ///
 /// * `base_path` - The directory to search in
@@ -341,7 +345,7 @@ pub fn search_files_by_pattern(
 /// * `Ok(Vec<FileMatchResult>)` - List of matching files with match details
 /// * `Err(String)` - Error message if search fails
 #[tauri::command]
-pub fn search_files_with_progress(
+pub async fn search_files_with_progress(
     base_path: String,
     pattern: String,
     pattern_type: PatternType,
@@ -353,115 +357,120 @@ pub fn search_files_with_progress(
         return Err("Pattern cannot be empty".to_string());
     }
 
-    // Send started event
-    let _ = on_progress.send(SearchProgress::Started {
-        base_path: base_path.clone(),
-    });
+    // Run the heavy work in a blocking thread to keep the main thread responsive
+    tokio::task::spawn_blocking(move || {
+        // Send started event
+        let _ = on_progress.send(SearchProgress::Started {
+            base_path: base_path.clone(),
+        });
 
-    // Phase 1: Collect all file paths while sending scanning progress
-    let mut all_files: Vec<walkdir::DirEntry> = Vec::new();
-    let mut last_progress_dir = String::new();
-    let progress_interval = 100; // Send progress every 100 files
+        // Phase 1: Collect all file paths while sending scanning progress
+        let mut all_files: Vec<walkdir::DirEntry> = Vec::new();
+        let mut last_progress_dir = String::new();
+        let progress_interval = 100; // Send progress every 100 files
 
-    let walker = if include_subdirs {
-        WalkDir::new(&base_path)
-    } else {
-        WalkDir::new(&base_path).max_depth(1)
-    };
-
-    for entry in walker.into_iter().filter_map(|e| e.ok()) {
-        let path = entry.path();
-
-        // Skip the base directory itself
-        if path == Path::new(&base_path) {
-            continue;
-        }
-
-        // Send scanning progress periodically
-        if all_files.len() % progress_interval == 0 {
-            if let Some(parent) = path.parent() {
-                let current_dir = parent.to_string_lossy().to_string();
-                if current_dir != last_progress_dir {
-                    last_progress_dir = current_dir.clone();
-                    let _ = on_progress.send(SearchProgress::Scanning {
-                        current_dir,
-                        files_found: all_files.len(),
-                    });
-                }
-            }
-        }
-
-        all_files.push(entry);
-    }
-
-    // Send matching phase event
-    let _ = on_progress.send(SearchProgress::Matching {
-        total_files: all_files.len(),
-    });
-
-    // Phase 2: Pattern matching with Rayon parallelization
-    // Pre-compile regex if needed for thread-safe sharing
-    let compiled_regex = if pattern_type == PatternType::Regex {
-        let regex_pattern = if case_sensitive {
-            regex::Regex::new(&pattern)
+        let walker = if include_subdirs {
+            WalkDir::new(&base_path)
         } else {
-            regex::Regex::new(&format!("(?i){}", pattern))
-        }
-        .map_err(|e| e.to_string())?;
-        Some(regex_pattern)
-    } else {
-        None
-    };
+            WalkDir::new(&base_path).max_depth(1)
+        };
 
-    let results: Vec<FileMatchResult> = all_files
-        .par_iter()
-        .filter_map(|entry| {
+        for entry in walker.into_iter().filter_map(|e| e.ok()) {
             let path = entry.path();
-            let name = path.file_name()?.to_string_lossy().to_string();
 
-            let match_ranges = match &pattern_type {
-                PatternType::Simple => match_simple(&name, &pattern, case_sensitive),
-                PatternType::Extension => match_extension(&name, &pattern, case_sensitive),
-                PatternType::Regex => {
-                    // Use pre-compiled regex for thread safety
-                    if let Some(ref regex) = compiled_regex {
-                        let matches: Vec<(usize, usize)> = regex
-                            .find_iter(&name)
-                            .map(|m| (m.start(), m.end()))
-                            .collect();
-                        if matches.is_empty() {
-                            None
-                        } else {
-                            Some(matches)
-                        }
-                    } else {
-                        None
+            // Skip the base directory itself
+            if path == Path::new(&base_path) {
+                continue;
+            }
+
+            // Send scanning progress periodically
+            if all_files.len() % progress_interval == 0 {
+                if let Some(parent) = path.parent() {
+                    let current_dir = parent.to_string_lossy().to_string();
+                    if current_dir != last_progress_dir {
+                        last_progress_dir = current_dir.clone();
+                        let _ = on_progress.send(SearchProgress::Scanning {
+                            current_dir,
+                            files_found: all_files.len(),
+                        });
                     }
                 }
-            };
-
-            if let Some(ranges) = match_ranges {
-                let metadata = fs::metadata(path).ok()?;
-
-                Some(FileMatchResult {
-                    path: path.to_string_lossy().to_string(),
-                    name,
-                    match_ranges: ranges,
-                    size: metadata.len(),
-                    is_directory: metadata.is_dir(),
-                })
-            } else {
-                None
             }
-        })
-        .collect();
 
-    // Send completed event
-    let _ = on_progress.send(SearchProgress::Completed {
-        matches_found: results.len(),
-    });
+            all_files.push(entry);
+        }
 
-    Ok(results)
+        // Send matching phase event
+        let _ = on_progress.send(SearchProgress::Matching {
+            total_files: all_files.len(),
+        });
+
+        // Phase 2: Pattern matching with Rayon parallelization
+        // Pre-compile regex if needed for thread-safe sharing
+        let compiled_regex = if pattern_type == PatternType::Regex {
+            let regex_pattern = if case_sensitive {
+                regex::Regex::new(&pattern)
+            } else {
+                regex::Regex::new(&format!("(?i){}", pattern))
+            }
+            .map_err(|e| e.to_string())?;
+            Some(regex_pattern)
+        } else {
+            None
+        };
+
+        let results: Vec<FileMatchResult> = all_files
+            .par_iter()
+            .filter_map(|entry| {
+                let path = entry.path();
+                let name = path.file_name()?.to_string_lossy().to_string();
+
+                let match_ranges = match &pattern_type {
+                    PatternType::Simple => match_simple(&name, &pattern, case_sensitive),
+                    PatternType::Extension => match_extension(&name, &pattern, case_sensitive),
+                    PatternType::Regex => {
+                        // Use pre-compiled regex for thread safety
+                        if let Some(ref regex) = compiled_regex {
+                            let matches: Vec<(usize, usize)> = regex
+                                .find_iter(&name)
+                                .map(|m| (m.start(), m.end()))
+                                .collect();
+                            if matches.is_empty() {
+                                None
+                            } else {
+                                Some(matches)
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                };
+
+                if let Some(ranges) = match_ranges {
+                    let metadata = fs::metadata(path).ok()?;
+
+                    Some(FileMatchResult {
+                        path: path.to_string_lossy().to_string(),
+                        name,
+                        match_ranges: ranges,
+                        size: metadata.len(),
+                        is_directory: metadata.is_dir(),
+                    })
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        // Send completed event
+        let _ = on_progress.send(SearchProgress::Completed {
+            matches_found: results.len(),
+        });
+
+        Ok(results)
+    })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?
 }
 
 /// Deletes multiple files and optionally cleans up empty directories.
@@ -542,6 +551,10 @@ pub fn batch_delete(files: Vec<String>, delete_empty_dirs: bool) -> Result<Delet
 /// This is the streaming variant of `batch_delete` that sends progress updates
 /// via a Tauri Channel. Use this for deleting many files to show progress.
 ///
+/// This command runs asynchronously on a background thread, allowing the
+/// main Tauri thread to remain responsive and deliver progress events
+/// to the frontend in real-time.
+///
 /// # Arguments
 ///
 /// * `files` - List of file paths to delete
@@ -553,87 +566,92 @@ pub fn batch_delete(files: Vec<String>, delete_empty_dirs: bool) -> Result<Delet
 /// * `Ok(DeleteResult)` - Result containing successful/failed deletions and cleaned dirs
 /// * `Err(String)` - Error message if operation completely fails
 #[tauri::command]
-pub fn batch_delete_with_progress(
+pub async fn batch_delete_with_progress(
     files: Vec<String>,
     delete_empty_dirs: bool,
     on_progress: Channel<DeleteProgress>,
 ) -> Result<DeleteResult, String> {
-    let total = files.len();
+    // Run the heavy work in a blocking thread to keep the main thread responsive
+    tokio::task::spawn_blocking(move || {
+        let total = files.len();
 
-    // Send started event
-    let _ = on_progress.send(DeleteProgress::Started { total_files: total });
+        // Send started event
+        let _ = on_progress.send(DeleteProgress::Started { total_files: total });
 
-    let mut successful = Vec::new();
-    let mut failed = Vec::new();
-    let mut deleted_dirs = Vec::new();
-    let mut parent_dirs: HashSet<String> = HashSet::new();
+        let mut successful = Vec::new();
+        let mut failed = Vec::new();
+        let mut deleted_dirs = Vec::new();
+        let mut parent_dirs: HashSet<String> = HashSet::new();
 
-    for (index, file_path) in files.into_iter().enumerate() {
-        let path = Path::new(&file_path);
+        for (index, file_path) in files.into_iter().enumerate() {
+            let path = Path::new(&file_path);
 
-        // Track parent directory for potential cleanup
-        if delete_empty_dirs {
-            if let Some(parent) = path.parent() {
-                parent_dirs.insert(parent.to_string_lossy().to_string());
+            // Track parent directory for potential cleanup
+            if delete_empty_dirs {
+                if let Some(parent) = path.parent() {
+                    parent_dirs.insert(parent.to_string_lossy().to_string());
+                }
+            }
+
+            // Attempt deletion
+            let result = if path.is_dir() {
+                fs::remove_dir_all(path)
+            } else {
+                fs::remove_file(path)
+            };
+
+            // Send progress update
+            let _ = on_progress.send(DeleteProgress::Progress {
+                current: index + 1,
+                total,
+                current_path: file_path.clone(),
+            });
+
+            match result {
+                Ok(_) => successful.push(file_path),
+                Err(e) => failed.push((file_path, e.to_string())),
             }
         }
 
-        // Attempt deletion
-        let result = if path.is_dir() {
-            fs::remove_dir_all(path)
-        } else {
-            fs::remove_file(path)
-        };
+        // Clean up empty directories if requested
+        if delete_empty_dirs {
+            // Sort by depth (deepest first) to handle nested empty dirs
+            let mut dirs: Vec<_> = parent_dirs.into_iter().collect();
+            dirs.sort_by(|a, b| {
+                b.matches(std::path::MAIN_SEPARATOR)
+                    .count()
+                    .cmp(&a.matches(std::path::MAIN_SEPARATOR).count())
+            });
 
-        // Send progress update
-        let _ = on_progress.send(DeleteProgress::Progress {
-            current: index + 1,
-            total,
-            current_path: file_path.clone(),
-        });
-
-        match result {
-            Ok(_) => successful.push(file_path),
-            Err(e) => failed.push((file_path, e.to_string())),
-        }
-    }
-
-    // Clean up empty directories if requested
-    if delete_empty_dirs {
-        // Sort by depth (deepest first) to handle nested empty dirs
-        let mut dirs: Vec<_> = parent_dirs.into_iter().collect();
-        dirs.sort_by(|a, b| {
-            b.matches(std::path::MAIN_SEPARATOR)
-                .count()
-                .cmp(&a.matches(std::path::MAIN_SEPARATOR).count())
-        });
-
-        for dir in dirs {
-            let path = Path::new(&dir);
-            if path.exists() && path.is_dir() {
-                if let Ok(mut entries) = fs::read_dir(path) {
-                    if entries.next().is_none() {
-                        // Directory is empty
-                        if fs::remove_dir(path).is_ok() {
-                            deleted_dirs.push(dir);
+            for dir in dirs {
+                let path = Path::new(&dir);
+                if path.exists() && path.is_dir() {
+                    if let Ok(mut entries) = fs::read_dir(path) {
+                        if entries.next().is_none() {
+                            // Directory is empty
+                            if fs::remove_dir(path).is_ok() {
+                                deleted_dirs.push(dir);
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    // Send completed event
-    let _ = on_progress.send(DeleteProgress::Completed {
-        successful: successful.len(),
-        failed: failed.len(),
-    });
+        // Send completed event
+        let _ = on_progress.send(DeleteProgress::Completed {
+            successful: successful.len(),
+            failed: failed.len(),
+        });
 
-    Ok(DeleteResult {
-        successful,
-        failed,
-        deleted_dirs,
+        Ok(DeleteResult {
+            successful,
+            failed,
+            deleted_dirs,
+        })
     })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?
 }
 
 #[cfg(test)]

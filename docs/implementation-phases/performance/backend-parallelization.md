@@ -160,6 +160,28 @@ This document covers adding parallel processing with Rayon and progress streamin
 - Avoid sending too many events (throttle to every N items)
 - Channel automatically handles serialization of Rust types to JSON
 
+### Async Commands for Non-Blocking Progress
+- **Critical**: Streaming commands MUST be `async` to prevent UI blocking
+- Use `tokio::task::spawn_blocking` to run heavy file I/O in a background thread
+- This allows the main Tauri async runtime to deliver progress events while work happens
+- Without async, the command blocks the main thread and progress events aren't delivered until completion
+
+```rust
+#[tauri::command]
+pub async fn command_with_progress(
+    on_progress: Channel<ProgressType>,
+) -> Result<T, String> {
+    tokio::task::spawn_blocking(move || {
+        // Heavy work here - progress events are delivered in real-time
+        let _ = on_progress.send(Progress::Started { ... });
+        // ... do work, send more progress events ...
+        Ok(result)
+    })
+    .await
+    .map_err(|e| format!("Task failed: {}", e))?
+}
+```
+
 ### Thread Safety
 - Regex patterns should be compiled once and shared (they are thread-safe)
 - Use `Arc` if sharing mutable state across threads
