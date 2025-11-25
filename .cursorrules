@@ -38,3 +38,7 @@
 
 - Information about the project is available inside the /docs directory
 - Every new feature must be documented either in new file or in the according file if exists
+
+## Misc
+
+- Always use `bun run test` instead of just `bun test`

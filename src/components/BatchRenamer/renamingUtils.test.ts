@@ -71,7 +71,16 @@ describe("calculateNewName", () => {
     });
 
     it("should handle regex special characters as literals in normal mode", () => {
-      const result = calculateNewName("file.txt", ".", "-", false, false);
+      // With includeExt: true to test on the full filename
+      const result = calculateNewName(
+        "file.txt",
+        ".",
+        "-",
+        false,
+        false,
+        false,
+        true
+      );
       expect(result.newName).toBe("file-txt"); // Replaces dots, not any char
     });
 
@@ -185,6 +194,224 @@ describe("calculateNewName", () => {
       // "aaaa" -> find "aaa" -> matches first 3. Last "a" remains.
       const result = calculateNewName("aaaa", "aaa", "b", false, false);
       expect(result.newName).toBe("ba");
+    });
+  });
+
+  describe("Include Extension Mode", () => {
+    it("should not replace text in extension when includeExt is false (default)", () => {
+      const result = calculateNewName("file.txt", "txt", "doc", false, false);
+      expect(result.newName).toBe("file.txt"); // Extension is protected
+    });
+
+    it("should replace text in extension when includeExt is true", () => {
+      const result = calculateNewName(
+        "file.txt",
+        "txt",
+        "doc",
+        false,
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe("file.doc");
+    });
+
+    it("should only replace in basename when includeExt is false", () => {
+      const result = calculateNewName(
+        "test.test.txt",
+        "test",
+        "sample",
+        false,
+        false,
+        false,
+        false
+      );
+      expect(result.newName).toBe("sample.sample.txt"); // Both "test" in basename replaced, extension unchanged
+    });
+
+    it("should replace everywhere when includeExt is true", () => {
+      const result = calculateNewName(
+        "test.test.test",
+        "test",
+        "sample",
+        false,
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe("sample.sample.sample");
+    });
+
+    it("should handle files without extension with includeExt false", () => {
+      const result = calculateNewName(
+        "README",
+        "READ",
+        "WRITE",
+        false,
+        false,
+        false,
+        false
+      );
+      expect(result.newName).toBe("WRITEME");
+    });
+
+    it("should handle files without extension with includeExt true", () => {
+      const result = calculateNewName(
+        "README",
+        "READ",
+        "WRITE",
+        false,
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe("WRITEME");
+    });
+
+    it("should handle hidden files (starting with dot) with includeExt false", () => {
+      // .gitignore has lastDotIndex = 0, which is NOT > 0, so treated as no extension
+      const result = calculateNewName(
+        ".gitignore",
+        "git",
+        "svn",
+        false,
+        false,
+        false,
+        false
+      );
+      expect(result.newName).toBe(".svnignore");
+    });
+
+    it("should handle hidden files with includeExt true", () => {
+      const result = calculateNewName(
+        ".gitignore",
+        "git",
+        "svn",
+        false,
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe(".svnignore");
+    });
+
+    it("should protect extension from regex replacement when includeExt is false", () => {
+      const result = calculateNewName(
+        "file123.txt",
+        "\\d+",
+        "NUM",
+        false,
+        true,
+        false,
+        false
+      );
+      expect(result.newName).toBe("fileNUM.txt");
+    });
+
+    it("should allow regex to match extension when includeExt is true", () => {
+      const result = calculateNewName(
+        "file.txt123",
+        "\\d+",
+        "NUM",
+        false,
+        true,
+        false,
+        true
+      );
+      expect(result.newName).toBe("file.txtNUM");
+    });
+
+    it("should handle dot replacement with includeExt false", () => {
+      // The dot before extension is part of the extension, so it shouldn't be replaced
+      const result = calculateNewName(
+        "file.name.txt",
+        ".",
+        "-",
+        false,
+        false,
+        false,
+        false
+      );
+      expect(result.newName).toBe("file-name.txt"); // Only dot in basename replaced
+    });
+
+    it("should replace all dots including extension separator when includeExt is true", () => {
+      const result = calculateNewName(
+        "file.name.txt",
+        ".",
+        "-",
+        false,
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe("file-name-txt");
+    });
+
+    it("should handle replaceFirstOnly with includeExt false", () => {
+      const result = calculateNewName(
+        "test.test.txt",
+        "test",
+        "sample",
+        false,
+        false,
+        true,
+        false
+      );
+      expect(result.newName).toBe("sample.test.txt"); // Only first in basename replaced
+    });
+
+    it("should handle replaceFirstOnly with includeExt true", () => {
+      const result = calculateNewName(
+        "test.test.test",
+        "test",
+        "sample",
+        false,
+        false,
+        true,
+        true
+      );
+      expect(result.newName).toBe("sample.test.test"); // Only first occurrence replaced
+    });
+
+    it("should handle extension-only filename with includeExt false", () => {
+      // ".txt" has lastDotIndex = 0, treated as no extension
+      const result = calculateNewName(
+        ".txt",
+        "txt",
+        "doc",
+        false,
+        false,
+        false,
+        false
+      );
+      expect(result.newName).toBe(".doc");
+    });
+
+    it("should handle case sensitivity with includeExt false", () => {
+      const result = calculateNewName(
+        "File.TXT",
+        "txt",
+        "doc",
+        true,
+        false,
+        false,
+        false
+      );
+      expect(result.newName).toBe("File.TXT"); // No match in basename, extension protected
+    });
+
+    it("should handle case sensitivity with includeExt true", () => {
+      const result = calculateNewName(
+        "File.TXT",
+        "TXT",
+        "DOC",
+        true,
+        false,
+        false,
+        true
+      );
+      expect(result.newName).toBe("File.DOC");
     });
   });
 
