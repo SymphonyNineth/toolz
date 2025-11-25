@@ -237,25 +237,16 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
             />
 
             {/* Separator */}
-            <div class="form-control w-full">
-              <label class="label" for="numbering-separator">
-                <span class="label-text font-semibold">Separator</span>
-              </label>
-              <div class="flex gap-2">
-                <input
-                  id="numbering-separator"
-                  type="text"
-                  class="input input-bordered flex-1"
-                  value={props.options.separator}
-                  onInput={(e) =>
-                    updateOption("separator", e.currentTarget.value)
-                  }
-                  placeholder="e.g., -, _, ."
-                  disabled={!props.options.enabled}
-                  maxLength={5}
-                />
-              </div>
-            </div>
+            <Input
+              id="numbering-separator"
+              label="Separator"
+              type="text"
+              value={props.options.separator}
+              onInput={(e) => updateOption("separator", e.currentTarget.value)}
+              placeholder="e.g., -, _, ."
+              disabled={!props.options.enabled}
+              maxLength={5}
+            />
           </div>
 
           {/* Position */}
@@ -283,19 +274,21 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
               <Show when={props.options.position === "index"}>
                 <div class="flex items-center gap-2">
                   <span class="label-text">at position:</span>
-                  <input
-                    type="number"
-                    class="input input-bordered input-sm w-20"
-                    value={props.options.insertIndex ?? 0}
-                    onInput={(e) =>
-                      updateOption(
-                        "insertIndex",
-                        Math.max(0, parseInt(e.currentTarget.value) || 0)
-                      )
-                    }
-                    min={0}
-                    disabled={!props.options.enabled}
-                  />
+                  <div class="w-24">
+                    <Input
+                      type="number"
+                      size="sm"
+                      value={props.options.insertIndex ?? 0}
+                      onInput={(e) =>
+                        updateOption(
+                          "insertIndex",
+                          Math.max(0, parseInt(e.currentTarget.value) || 0)
+                        )
+                      }
+                      min={0}
+                      disabled={!props.options.enabled}
+                    />
+                  </div>
                 </div>
               </Show>
             </div>

@@ -128,3 +128,14 @@
   background-size: 1rem 1rem;
   animation: progress-stripe 1s linear infinite;
 }
+
+/* Hide number input arrows */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner[type="number"] {
+  -moz-appearance: textfield;
+}
