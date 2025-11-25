@@ -23,6 +23,7 @@ export default function BatchRenamer() {
   const [caseSensitive, setCaseSensitive] = createSignal(false);
   const [regexMode, setRegexMode] = createSignal(false);
   const [replaceFirstOnly, setReplaceFirstOnly] = createSignal(false);
+  const [includeExt, setIncludeExt] = createSignal(false);
   const [regexError, setRegexError] = createSignal<string | undefined>(
     undefined
   );
@@ -61,6 +62,11 @@ export default function BatchRenamer() {
     setStatusMap({});
   };
 
+  const updateIncludeExt = (val: boolean) => {
+    setIncludeExt(val);
+    setStatusMap({});
+  };
+
   const updateNumberingOptions = (options: NumberingOptions) => {
     setNumberingOptions(options);
     setStatusMap({});
@@ -82,7 +88,8 @@ export default function BatchRenamer() {
         replaceText(),
         caseSensitive(),
         regexMode(),
-        replaceFirstOnly()
+        replaceFirstOnly(),
+        includeExt()
       );
 
       newName = result.newName;
@@ -111,9 +118,19 @@ export default function BatchRenamer() {
               ? "i"
               : "gi";
           const regex = new RegExp(findText(), flags);
-          regexMatches = getRegexMatches(name, regex);
+
+          let targetText = name;
+          if (!includeExt()) {
+            const lastDotIndex = name.lastIndexOf(".");
+            if (lastDotIndex > 0) {
+              targetText = name.substring(0, lastDotIndex);
+            }
+          }
+
+          regexMatches = getRegexMatches(targetText, regex);
+
           const replacementResult = getReplacementSegments(
-            name,
+            targetText,
             regex,
             replaceText()
           );
@@ -285,6 +302,8 @@ export default function BatchRenamer() {
             regexError={regexError()}
             replaceFirstOnly={replaceFirstOnly()}
             setReplaceFirstOnly={updateReplaceFirstOnly}
+            includeExt={includeExt()}
+            setIncludeExt={updateIncludeExt}
           />
 
           <NumberingControls

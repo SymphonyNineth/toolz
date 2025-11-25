@@ -79,8 +79,8 @@ export function applyNumbering(
         insertAt === 0
           ? `${formattedNumber}${options.separator}`
           : insertAt === baseName.length
-          ? `${options.separator}${formattedNumber}`
-          : `${options.separator}${formattedNumber}${options.separator}`;
+            ? `${options.separator}${formattedNumber}`
+            : `${options.separator}${formattedNumber}${options.separator}`;
       newBaseName =
         baseName.substring(0, insertAt) +
         numberWithSeparator +
@@ -100,10 +100,24 @@ export function calculateNewName(
   replaceText: string,
   caseSensitive: boolean,
   regexMode: boolean,
-  replaceFirstOnly: boolean = false
+  replaceFirstOnly: boolean = false,
+  includeExt: boolean = false
 ): RenameResult {
   if (!findText) {
     return { newName: originalName };
+  }
+
+  // Determine what part of the name to process
+  let targetText = originalName;
+  let extension = "";
+
+  if (!includeExt) {
+    const lastDotIndex = originalName.lastIndexOf(".");
+    // Only split if there is an extension and it's not the first character (hidden file)
+    if (lastDotIndex > 0) {
+      targetText = originalName.substring(0, lastDotIndex);
+      extension = originalName.substring(lastDotIndex);
+    }
   }
 
   try {
@@ -116,8 +130,8 @@ export function calculateNewName(
           ? ""
           : "g"
         : replaceFirstOnly
-        ? "i"
-        : "gi";
+          ? "i"
+          : "gi";
       regex = new RegExp(findText, flags);
     } else {
       // In normal mode, escape special characters
@@ -126,13 +140,14 @@ export function calculateNewName(
           ? ""
           : "g"
         : replaceFirstOnly
-        ? "i"
-        : "gi";
+          ? "i"
+          : "gi";
       const escapedFindText = findText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       regex = new RegExp(escapedFindText, flags);
     }
 
-    const newName = originalName.replace(regex, replaceText);
+    const newTargetText = targetText.replace(regex, replaceText);
+    const newName = newTargetText + extension;
     return { newName };
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e);

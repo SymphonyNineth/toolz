@@ -15,6 +15,8 @@ interface RenamerControlsProps {
   regexError?: string;
   replaceFirstOnly: boolean;
   setReplaceFirstOnly: (firstOnly: boolean) => void;
+  includeExt: boolean;
+  setIncludeExt: (include: boolean) => void;
 }
 
 const RenamerControls: Component<RenamerControlsProps> = (props) => {
@@ -71,6 +73,11 @@ const RenamerControls: Component<RenamerControlsProps> = (props) => {
             label="Replace First Only"
             checked={props.replaceFirstOnly}
             onChange={(e) => props.setReplaceFirstOnly(e.currentTarget.checked)}
+          />
+          <Checkbox
+            label="Include Extension"
+            checked={props.includeExt}
+            onChange={(e) => props.setIncludeExt(e.currentTarget.checked)}
           />
         </div>
 
