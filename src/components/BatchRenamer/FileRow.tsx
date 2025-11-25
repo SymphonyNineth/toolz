@@ -3,6 +3,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import DiffText from "./DiffText";
 import RegexHighlightText from "./RegexHighlightText";
 import StatusIcon from "./StatusIcon";
+import Checkbox from "../ui/Checkbox";
 import { FolderIcon, WarningIcon } from "../ui/icons";
 import { RegexMatch, NumberingInfo } from "./renamingUtils";
 import { computeDiff, DiffSegment } from "../../utils/diff";
@@ -259,11 +260,10 @@ const FileRow: Component<FileRowProps> = (props) => {
   return (
     <tr class="hover">
       <td>
-        <input
-          type="checkbox"
-          class="checkbox checkbox-sm"
+        <Checkbox
           checked={props.isSelected}
           onChange={props.onToggleSelection}
+          size="sm"
         />
       </td>
       <td>

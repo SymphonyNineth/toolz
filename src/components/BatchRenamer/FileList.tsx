@@ -1,5 +1,6 @@
 import { Component, For, createMemo } from "solid-js";
 import Button from "../ui/Button";
+import Checkbox from "../ui/Checkbox";
 import FileRow, { FileRowData } from "./FileRow";
 import { useFileSelection } from "../../hooks/useFileSelection";
 
@@ -76,12 +77,11 @@ const FileList: Component<FileListProps> = (props) => {
           <thead>
             <tr>
               <th class="w-10 bg-base-200">
-                <input
-                  type="checkbox"
-                  class="checkbox checkbox-sm"
+                <Checkbox
                   checked={allSelected()}
                   ref={setSelectAllCheckbox}
                   onChange={toggleSelectAll}
+                  size="sm"
                 />
               </th>
               <th class="w-10 bg-base-200"></th>
