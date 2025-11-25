@@ -41,7 +41,7 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
   });
 
   return (
-    <div class="bg-base-200 rounded-box shadow-lg overflow-hidden">
+    <div class="bg-base-200 rounded-box shadow-lg overflow-hidden h-full">
       {/* Header */}
       <button
         type="button"
@@ -174,8 +174,8 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
                           {sep === ""
                             ? "(none)"
                             : sep === " "
-                            ? "space"
-                            : `"${sep}"`}
+                              ? "space"
+                              : `"${sep}"`}
                         </button>
                       </li>
                     ))}

@@ -108,8 +108,8 @@ export default function BatchRenamer() {
               ? ""
               : "g"
             : replaceFirstOnly()
-            ? "i"
-            : "gi";
+              ? "i"
+              : "gi";
           const regex = new RegExp(findText(), flags);
           regexMatches = getRegexMatches(name, regex);
           const replacementResult = getReplacementSegments(
@@ -269,24 +269,24 @@ export default function BatchRenamer() {
 
   return (
     <div class="min-h-screen bg-base-300 p-8">
-      <div class="max-w-6xl mx-auto">
+      <div class="max-w-7xl mx-auto">
         <Header />
 
-        <RenamerControls
-          findText={findText()}
-          setFindText={updateFindText}
-          replaceText={replaceText()}
-          setReplaceText={updateReplaceText}
-          caseSensitive={caseSensitive()}
-          setCaseSensitive={updateCaseSensitive}
-          regexMode={regexMode()}
-          setRegexMode={updateRegexMode}
-          regexError={regexError()}
-          replaceFirstOnly={replaceFirstOnly()}
-          setReplaceFirstOnly={updateReplaceFirstOnly}
-        />
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4">
+          <RenamerControls
+            findText={findText()}
+            setFindText={updateFindText}
+            replaceText={replaceText()}
+            setReplaceText={updateReplaceText}
+            caseSensitive={caseSensitive()}
+            setCaseSensitive={updateCaseSensitive}
+            regexMode={regexMode()}
+            setRegexMode={updateRegexMode}
+            regexError={regexError()}
+            replaceFirstOnly={replaceFirstOnly()}
+            setReplaceFirstOnly={updateReplaceFirstOnly}
+          />
 
-        <div class="w-full max-w-4xl mx-auto mt-4">
           <NumberingControls
             options={numberingOptions()}
             onOptionsChange={updateNumberingOptions}

@@ -28,8 +28,8 @@ const RenamerControls: Component<RenamerControlsProps> = (props) => {
   });
 
   return (
-    <div class="w-full max-w-4xl mx-auto">
-      <div class="p-6 bg-base-200 rounded-box shadow-lg">
+    <div class="w-full h-full">
+      <div class="p-6 bg-base-200 rounded-box shadow-lg h-full flex flex-col">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <Input
@@ -73,17 +73,17 @@ const RenamerControls: Component<RenamerControlsProps> = (props) => {
             onChange={(e) => props.setReplaceFirstOnly(e.currentTarget.checked)}
           />
         </div>
-      </div>
 
-      {/* Inline Regex Cheat Sheet - visible when regex mode is enabled */}
-      <Show when={props.regexMode}>
-        <div class="mt-4">
-          <RegexCheatSheetInline
-            isExpanded={cheatSheetExpanded()}
-            onToggle={() => setCheatSheetExpanded(!cheatSheetExpanded())}
-          />
-        </div>
-      </Show>
+        {/* Inline Regex Cheat Sheet - visible when regex mode is enabled */}
+        <Show when={props.regexMode}>
+          <div class="mt-6 pt-4 border-t border-base-content/10">
+            <RegexCheatSheetInline
+              isExpanded={cheatSheetExpanded()}
+              onToggle={() => setCheatSheetExpanded(!cheatSheetExpanded())}
+            />
+          </div>
+        </Show>
+      </div>
     </div>
   );
 };

@@ -3,7 +3,7 @@ import Button from "../ui/Button";
 import FileRow, { FileRowData } from "./FileRow";
 import { useFileSelection } from "../../hooks/useFileSelection";
 
-export interface FileItem extends FileRowData {}
+export interface FileItem extends FileRowData { }
 
 interface FileListProps {
   files: FileItem[];
@@ -45,7 +45,7 @@ const FileList: Component<FileListProps> = (props) => {
   );
 
   return (
-    <div class="w-full max-w-6xl mx-auto mt-6 bg-base-100 rounded-box shadow flex flex-col max-h-[60vh]">
+    <div class="w-full mt-6 bg-base-100 rounded-box shadow flex flex-col max-h-[60vh]">
       {/* Action Buttons */}
       {props.files.length > 0 && (
         <div class="p-4 border-b border-base-300 flex gap-2 justify-end">
