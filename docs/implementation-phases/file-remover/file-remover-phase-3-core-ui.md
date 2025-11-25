@@ -306,7 +306,7 @@ import { Component, For, Show } from "solid-js";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { WarningIcon, TrashIcon } from "../ui/icons";
-import { FileMatchItem } from "./types";
+import { FileMatchItem, DeleteProgress } from "./types";
 import { formatFileSize } from "./utils";
 
 interface DeleteConfirmModalProps {
@@ -315,10 +315,16 @@ interface DeleteConfirmModalProps {
   onConfirm: () => void;
   files: FileMatchItem[];
   isDeleting: boolean;
+  dangerWarning?: string;
+  progress: DeleteProgress | null;
+  compactPreview?: boolean;
 }
 
 const DeleteConfirmModal: Component<DeleteConfirmModalProps> = (props) => {
   const totalSize = () => props.files.reduce((sum, f) => sum + f.size, 0);
+  const shouldCompactPreview = () => props.compactPreview ?? false;
+  const visibleFiles = () =>
+    shouldCompactPreview() ? props.files.slice(0, 10) : props.files;
 
   return (
     <Modal isOpen={props.isOpen} onClose={props.onClose}>
@@ -338,7 +344,7 @@ const DeleteConfirmModal: Component<DeleteConfirmModalProps> = (props) => {
           </div>
         </div>
 
-        {/* Warning Message */}
+        {/* Standard Warning Message */}
         <div class="alert alert-warning mb-4">
           <WarningIcon size="sm" />
           <span>
@@ -351,14 +357,14 @@ const DeleteConfirmModal: Component<DeleteConfirmModalProps> = (props) => {
         <div class="bg-base-200 rounded-lg p-3 mb-4 max-h-48 overflow-y-auto">
           <p class="text-xs text-base-content/60 mb-2">Files to be deleted:</p>
           <div class="space-y-1">
-            <For each={props.files.slice(0, 10)}>
+            <For each={visibleFiles()}>
               {(file) => (
                 <div class="text-sm font-mono truncate text-base-content/80">
                   {file.path}
                 </div>
               )}
             </For>
-            <Show when={props.files.length > 10}>
+            <Show when={shouldCompactPreview() && props.files.length > 10}>
               <div class="text-sm text-base-content/50 italic">
                 ... and {props.files.length - 10} more files
               </div>
@@ -391,6 +397,8 @@ const DeleteConfirmModal: Component<DeleteConfirmModalProps> = (props) => {
 
 export default DeleteConfirmModal;
 ```
+
+> **Preview sizing:** By default the modal now renders the complete file list inside the scrollable container so reviewers can spot mistakes before confirming. Set `compactPreview` to `true` when you need the original summarized view (first 10 entries plus the `... and N more files` note), e.g. for extremely large selections or constrained layouts.
 
 ### 5. Create Utility Functions
 

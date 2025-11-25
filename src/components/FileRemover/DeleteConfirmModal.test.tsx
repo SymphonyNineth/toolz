@@ -23,6 +23,7 @@ describe("DeleteConfirmModal", () => {
     isDeleting: false,
     dangerWarning: undefined as string | undefined,
     progress: null,
+    compactPreview: false,
   };
 
   beforeEach(() => {
@@ -82,25 +83,50 @@ describe("DeleteConfirmModal", () => {
       expect(screen.getByText("/test/file0.txt")).toBeInTheDocument();
     });
 
-    it("shows up to 10 files in preview", () => {
-      const files = createMockFiles(10);
+    it("shows all files when compactPreview is false (default)", () => {
+      const files = createMockFiles(12);
       render(() => <DeleteConfirmModal {...defaultProps} files={files} />);
+
+      for (let i = 0; i < 12; i++) {
+        expect(screen.getByText(`/test/file${i}.txt`)).toBeInTheDocument();
+      }
+      expect(screen.queryByText(/\.\.\. and \d+ more files/)).not.toBeInTheDocument();
+    });
+
+    it("limits preview to 10 files when compactPreview is true", () => {
+      const files = createMockFiles(12);
+      render(() => (
+        <DeleteConfirmModal {...defaultProps} files={files} compactPreview={true} />
+      ));
 
       for (let i = 0; i < 10; i++) {
         expect(screen.getByText(`/test/file${i}.txt`)).toBeInTheDocument();
       }
+      expect(screen.queryByText("/test/file10.txt")).not.toBeInTheDocument();
+      expect(screen.queryByText("/test/file11.txt")).not.toBeInTheDocument();
     });
 
-    it("shows '... and X more files' when more than 10 files", () => {
+    it("shows '... and X more files' only when compactPreview is true", () => {
       const files = createMockFiles(15);
-      render(() => <DeleteConfirmModal {...defaultProps} files={files} />);
+      const { unmount } = render(() => (
+        <DeleteConfirmModal {...defaultProps} files={files} compactPreview={false} />
+      ));
+
+      expect(screen.queryByText("... and 5 more files")).not.toBeInTheDocument();
+
+      unmount();
+      render(() => (
+        <DeleteConfirmModal {...defaultProps} files={files} compactPreview={true} />
+      ));
 
       expect(screen.getByText("... and 5 more files")).toBeInTheDocument();
     });
 
-    it("does not show '... and X more files' when exactly 10 files", () => {
+    it("does not show '... and X more files' when compactPreview is true and exactly 10 files", () => {
       const files = createMockFiles(10);
-      render(() => <DeleteConfirmModal {...defaultProps} files={files} />);
+      render(() => (
+        <DeleteConfirmModal {...defaultProps} files={files} compactPreview={true} />
+      ));
 
       expect(screen.queryByText(/\.\.\. and \d+ more files/)).not.toBeInTheDocument();
     });

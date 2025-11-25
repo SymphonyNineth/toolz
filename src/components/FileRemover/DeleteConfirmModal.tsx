@@ -13,10 +13,14 @@ interface DeleteConfirmModalProps {
   isDeleting: boolean;
   dangerWarning?: string;
   progress: DeleteProgress | null;
+  compactPreview?: boolean;
 }
 
 const DeleteConfirmModal: Component<DeleteConfirmModalProps> = (props) => {
   const totalSize = () => props.files.reduce((sum, f) => sum + f.size, 0);
+  const shouldCompactPreview = () => props.compactPreview ?? false;
+  const visibleFiles = () =>
+    shouldCompactPreview() ? props.files.slice(0, 10) : props.files;
   const progressPercent = () => {
     if (!props.progress) return 0;
     return Math.round((props.progress.current / props.progress.total) * 100);
@@ -78,14 +82,14 @@ const DeleteConfirmModal: Component<DeleteConfirmModalProps> = (props) => {
           <div class="bg-base-200 rounded-lg p-3 mb-4 max-h-48 overflow-y-auto">
             <p class="text-xs text-base-content/60 mb-2">Files to be deleted:</p>
             <div class="space-y-1">
-              <For each={props.files.slice(0, 10)}>
+              <For each={visibleFiles()}>
                 {(file) => (
                   <div class="text-sm font-mono truncate text-base-content/80">
                     {file.path}
                   </div>
                 )}
               </For>
-              <Show when={props.files.length > 10}>
+              <Show when={shouldCompactPreview() && props.files.length > 10}>
                 <div class="text-sm text-base-content/50 italic">
                   ... and {props.files.length - 10} more files
                 </div>
