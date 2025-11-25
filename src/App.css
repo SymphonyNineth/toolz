@@ -1,6 +1,40 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Color coding for sequence preview - works in both light and dark modes */
+:root {
+  --seq-start-number: #0891b2;    /* cyan-600 */
+  --seq-increment: #ea580c;       /* orange-600 */
+  --seq-padding: #7c3aed;         /* violet-600 */
+  --seq-separator: #16a34a;       /* green-600 */
+}
+
+/* Slightly adjust for dark mode for better visibility */
+[data-theme="dark"], .dark, @media (prefers-color-scheme: dark) {
+  :root {
+    --seq-start-number: #22d3ee;  /* cyan-400 */
+    --seq-increment: #fb923c;     /* orange-400 */
+    --seq-padding: #a78bfa;       /* violet-400 */
+    --seq-separator: #4ade80;     /* green-400 */
+  }
+}
+
+.seq-start-number {
+  color: var(--seq-start-number);
+}
+
+.seq-increment {
+  color: var(--seq-increment);
+}
+
+.seq-padding {
+  color: var(--seq-padding);
+}
+
+.seq-separator {
+  color: var(--seq-separator);
+}
+
 /* Custom animations for better UX */
 @keyframes gentle-pulse {
   0%, 100% {

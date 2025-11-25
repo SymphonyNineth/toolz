@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@solidjs/testing-library";
 import NumberingControls from "./NumberingControls";
-import { DEFAULT_NUMBERING_OPTIONS, NumberingOptions } from "./renamingUtils";
+import { DEFAULT_NUMBERING_OPTIONS } from "./renamingUtils";
 
 describe("NumberingControls", () => {
   const defaultProps = {
@@ -229,12 +229,18 @@ describe("NumberingControls", () => {
 
   describe("Preview", () => {
     it("should show preview when enabled", () => {
-      renderComponent({
+      const { container } = renderComponent({
         isExpanded: true,
         options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: true },
       });
-      expect(screen.getByText("Preview:")).toBeTruthy();
-      expect(screen.getByText("1, 2, ...")).toBeTruthy();
+      expect(screen.getByText("Sequence:")).toBeTruthy();
+      // Should show the color-coded legend (in the preview box)
+      const previewBox = container.querySelector(".bg-base-300.rounded-lg");
+      expect(previewBox).toBeTruthy();
+      expect(previewBox?.textContent).toContain("Start Number");
+      expect(previewBox?.textContent).toContain("Increment");
+      expect(previewBox?.textContent).toContain("Padding");
+      expect(previewBox?.textContent).toContain("Separator");
     });
 
     it("should not show preview when disabled", () => {
@@ -242,19 +248,38 @@ describe("NumberingControls", () => {
         isExpanded: true,
         options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: false },
       });
-      expect(screen.queryByText("Preview:")).toBeNull();
+      expect(screen.queryByText("Sequence:")).toBeNull();
     });
 
-    it("should update preview with padding", () => {
-      renderComponent({
+    it("should display separator in preview", () => {
+      const { container } = renderComponent({
+        isExpanded: true,
+        options: {
+          ...DEFAULT_NUMBERING_OPTIONS,
+          enabled: true,
+          separator: "_",
+        },
+      });
+      // Check for separator elements with the seq-separator class
+      const separatorElements = container.querySelectorAll(".seq-separator");
+      expect(separatorElements.length).toBeGreaterThan(0);
+      expect(separatorElements[0].textContent).toBe("_");
+    });
+
+    it("should display color-coded padding zeros", () => {
+      const { container } = renderComponent({
         isExpanded: true,
         options: { ...DEFAULT_NUMBERING_OPTIONS, enabled: true, padding: 3 },
       });
-      expect(screen.getByText("001, 002, ...")).toBeTruthy();
+      // Check for padding elements with the seq-padding class
+      const paddingElements = container.querySelectorAll(".seq-padding");
+      expect(paddingElements.length).toBeGreaterThan(0);
+      // With padding 3 and start 1, first number "001" has 2 padding zeros
+      expect(paddingElements[0].textContent).toBe("0");
     });
 
-    it("should update preview with start number and increment", () => {
-      renderComponent({
+    it("should display color-coded sequence numbers", () => {
+      const { container } = renderComponent({
         isExpanded: true,
         options: {
           ...DEFAULT_NUMBERING_OPTIONS,
@@ -263,7 +288,13 @@ describe("NumberingControls", () => {
           increment: 5,
         },
       });
-      expect(screen.getByText("10, 15, ...")).toBeTruthy();
+      // Check for start number elements
+      const startNumberElements =
+        container.querySelectorAll(".seq-start-number");
+      expect(startNumberElements.length).toBeGreaterThan(0);
+      // Check for increment indicator
+      const incrementElements = container.querySelectorAll(".seq-increment");
+      expect(incrementElements.length).toBeGreaterThan(0);
     });
   });
 

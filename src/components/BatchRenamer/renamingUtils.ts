@@ -27,6 +27,68 @@ export const DEFAULT_NUMBERING_OPTIONS: NumberingOptions = {
 };
 
 /**
+ * Information about the numbering applied to a filename
+ * Used for color-coded preview display
+ */
+export interface NumberingInfo {
+  enabled: boolean;
+  formattedNumber: string;
+  separator: string;
+  position: NumberingPosition;
+  /** Character index where the numbering starts in the new name (before extension) */
+  insertIndex: number;
+}
+
+/**
+ * Gets numbering information for a file at a given index
+ * Used for highlighting the numbering parts in the preview
+ */
+export function getNumberingInfo(
+  name: string,
+  fileIndex: number,
+  options: NumberingOptions
+): NumberingInfo {
+  if (!options.enabled) {
+    return {
+      enabled: false,
+      formattedNumber: "",
+      separator: "",
+      position: options.position,
+      insertIndex: 0,
+    };
+  }
+
+  const number = options.startNumber + fileIndex * options.increment;
+  const formattedNumber = formatNumber(number, options.padding);
+
+  // Calculate insert index based on position
+  const lastDotIndex = name.lastIndexOf(".");
+  const hasExtension = lastDotIndex > 0;
+  const baseName = hasExtension ? name.substring(0, lastDotIndex) : name;
+
+  let insertIndex = 0;
+  switch (options.position) {
+    case "start":
+      insertIndex = 0;
+      break;
+    case "end":
+      insertIndex = baseName.length;
+      break;
+    case "index":
+      insertIndex = Math.max(0, Math.min(options.insertIndex ?? 0, baseName.length));
+      break;
+  }
+
+  return {
+    enabled: true,
+    formattedNumber,
+    separator: options.separator,
+    position: options.position,
+    insertIndex,
+  };
+}
+
+/**
  * Formats a number with leading zeros based on padding
  * @param num - The number to format
  * @param padding - Number of digits (minimum length)

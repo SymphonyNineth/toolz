@@ -11,6 +11,7 @@ import {
   getRegexMatches,
   getReplacementSegments,
   applyNumbering,
+  getNumberingInfo,
   NumberingOptions,
   DEFAULT_NUMBERING_OPTIONS,
 } from "./renamingUtils";
@@ -103,6 +104,12 @@ export default function BatchRenamer() {
         setRegexError(undefined);
       }
 
+      // Store name after find/replace (before numbering) for diff display
+      const nameAfterReplace = newName;
+
+      // Get numbering info before applying (for color-coded preview)
+      const numberingInfo = getNumberingInfo(newName, index, numOptions);
+
       // Apply numbering after find/replace
       newName = applyNumbering(newName, index, numOptions);
 
@@ -115,8 +122,8 @@ export default function BatchRenamer() {
               ? ""
               : "g"
             : replaceFirstOnly()
-              ? "i"
-              : "gi";
+            ? "i"
+            : "gi";
           const regex = new RegExp(findText(), flags);
 
           let targetText = name;
@@ -140,7 +147,15 @@ export default function BatchRenamer() {
         }
       }
 
-      return { path, name, newName, regexMatches, newNameRegexMatches };
+      return {
+        path,
+        name,
+        newName,
+        nameAfterReplace,
+        regexMatches,
+        newNameRegexMatches,
+        numberingInfo,
+      };
     });
 
     // Check for collisions

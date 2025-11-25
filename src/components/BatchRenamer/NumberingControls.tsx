@@ -1,8 +1,62 @@
-import { Component, Show, createMemo } from "solid-js";
+import { Component, Show, createMemo, For } from "solid-js";
 import Input from "../ui/Input";
 import Checkbox from "../ui/Checkbox";
 import { ChevronDownIcon, ChevronRightIcon } from "../ui/icons";
 import { NumberingOptions, NumberingPosition } from "./renamingUtils";
+
+/** Helper component to render a number with color-coded parts */
+interface ColorCodedNumberProps {
+  number: number;
+  padding: number;
+  showIncrement?: boolean;
+}
+
+const ColorCodedNumber: Component<ColorCodedNumberProps> = (props) => {
+  const parts = createMemo(() => {
+    const numStr = String(props.number);
+    const paddedStr = numStr.padStart(props.padding, "0");
+    const paddingCount = paddedStr.length - numStr.length;
+
+    const result: { char: string; type: "padding" | "number" | "increment" }[] =
+      [];
+
+    // Add padding zeros
+    for (let i = 0; i < paddingCount; i++) {
+      result.push({ char: "0", type: "padding" });
+    }
+
+    // Add number digits
+    for (let i = 0; i < numStr.length; i++) {
+      result.push({
+        char: numStr[i],
+        type:
+          props.showIncrement && i === numStr.length - 1
+            ? "increment"
+            : "number",
+      });
+    }
+
+    return result;
+  });
+
+  return (
+    <For each={parts()}>
+      {(part) => (
+        <span
+          class={
+            part.type === "padding"
+              ? "seq-padding"
+              : part.type === "increment"
+              ? "seq-increment"
+              : "seq-start-number"
+          }
+        >
+          {part.char}
+        </span>
+      )}
+    </For>
+  );
+};
 
 interface NumberingControlsProps {
   options: NumberingOptions;
@@ -29,16 +83,6 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
       [key]: value,
     });
   };
-
-  const previewNumber = createMemo(() => {
-    const { startNumber, padding } = props.options;
-    return String(startNumber).padStart(padding, "0");
-  });
-
-  const nextNumber = createMemo(() => {
-    const { startNumber, increment, padding } = props.options;
-    return String(startNumber + increment).padStart(padding, "0");
-  });
 
   return (
     <div class="bg-base-200 rounded-box shadow-lg overflow-hidden h-full">
@@ -76,13 +120,70 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
       {/* Content */}
       <Show when={props.isExpanded}>
         <div class="px-6 pb-6 pt-2 border-t border-base-300">
-          {/* Preview */}
+          {/* Preview with color coding */}
           <Show when={props.options.enabled}>
             <div class="mb-4 p-3 bg-base-300 rounded-lg">
-              <span class="text-sm text-base-content/70">Preview: </span>
-              <span class="font-mono text-primary">
-                {previewNumber()}, {nextNumber()}, ...
-              </span>
+              <div class="flex flex-wrap items-center gap-x-1 mb-2">
+                <span class="text-sm text-base-content/70">Sequence: </span>
+                <span class="font-mono font-semibold">
+                  <ColorCodedNumber
+                    number={props.options.startNumber}
+                    padding={props.options.padding}
+                  />
+                </span>
+                <Show when={props.options.separator}>
+                  <span class="font-mono font-semibold seq-separator">
+                    {props.options.separator}
+                  </span>
+                </Show>
+                <span class="text-base-content/50">,</span>
+                <span class="font-mono font-semibold">
+                  <ColorCodedNumber
+                    number={props.options.startNumber + props.options.increment}
+                    padding={props.options.padding}
+                    showIncrement
+                  />
+                </span>
+                <Show when={props.options.separator}>
+                  <span class="font-mono font-semibold seq-separator">
+                    {props.options.separator}
+                  </span>
+                </Show>
+                <span class="text-base-content/50">,</span>
+                <span class="font-mono font-semibold">
+                  <ColorCodedNumber
+                    number={
+                      props.options.startNumber + props.options.increment * 2
+                    }
+                    padding={props.options.padding}
+                  />
+                </span>
+                <Show when={props.options.separator}>
+                  <span class="font-mono font-semibold seq-separator">
+                    {props.options.separator}
+                  </span>
+                </Show>
+                <span class="text-base-content/50">, ...</span>
+              </div>
+              {/* Color legend */}
+              <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                <span>
+                  <span class="seq-start-number font-semibold">●</span>{" "}
+                  <span class="text-base-content/70">Start Number</span>
+                </span>
+                <span>
+                  <span class="seq-increment font-semibold">●</span>{" "}
+                  <span class="text-base-content/70">Increment</span>
+                </span>
+                <span>
+                  <span class="seq-padding font-semibold">●</span>{" "}
+                  <span class="text-base-content/70">Padding</span>
+                </span>
+                <span>
+                  <span class="seq-separator font-semibold">●</span>{" "}
+                  <span class="text-base-content/70">Separator</span>
+                </span>
+              </div>
             </div>
           </Show>
 
@@ -174,8 +275,8 @@ const NumberingControls: Component<NumberingControlsProps> = (props) => {
                           {sep === ""
                             ? "(none)"
                             : sep === " "
-                              ? "space"
-                              : `"${sep}"`}
+                            ? "space"
+                            : `"${sep}"`}
                         </button>
                       </li>
                     ))}
