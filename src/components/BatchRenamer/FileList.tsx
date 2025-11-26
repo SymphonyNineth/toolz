@@ -1,10 +1,10 @@
-import { Component, For, createMemo } from "solid-js";
+import { Component, For, Show, createMemo } from "solid-js";
 import Button from "../ui/Button";
 import Checkbox from "../ui/Checkbox";
 import FileRow, { FileRowData } from "./FileRow";
 import { useFileSelection } from "../../hooks/useFileSelection";
 
-export interface FileItem extends FileRowData { }
+export interface FileItem extends FileRowData {}
 
 interface FileListProps {
   files: FileItem[];
@@ -81,6 +81,7 @@ const FileList: Component<FileListProps> = (props) => {
                   checked={allSelected()}
                   ref={setSelectAllCheckbox}
                   onChange={toggleSelectAll}
+                  disabled={props.files.length === 0}
                   size="sm"
                 />
               </th>
@@ -111,7 +112,9 @@ const FileList: Component<FileListProps> = (props) => {
                         />
                       </svg>
                       <p class="text-sm">No files selected</p>
-                      <p class="text-xs">Use the buttons above to select files or folders</p>
+                      <p class="text-xs">
+                        Use the buttons above to select files or folders
+                      </p>
                     </div>
                   </td>
                 </tr>

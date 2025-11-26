@@ -4,7 +4,7 @@ import { invoke, Channel } from "@tauri-apps/api/core";
 import RenamerControls from "./RenamerControls";
 import NumberingControls from "./NumberingControls";
 import FileList, { FileItem } from "./FileList";
-import Header from "./Header";
+import Header from "../ui/Header";
 import ActionButtons from "./ActionButtons";
 import ProgressBar from "../ui/ProgressBar";
 import {
@@ -49,11 +49,13 @@ export default function BatchRenamer() {
     phase: "idle",
     filesFound: 0,
   });
-  const [renameProgress, setRenameProgress] = createSignal<RenameProgressState>({
-    phase: "idle",
-    current: 0,
-    total: 0,
-  });
+  const [renameProgress, setRenameProgress] = createSignal<RenameProgressState>(
+    {
+      phase: "idle",
+      current: 0,
+      total: 0,
+    }
+  );
 
   // Reset status when controls change
   const updateFindText = (text: string) => {
@@ -142,8 +144,8 @@ export default function BatchRenamer() {
               ? ""
               : "g"
             : replaceFirstOnly()
-              ? "i"
-              : "gi";
+            ? "i"
+            : "gi";
           const regex = new RegExp(findText(), flags);
 
           let targetText = name;
@@ -296,7 +298,11 @@ export default function BatchRenamer() {
 
       // Use streaming progress for larger rename operations
       if (filesToRename.length > 10) {
-        setRenameProgress({ phase: "renaming", current: 0, total: filesToRename.length });
+        setRenameProgress({
+          phase: "renaming",
+          current: 0,
+          total: filesToRename.length,
+        });
 
         const progressChannel = new Channel<RenameProgressEvent>();
 
@@ -418,7 +424,10 @@ export default function BatchRenamer() {
         }
         return `Scanning directories... (${progress.filesFound.toLocaleString()} files found)`;
       case "completed":
-        return `Found ${progress.totalFiles?.toLocaleString() ?? progress.filesFound.toLocaleString()} files`;
+        return `Found ${
+          progress.totalFiles?.toLocaleString() ??
+          progress.filesFound.toLocaleString()
+        } files`;
       default:
         return "";
     }
@@ -440,7 +449,7 @@ export default function BatchRenamer() {
   return (
     <div class="min-h-screen bg-base-300 p-8">
       <div class="max-w-7xl mx-auto">
-        <Header />
+        <Header title="File Renamer" subtitle="Rename files in bulk" />
 
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-4">
           <RenamerControls

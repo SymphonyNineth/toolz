@@ -1,7 +1,6 @@
 import { createSignal, createMemo, onMount, Show } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
-import Header from "./Header";
 import PatternControls from "./PatternControls";
 import ActionButtons from "./ActionButtons";
 import FileRemoverList from "./FileRemoverList";
@@ -18,6 +17,7 @@ import {
   StreamingDeleteProgress,
 } from "./types";
 import { validatePattern, checkDangerousOperation } from "./utils";
+import Header from "../ui/Header";
 
 // localStorage keys for preferences
 const STORAGE_KEYS = {
@@ -44,17 +44,22 @@ export default function FileRemover() {
 
   // Modal state
   const [showDeleteModal, setShowDeleteModal] = createSignal(false);
-  const [deleteResult, setDeleteResult] = createSignal<DeleteResult | null>(null);
+  const [deleteResult, setDeleteResult] = createSignal<DeleteResult | null>(
+    null
+  );
   const [dangerWarning, setDangerWarning] = createSignal<string | undefined>();
 
   // Progress state for large deletions
-  const [deleteProgress, setDeleteProgress] = createSignal<DeleteProgress | null>(null);
+  const [deleteProgress, setDeleteProgress] =
+    createSignal<DeleteProgress | null>(null);
 
   // Search progress state for streaming feedback
-  const [searchProgress, setSearchProgress] = createSignal<SearchProgressState>({
-    phase: "idle",
-    filesFound: 0,
-  });
+  const [searchProgress, setSearchProgress] = createSignal<SearchProgressState>(
+    {
+      phase: "idle",
+      filesFound: 0,
+    }
+  );
 
   // Computed
   const selectedFiles = createMemo(() => files().filter((f) => f.selected));
@@ -79,7 +84,9 @@ export default function FileRemover() {
         setDeleteEmptyDirs(savedEmptyDirs === "true");
       }
 
-      const savedCaseSensitive = localStorage.getItem(STORAGE_KEYS.caseSensitive);
+      const savedCaseSensitive = localStorage.getItem(
+        STORAGE_KEYS.caseSensitive
+      );
       if (savedCaseSensitive !== null) {
         setCaseSensitive(savedCaseSensitive === "true");
       }
@@ -92,8 +99,14 @@ export default function FileRemover() {
   function savePreferences() {
     try {
       localStorage.setItem(STORAGE_KEYS.patternType, patternType());
-      localStorage.setItem(STORAGE_KEYS.includeSubdirs, String(includeSubdirs()));
-      localStorage.setItem(STORAGE_KEYS.deleteEmptyDirs, String(deleteEmptyDirs()));
+      localStorage.setItem(
+        STORAGE_KEYS.includeSubdirs,
+        String(includeSubdirs())
+      );
+      localStorage.setItem(
+        STORAGE_KEYS.deleteEmptyDirs,
+        String(deleteEmptyDirs())
+      );
       localStorage.setItem(STORAGE_KEYS.caseSensitive, String(caseSensitive()));
     } catch {
       // localStorage not available, ignore
@@ -150,7 +163,7 @@ export default function FileRemover() {
     try {
       // Create a channel for receiving progress events
       const progressChannel = new Channel<SearchProgressEvent>();
-      
+
       progressChannel.onmessage = (event: SearchProgressEvent) => {
         switch (event.type) {
           case "started":
@@ -286,13 +299,15 @@ export default function FileRemover() {
     }
   }
 
-  async function handleDeleteWithProgress(filesToDelete: FileMatchItem[]): Promise<DeleteResult> {
+  async function handleDeleteWithProgress(
+    filesToDelete: FileMatchItem[]
+  ): Promise<DeleteResult> {
     const total = filesToDelete.length;
     setDeleteProgress({ current: 0, total });
 
     // Create a channel for receiving progress events
     const progressChannel = new Channel<StreamingDeleteProgress>();
-    
+
     progressChannel.onmessage = (event: StreamingDeleteProgress) => {
       switch (event.type) {
         case "started":
@@ -331,7 +346,9 @@ export default function FileRemover() {
       case "matching":
         return "Matching patterns...";
       case "completed":
-        return `Found ${progress.matchesFound?.toLocaleString() ?? 0} matching files`;
+        return `Found ${
+          progress.matchesFound?.toLocaleString() ?? 0
+        } matching files`;
       default:
         return "";
     }
@@ -340,7 +357,10 @@ export default function FileRemover() {
   return (
     <div class="min-h-screen bg-base-300 p-8">
       <div class="max-w-7xl mx-auto">
-        <Header />
+        <Header
+          title="File Remover"
+          subtitle="Delete files matching a pattrn"
+        />
 
         <div class="space-y-6 mt-4">
           <PatternControls
