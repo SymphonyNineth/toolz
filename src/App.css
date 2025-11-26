@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark, emerald, forest, pastel, black,
-    dracula, business, night, dim, sunset;
+  themes: light, dark --default;
+  /* forest, pastel, black,
+    dracula, business, night, dim, sunset; */
 }
 
 /* Color coding for sequence preview - works in both light and dark modes */

@@ -28,7 +28,7 @@ src/
 │       │   └── index.tsx       # All icons exported from here
 │       ├── Input.tsx           # DaisyUI input wrapper
 │       ├── Modal.tsx           # Reusable modal dialog
-│       ├── ThemeToggle.tsx     # Light/dark theme toggle
+│       ├── ThemeSwitcher.tsx   # Multi-theme dropdown switcher
 │       └── Tooltip.tsx         # Hover tooltip component
 ├── hooks/
 │   └── useFileSelection.ts     # File selection state management
@@ -44,9 +44,8 @@ src/
 App
 └── BatchRenamer
     ├── Header
-    │   └── ThemeToggle
-    │       ├── SunIcon
-    │       └── MoonIcon
+    │   └── ThemeSwitcher
+    │       └── PaletteIcon
     ├── RenamerControls
     │   ├── Input (x2)
     │   ├── Checkbox (x3)
@@ -87,6 +86,7 @@ All SVG icons are centralized with consistent sizing and styling:
 - `RefreshIcon` - Refresh arrows for rename button
 - `SunIcon` - Light theme indicator
 - `MoonIcon` - Dark theme indicator
+- `PaletteIcon` - Theme switcher icon
 - `CloseIcon` - Modal close button
 - `ChevronDownIcon` - Expanded state indicator
 - `ChevronRightIcon` - Collapsed state indicator
