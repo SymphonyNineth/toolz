@@ -495,7 +495,7 @@ export default function BatchRenamer() {
               current={listProgress().filesFound}
               showCount={false}
               indeterminate={true}
-              variant="secondary"
+              variant="primary"
             />
           </div>
         </Show>
@@ -510,7 +510,7 @@ export default function BatchRenamer() {
               showCount={true}
               showPercentage={true}
               indeterminate={false}
-              variant="accent"
+              variant="primary"
             />
           </div>
         </Show>

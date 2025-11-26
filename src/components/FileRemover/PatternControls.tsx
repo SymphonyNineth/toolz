@@ -30,18 +30,20 @@ interface PatternControlsProps {
 
 const PatternControls: Component<PatternControlsProps> = (props) => {
   const [cheatSheetExpanded, setCheatSheetExpanded] = createSignal(false);
-  const [localValidationError, setLocalValidationError] = createSignal<string | undefined>();
+  const [localValidationError, setLocalValidationError] = createSignal<
+    string | undefined
+  >();
 
   // Real-time validation
   createEffect(() => {
     const pattern = props.pattern;
     const patternType = props.patternType;
-    
+
     if (!pattern.trim()) {
       setLocalValidationError(undefined);
       return;
     }
-    
+
     const error = validatePattern(pattern, patternType);
     setLocalValidationError(error);
   });
@@ -94,14 +96,21 @@ const PatternControls: Component<PatternControlsProps> = (props) => {
         {/* Folder Selection - Prominent at the top */}
         <div class="mb-6">
           <div class="flex items-center gap-3">
-            <Button variant="secondary" onClick={props.onSelectFolder} class="gap-2">
+            <Button
+              variant="secondary"
+              onClick={props.onSelectFolder}
+              class="gap-2"
+            >
               <FolderOpenIcon size="sm" />
               Select Folder
             </Button>
             <Show when={props.basePath}>
               <div class="flex-1 min-w-0">
                 <div class="px-3 py-2 bg-base-100 rounded-lg border border-base-300">
-                  <span class="text-sm text-base-content/70 truncate block" title={props.basePath}>
+                  <span
+                    class="text-sm text-base-content/70 truncate block"
+                    title={props.basePath}
+                  >
                     {props.basePath}
                   </span>
                 </div>
@@ -122,19 +131,25 @@ const PatternControls: Component<PatternControlsProps> = (props) => {
           </label>
           <div class="join w-full">
             <button
-              class={`btn join-item flex-1 ${props.patternType === "simple" ? "btn-active" : ""}`}
+              class={`btn join-item flex-1 ${
+                props.patternType === "simple" ? "btn-active" : ""
+              }`}
               onClick={() => props.setPatternType("simple")}
             >
               Simple
             </button>
             <button
-              class={`btn join-item flex-1 ${props.patternType === "extension" ? "btn-active" : ""}`}
+              class={`btn join-item flex-1 ${
+                props.patternType === "extension" ? "btn-active" : ""
+              }`}
               onClick={() => props.setPatternType("extension")}
             >
               Extension
             </button>
             <button
-              class={`btn join-item flex-1 ${props.patternType === "regex" ? "btn-active" : ""}`}
+              class={`btn join-item flex-1 ${
+                props.patternType === "regex" ? "btn-active" : ""
+              }`}
               onClick={() => props.setPatternType("regex")}
             >
               Regex
@@ -147,7 +162,9 @@ const PatternControls: Component<PatternControlsProps> = (props) => {
           <label class="label">
             <span class="label-text font-semibold">Pattern</span>
             <Tooltip content={patternHelp()}>
-              <span class="label-text-alt cursor-help text-base-content/50">ⓘ</span>
+              <span class="label-text-alt cursor-help text-base-content/50">
+                ⓘ
+              </span>
             </Tooltip>
           </label>
           <div class="flex gap-2">
