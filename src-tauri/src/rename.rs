@@ -6,11 +6,21 @@
 //! This module supports both synchronous commands (for backward compatibility)
 //! and streaming commands with progress updates via Tauri Channels.
 
+use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+use std::sync::atomic::{AtomicU64, Ordering};
 use tauri::ipc::Channel;
 use walkdir::WalkDir;
+
+/// Global counter for generating unique operation IDs
+static OPERATION_COUNTER: AtomicU64 = AtomicU64::new(0);
+
+/// Generate a unique operation ID for logging purposes
+fn next_operation_id() -> u64 {
+    OPERATION_COUNTER.fetch_add(1, Ordering::SeqCst)
+}
 
 // ==================== Progress Types ====================
 
@@ -140,9 +150,18 @@ pub async fn batch_rename_with_progress(
     files: Vec<(String, String)>,
     on_progress: Channel<RenameProgress>,
 ) -> Result<Vec<String>, String> {
+    let op_id = next_operation_id();
+    let file_count = files.len();
+    info!(
+        "[RENAME:{}] Starting batch_rename_with_progress with {} files",
+        op_id, file_count
+    );
+
     // Run the heavy work in a blocking thread to keep the main thread responsive
-    tokio::task::spawn_blocking(move || {
+    let result = tokio::task::spawn_blocking(move || {
         let total = files.len();
+
+        debug!("[RENAME:{}] Spawned blocking task, processing {} files", op_id, total);
 
         // Send started event
         let _ = on_progress.send(RenameProgress::Started { total_files: total });
@@ -151,6 +170,17 @@ pub async fn batch_rename_with_progress(
         let mut errors = Vec::new();
 
         for (index, (old_path, new_path)) in files.into_iter().enumerate() {
+            // Log progress every 10 files or on first/last file
+            if index == 0 || index == total - 1 || (index + 1) % 10 == 0 {
+                debug!(
+                    "[RENAME:{}] Processing file {}/{}: {}",
+                    op_id,
+                    index + 1,
+                    total,
+                    old_path
+                );
+            }
+
             match fs::rename(&old_path, &new_path) {
                 Ok(_) => renamed_files.push(new_path.clone()),
                 Err(e) => errors.push(format!("Failed to rename {}: {}", old_path, e)),
@@ -170,6 +200,13 @@ pub async fn batch_rename_with_progress(
             failed: errors.len(),
         });
 
+        info!(
+            "[RENAME:{}] Completed: {} successful, {} failed",
+            op_id,
+            renamed_files.len(),
+            errors.len()
+        );
+
         if errors.is_empty() {
             Ok(renamed_files)
         } else {
@@ -177,7 +214,13 @@ pub async fn batch_rename_with_progress(
         }
     })
     .await
-    .map_err(|e| format!("Task failed: {}", e))?
+    .map_err(|e| {
+        warn!("[RENAME:{}] Task failed: {}", op_id, e);
+        format!("Task failed: {}", e)
+    })?;
+
+    info!("[RENAME:{}] Async operation finished", op_id);
+    result
 }
 
 /// Lists all files recursively within a directory.
@@ -256,20 +299,30 @@ pub async fn list_files_with_progress(
     dir_path: String,
     on_progress: Channel<ListProgress>,
 ) -> Result<Vec<String>, String> {
+    let op_id = next_operation_id();
+    info!(
+        "[LIST:{}] Starting list_files_with_progress for directory: {}",
+        op_id, dir_path
+    );
+
     let path = Path::new(&dir_path);
 
     if !path.exists() {
+        warn!("[LIST:{}] Path does not exist: {}", op_id, dir_path);
         return Err(format!("Path does not exist: {}", dir_path));
     }
 
     if !path.is_dir() {
+        warn!("[LIST:{}] Path is not a directory: {}", op_id, dir_path);
         return Err(format!("Path is not a directory: {}", dir_path));
     }
 
     let dir_path_clone = dir_path.clone();
 
     // Run the heavy work in a blocking thread to keep the main thread responsive
-    tokio::task::spawn_blocking(move || {
+    let result = tokio::task::spawn_blocking(move || {
+        debug!("[LIST:{}] Spawned blocking task for: {}", op_id, dir_path_clone);
+
         // Send started event
         let _ = on_progress.send(ListProgress::Started {
             base_path: dir_path_clone.clone(),
@@ -278,6 +331,7 @@ pub async fn list_files_with_progress(
         let mut files = Vec::new();
         let mut last_progress_dir = String::new();
         let progress_interval = 50; // Send progress every 50 files
+        let log_interval = 500; // Log every 500 files
 
         // Use WalkDir for efficient directory traversal
         for entry in WalkDir::new(&dir_path_clone)
@@ -287,6 +341,15 @@ pub async fn list_files_with_progress(
         {
             if let Some(path_str) = entry.path().to_str() {
                 files.push(path_str.to_string());
+
+                // Log progress periodically
+                if files.len() % log_interval == 0 {
+                    debug!(
+                        "[LIST:{}] Still scanning... {} files found so far",
+                        op_id,
+                        files.len()
+                    );
+                }
 
                 // Send scanning progress periodically
                 if files.len() % progress_interval == 0 {
@@ -309,10 +372,23 @@ pub async fn list_files_with_progress(
             total_files: files.len(),
         });
 
+        info!(
+            "[LIST:{}] Completed: found {} files in {}",
+            op_id,
+            files.len(),
+            dir_path_clone
+        );
+
         Ok(files)
     })
     .await
-    .map_err(|e| format!("Task failed: {}", e))?
+    .map_err(|e| {
+        warn!("[LIST:{}] Task failed: {}", op_id, e);
+        format!("Task failed: {}", e)
+    })?;
+
+    info!("[LIST:{}] Async operation finished", op_id);
+    result
 }
 
 /// Recursively collects file paths from a directory and its subdirectories.

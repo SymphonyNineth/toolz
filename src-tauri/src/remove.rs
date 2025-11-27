@@ -6,13 +6,23 @@
 //! This module supports both synchronous commands (for backward compatibility)
 //! and streaming commands with progress updates via Tauri Channels.
 
+use log::{debug, info, warn};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
+use std::sync::atomic::{AtomicU64, Ordering};
 use tauri::ipc::Channel;
 use walkdir::WalkDir;
+
+/// Global counter for generating unique operation IDs
+static OPERATION_COUNTER: AtomicU64 = AtomicU64::new(0);
+
+/// Generate a unique operation ID for logging purposes
+fn next_operation_id() -> u64 {
+    OPERATION_COUNTER.fetch_add(1, Ordering::SeqCst)
+}
 
 // ==================== Types ====================
 
@@ -353,12 +363,21 @@ pub async fn search_files_with_progress(
     case_sensitive: bool,
     on_progress: Channel<SearchProgress>,
 ) -> Result<Vec<FileMatchResult>, String> {
+    let op_id = next_operation_id();
+    info!(
+        "[SEARCH:{}] Starting search_files_with_progress in: {} with pattern: '{}' (type: {:?})",
+        op_id, base_path, pattern, pattern_type
+    );
+
     if pattern.trim().is_empty() {
+        warn!("[SEARCH:{}] Empty pattern provided", op_id);
         return Err("Pattern cannot be empty".to_string());
     }
 
     // Run the heavy work in a blocking thread to keep the main thread responsive
-    tokio::task::spawn_blocking(move || {
+    let result = tokio::task::spawn_blocking(move || {
+        debug!("[SEARCH:{}] Spawned blocking task for: {}", op_id, base_path);
+
         // Send started event
         let _ = on_progress.send(SearchProgress::Started {
             base_path: base_path.clone(),
@@ -368,6 +387,7 @@ pub async fn search_files_with_progress(
         let mut all_files: Vec<walkdir::DirEntry> = Vec::new();
         let mut last_progress_dir = String::new();
         let progress_interval = 100; // Send progress every 100 files
+        let log_interval = 500; // Log every 500 files
 
         let walker = if include_subdirs {
             WalkDir::new(&base_path)
@@ -381,6 +401,15 @@ pub async fn search_files_with_progress(
             // Skip the base directory itself
             if path == Path::new(&base_path) {
                 continue;
+            }
+
+            // Log progress periodically
+            if all_files.len() % log_interval == 0 && all_files.len() > 0 {
+                debug!(
+                    "[SEARCH:{}] Phase 1 - Scanning... {} entries found so far",
+                    op_id,
+                    all_files.len()
+                );
             }
 
             // Send scanning progress periodically
@@ -400,10 +429,18 @@ pub async fn search_files_with_progress(
             all_files.push(entry);
         }
 
+        debug!(
+            "[SEARCH:{}] Phase 1 complete - {} total entries collected",
+            op_id,
+            all_files.len()
+        );
+
         // Send matching phase event
         let _ = on_progress.send(SearchProgress::Matching {
             total_files: all_files.len(),
         });
+
+        debug!("[SEARCH:{}] Phase 2 - Starting pattern matching", op_id);
 
         // Phase 2: Pattern matching with Rayon parallelization
         // Pre-compile regex if needed for thread-safe sharing
@@ -467,10 +504,23 @@ pub async fn search_files_with_progress(
             matches_found: results.len(),
         });
 
+        info!(
+            "[SEARCH:{}] Completed: {} matches found out of {} entries",
+            op_id,
+            results.len(),
+            all_files.len()
+        );
+
         Ok(results)
     })
     .await
-    .map_err(|e| format!("Task failed: {}", e))?
+    .map_err(|e| {
+        warn!("[SEARCH:{}] Task failed: {}", op_id, e);
+        format!("Task failed: {}", e)
+    })?;
+
+    info!("[SEARCH:{}] Async operation finished", op_id);
+    result
 }
 
 /// Deletes multiple files and optionally cleans up empty directories.
@@ -571,9 +621,18 @@ pub async fn batch_delete_with_progress(
     delete_empty_dirs: bool,
     on_progress: Channel<DeleteProgress>,
 ) -> Result<DeleteResult, String> {
+    let op_id = next_operation_id();
+    let file_count = files.len();
+    info!(
+        "[DELETE:{}] Starting batch_delete_with_progress with {} files (delete_empty_dirs: {})",
+        op_id, file_count, delete_empty_dirs
+    );
+
     // Run the heavy work in a blocking thread to keep the main thread responsive
-    tokio::task::spawn_blocking(move || {
+    let result = tokio::task::spawn_blocking(move || {
         let total = files.len();
+
+        debug!("[DELETE:{}] Spawned blocking task, processing {} files", op_id, total);
 
         // Send started event
         let _ = on_progress.send(DeleteProgress::Started { total_files: total });
@@ -585,6 +644,17 @@ pub async fn batch_delete_with_progress(
 
         for (index, file_path) in files.into_iter().enumerate() {
             let path = Path::new(&file_path);
+
+            // Log progress every 10 files or on first/last file
+            if index == 0 || index == total - 1 || (index + 1) % 10 == 0 {
+                debug!(
+                    "[DELETE:{}] Deleting file {}/{}: {}",
+                    op_id,
+                    index + 1,
+                    total,
+                    file_path
+                );
+            }
 
             // Track parent directory for potential cleanup
             if delete_empty_dirs {
@@ -615,6 +685,12 @@ pub async fn batch_delete_with_progress(
 
         // Clean up empty directories if requested
         if delete_empty_dirs {
+            debug!(
+                "[DELETE:{}] Cleaning up empty directories ({} candidates)",
+                op_id,
+                parent_dirs.len()
+            );
+
             // Sort by depth (deepest first) to handle nested empty dirs
             let mut dirs: Vec<_> = parent_dirs.into_iter().collect();
             dirs.sort_by(|a, b| {
@@ -644,6 +720,14 @@ pub async fn batch_delete_with_progress(
             failed: failed.len(),
         });
 
+        info!(
+            "[DELETE:{}] Completed: {} successful, {} failed, {} dirs cleaned",
+            op_id,
+            successful.len(),
+            failed.len(),
+            deleted_dirs.len()
+        );
+
         Ok(DeleteResult {
             successful,
             failed,
@@ -651,7 +735,13 @@ pub async fn batch_delete_with_progress(
         })
     })
     .await
-    .map_err(|e| format!("Task failed: {}", e))?
+    .map_err(|e| {
+        warn!("[DELETE:{}] Task failed: {}", op_id, e);
+        format!("Task failed: {}", e)
+    })?;
+
+    info!("[DELETE:{}] Async operation finished", op_id);
+    result
 }
 
 #[cfg(test)]
