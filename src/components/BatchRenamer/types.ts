@@ -8,7 +8,8 @@
 export type ListProgressEvent =
   | { type: "started"; basePath: string }
   | { type: "scanning"; currentDir: string; filesFound: number }
-  | { type: "completed"; totalFiles: number };
+  | { type: "completed"; totalFiles: number }
+  | { type: "cancelled" };
 
 /**
  * Progress events for batch rename operations.
@@ -17,13 +18,14 @@ export type ListProgressEvent =
 export type RenameProgressEvent =
   | { type: "started"; totalFiles: number }
   | { type: "progress"; current: number; total: number; currentPath: string }
-  | { type: "completed"; successful: number; failed: number };
+  | { type: "completed"; successful: number; failed: number }
+  | { type: "cancelled" };
 
 /**
  * State for tracking folder scanning progress in UI
  */
 export interface ListProgressState {
-  phase: "idle" | "scanning" | "completed";
+  phase: "idle" | "scanning" | "completed" | "cancelled";
   currentDir?: string;
   filesFound: number;
   totalFiles?: number;
@@ -33,7 +35,7 @@ export interface ListProgressState {
  * State for tracking rename operation progress in UI
  */
 export interface RenameProgressState {
-  phase: "idle" | "renaming" | "completed";
+  phase: "idle" | "renaming" | "completed" | "cancelled";
   current: number;
   total: number;
   currentPath?: string;

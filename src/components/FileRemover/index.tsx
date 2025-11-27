@@ -1,6 +1,7 @@
-import { createSignal, createMemo, onMount, Show } from "solid-js";
+import { createSignal, createMemo, onMount, onCleanup, Show } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
+import { nanoid } from "nanoid";
 import PatternControls from "./PatternControls";
 import ActionButtons from "./ActionButtons";
 import FileRemoverList from "./FileRemoverList";
@@ -60,6 +61,24 @@ export default function FileRemover() {
       filesFound: 0,
     }
   );
+
+  // Track active operation IDs for cancellation
+  let activeSearchOperationId: string | null = null;
+  let activeDeleteOperationId: string | null = null;
+
+  // Cancel any active operations when component unmounts
+  onCleanup(() => {
+    if (activeSearchOperationId) {
+      invoke("cancel_operation", {
+        operationId: activeSearchOperationId,
+      }).catch(() => {});
+    }
+    if (activeDeleteOperationId) {
+      invoke("cancel_operation", {
+        operationId: activeDeleteOperationId,
+      }).catch(() => {});
+    }
+  });
 
   // Computed
   const selectedFiles = createMemo(() => files().filter((f) => f.selected));
@@ -159,6 +178,11 @@ export default function FileRemover() {
     setIsSearching(true);
     setPatternError(undefined);
     setSearchProgress({ phase: "scanning", filesFound: 0 });
+    let wasCancelled = false;
+
+    // Generate operation ID for cancellation support
+    const operationId = nanoid();
+    activeSearchOperationId = operationId;
 
     try {
       // Create a channel for receiving progress events
@@ -190,6 +214,13 @@ export default function FileRemover() {
               matchesFound: event.matchesFound,
             });
             break;
+          case "cancelled":
+            wasCancelled = true;
+            setSearchProgress({
+              phase: "cancelled",
+              filesFound: 0,
+            });
+            break;
         }
       };
 
@@ -199,23 +230,30 @@ export default function FileRemover() {
         patternType: patternType(),
         includeSubdirs: includeSubdirs(),
         caseSensitive: caseSensitive(),
+        operationId,
         onProgress: progressChannel,
       });
 
-      setFiles(
-        results.map((r) => ({
-          path: r.path,
-          name: r.name,
-          matchRanges: r.match_ranges,
-          size: r.size,
-          isDirectory: r.is_directory,
-          selected: true,
-        }))
-      );
+      activeSearchOperationId = null;
+
+      // Only update files if not cancelled
+      if (!wasCancelled) {
+        setFiles(
+          results.map((r) => ({
+            path: r.path,
+            name: r.name,
+            matchRanges: r.match_ranges,
+            size: r.size,
+            isDirectory: r.is_directory,
+            selected: true,
+          }))
+        );
+      }
     } catch (error) {
       setPatternError(String(error));
       setFiles([]);
     } finally {
+      activeSearchOperationId = null;
       setIsSearching(false);
       // Reset progress after a short delay to allow user to see "completed"
       setTimeout(() => {
@@ -294,6 +332,7 @@ export default function FileRemover() {
         deletedDirs: [],
       });
     } finally {
+      activeDeleteOperationId = null;
       setIsDeleting(false);
       setDeleteProgress(null);
     }
@@ -304,6 +343,10 @@ export default function FileRemover() {
   ): Promise<DeleteResult> {
     const total = filesToDelete.length;
     setDeleteProgress({ current: 0, total });
+
+    // Generate operation ID for cancellation support
+    const operationId = nanoid();
+    activeDeleteOperationId = operationId;
 
     // Create a channel for receiving progress events
     const progressChannel = new Channel<StreamingDeleteProgress>();
@@ -319,15 +362,20 @@ export default function FileRemover() {
         case "completed":
           setDeleteProgress({ current: total, total });
           break;
+        case "cancelled":
+          // Deletion was cancelled - progress will be handled by the result
+          break;
       }
     };
 
     const result = await invoke<DeleteResult>("batch_delete_with_progress", {
       files: filesToDelete.map((f) => f.path),
       deleteEmptyDirs: deleteEmptyDirs(),
+      operationId,
       onProgress: progressChannel,
     });
 
+    activeDeleteOperationId = null;
     return result;
   }
 

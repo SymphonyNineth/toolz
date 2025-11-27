@@ -1,6 +1,7 @@
-import { createSignal, createMemo, Show } from "solid-js";
+import { createSignal, createMemo, Show, onCleanup } from "solid-js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
+import { nanoid } from "nanoid";
 import RenamerControls from "./RenamerControls";
 import NumberingControls from "./NumberingControls";
 import FileList, { FileItem } from "./FileList";
@@ -56,6 +57,24 @@ export default function BatchRenamer() {
       total: 0,
     }
   );
+
+  // Track active operation IDs for cancellation
+  let activeListOperationId: string | null = null;
+  let activeRenameOperationId: string | null = null;
+
+  // Cancel any active operations when component unmounts
+  onCleanup(() => {
+    if (activeListOperationId) {
+      invoke("cancel_operation", { operationId: activeListOperationId }).catch(
+        () => {}
+      );
+    }
+    if (activeRenameOperationId) {
+      invoke("cancel_operation", {
+        operationId: activeRenameOperationId,
+      }).catch(() => {});
+    }
+  });
 
   // Reset status when controls change
   const updateFindText = (text: string) => {
@@ -224,11 +243,16 @@ export default function BatchRenamer() {
       try {
         const folders = Array.isArray(selected) ? selected : [selected];
         const allFiles: string[] = [];
+        let wasCancelled = false;
 
         setIsScanning(true);
         setListProgress({ phase: "scanning", filesFound: 0 });
 
         for (const folder of folders) {
+          // Generate operation ID for this folder scan
+          const operationId = nanoid();
+          activeListOperationId = operationId;
+
           // Create a channel for receiving progress events
           const progressChannel = new Channel<ListProgressEvent>();
 
@@ -247,30 +271,47 @@ export default function BatchRenamer() {
               case "completed":
                 // Progress will be updated with actual files count
                 break;
+              case "cancelled":
+                wasCancelled = true;
+                setListProgress({ phase: "cancelled", filesFound: allFiles.length });
+                break;
             }
           };
 
           const files = await invoke<string[]>("list_files_with_progress", {
             dirPath: folder,
+            operationId,
             onProgress: progressChannel,
           });
+          
+          activeListOperationId = null;
+          
+          // Stop processing if cancelled
+          if (wasCancelled) {
+            break;
+          }
+          
           allFiles.push(...files);
         }
 
-        setListProgress({
-          phase: "completed",
-          filesFound: allFiles.length,
-          totalFiles: allFiles.length,
-        });
+        // Only update if not cancelled
+        if (!wasCancelled) {
+          setListProgress({
+            phase: "completed",
+            filesFound: allFiles.length,
+            totalFiles: allFiles.length,
+          });
 
-        const allPaths = [...selectedPaths(), ...allFiles];
-        const uniquePaths = Array.from(new Set(allPaths));
-        setSelectedPaths(uniquePaths);
-        setStatusMap({});
+          const allPaths = [...selectedPaths(), ...allFiles];
+          const uniquePaths = Array.from(new Set(allPaths));
+          setSelectedPaths(uniquePaths);
+          setStatusMap({});
+        }
       } catch (error) {
         console.error("Failed to list files:", error);
         alert(`Failed to list files: ${error}`);
       } finally {
+        activeListOperationId = null;
         setIsScanning(false);
         // Reset progress after a short delay
         setTimeout(() => {
@@ -292,12 +333,17 @@ export default function BatchRenamer() {
     if (filesToRename.length === 0) return;
 
     setIsRenaming(true);
+    let wasCancelled = false;
 
     try {
       let result: string[];
 
       // Use streaming progress for larger rename operations
       if (filesToRename.length > 10) {
+        // Generate operation ID for cancellation support
+        const operationId = nanoid();
+        activeRenameOperationId = operationId;
+
         setRenameProgress({
           phase: "renaming",
           current: 0,
@@ -330,35 +376,49 @@ export default function BatchRenamer() {
                 total: event.successful + event.failed,
               });
               break;
+            case "cancelled":
+              wasCancelled = true;
+              setRenameProgress({
+                phase: "cancelled",
+                current: 0,
+                total: 0,
+              });
+              break;
           }
         };
 
         result = await invoke<string[]>("batch_rename_with_progress", {
           files: filesToRename,
+          operationId,
           onProgress: progressChannel,
         });
+        
+        activeRenameOperationId = null;
       } else {
         result = await invoke<string[]>("batch_rename", {
           files: filesToRename,
         });
       }
 
-      console.log("Renamed files:", result);
+      // Only update state if not cancelled
+      if (!wasCancelled) {
+        console.log("Renamed files:", result);
 
-      const newPathsMap = new Map(filesToRename);
-      const newStatusMap: Record<string, "idle" | "success" | "error"> = {};
+        const newPathsMap = new Map(filesToRename);
+        const newStatusMap: Record<string, "idle" | "success" | "error"> = {};
 
-      const updatedPaths = selectedPaths().map((path) => {
-        const newPath = newPathsMap.get(path);
-        if (newPath) {
-          newStatusMap[newPath] = "success";
-          return newPath;
-        }
-        return path;
-      });
+        const updatedPaths = selectedPaths().map((path) => {
+          const newPath = newPathsMap.get(path);
+          if (newPath) {
+            newStatusMap[newPath] = "success";
+            return newPath;
+          }
+          return path;
+        });
 
-      setSelectedPaths(updatedPaths);
-      setStatusMap(newStatusMap);
+        setSelectedPaths(updatedPaths);
+        setStatusMap(newStatusMap);
+      }
     } catch (error) {
       console.error("Rename failed:", error);
       const errorStatusMap: Record<string, "idle" | "success" | "error"> = {};
@@ -368,6 +428,7 @@ export default function BatchRenamer() {
       setStatusMap(errorStatusMap);
       alert(`Rename failed: ${error}`);
     } finally {
+      activeRenameOperationId = null;
       setIsRenaming(false);
       // Reset progress after a short delay
       setTimeout(() => {

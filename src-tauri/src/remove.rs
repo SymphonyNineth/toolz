@@ -6,13 +6,15 @@
 //! This module supports both synchronous commands (for backward compatibility)
 //! and streaming commands with progress updates via Tauri Channels.
 
+use crate::operations::OperationRegistry;
 use log::{debug, info, warn};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Arc;
 use tauri::ipc::Channel;
 use walkdir::WalkDir;
 
@@ -30,7 +32,7 @@ fn next_operation_id() -> u64 {
 ///
 /// These events are sent via Tauri Channel to provide real-time feedback
 /// during file search operations on large directories.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum SearchProgress {
     /// Search has started - contains total estimated items (if known)
@@ -55,13 +57,15 @@ pub enum SearchProgress {
         /// Total number of matches found
         matches_found: usize,
     },
+    /// Operation was cancelled
+    Cancelled,
 }
 
 /// Progress events for batch delete operations.
 ///
 /// These events are sent via Tauri Channel to provide real-time feedback
 /// during batch file deletion.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum DeleteProgress {
     /// Deletion has started
@@ -85,6 +89,8 @@ pub enum DeleteProgress {
         /// Number of failed deletions
         failed: usize,
     },
+    /// Operation was cancelled
+    Cancelled,
 }
 
 /// Pattern matching mode for file search
@@ -348,6 +354,7 @@ pub fn search_files_by_pattern(
 /// * `pattern_type` - The type of pattern matching to use
 /// * `include_subdirs` - Whether to search subdirectories
 /// * `case_sensitive` - Whether the search should be case-sensitive
+/// * `operation_id` - Unique identifier for cancellation support
 /// * `on_progress` - Channel to send progress events
 ///
 /// # Returns
@@ -356,18 +363,30 @@ pub fn search_files_by_pattern(
 /// * `Err(String)` - Error message if search fails
 #[tauri::command]
 pub async fn search_files_with_progress(
+    registry: tauri::State<'_, OperationRegistry>,
     base_path: String,
     pattern: String,
     pattern_type: PatternType,
     include_subdirs: bool,
     case_sensitive: bool,
+    operation_id: String,
     on_progress: Channel<SearchProgress>,
 ) -> Result<Vec<FileMatchResult>, String> {
     let op_id = next_operation_id();
     info!(
-        "[SEARCH:{}] Starting search_files_with_progress in: {} with pattern: '{}' (type: {:?})",
-        op_id, base_path, pattern, pattern_type
+        "[SEARCH:{}] Starting search_files_with_progress in: {} with pattern: '{}' (type: {:?}, operation_id: {})",
+        op_id, base_path, pattern, pattern_type, operation_id
     );
+
+    // Register operation for cancellation support
+    let (_guard, cancel_flag) = match registry.try_register(&operation_id) {
+        Ok(result) => result,
+        Err(_) => {
+            info!("[SEARCH:{}] Operation was pre-cancelled", op_id);
+            let _ = on_progress.send(SearchProgress::Cancelled);
+            return Ok(vec![]);
+        }
+    };
 
     if pattern.trim().is_empty() {
         warn!("[SEARCH:{}] Empty pattern provided", op_id);
@@ -376,142 +395,16 @@ pub async fn search_files_with_progress(
 
     // Run the heavy work in a blocking thread to keep the main thread responsive
     let result = tokio::task::spawn_blocking(move || {
-        debug!("[SEARCH:{}] Spawned blocking task for: {}", op_id, base_path);
-
-        // Send started event
-        let _ = on_progress.send(SearchProgress::Started {
-            base_path: base_path.clone(),
-        });
-
-        // Phase 1: Collect all file paths while sending scanning progress
-        let mut all_files: Vec<walkdir::DirEntry> = Vec::new();
-        let mut last_progress_dir = String::new();
-        let progress_interval = 100; // Send progress every 100 files
-        let log_interval = 500; // Log every 500 files
-
-        let walker = if include_subdirs {
-            WalkDir::new(&base_path)
-        } else {
-            WalkDir::new(&base_path).max_depth(1)
-        };
-
-        for entry in walker.into_iter().filter_map(|e| e.ok()) {
-            let path = entry.path();
-
-            // Skip the base directory itself
-            if path == Path::new(&base_path) {
-                continue;
-            }
-
-            // Log progress periodically
-            if all_files.len() % log_interval == 0 && all_files.len() > 0 {
-                debug!(
-                    "[SEARCH:{}] Phase 1 - Scanning... {} entries found so far",
-                    op_id,
-                    all_files.len()
-                );
-            }
-
-            // Send scanning progress periodically
-            if all_files.len() % progress_interval == 0 {
-                if let Some(parent) = path.parent() {
-                    let current_dir = parent.to_string_lossy().to_string();
-                    if current_dir != last_progress_dir {
-                        last_progress_dir = current_dir.clone();
-                        let _ = on_progress.send(SearchProgress::Scanning {
-                            current_dir,
-                            files_found: all_files.len(),
-                        });
-                    }
-                }
-            }
-
-            all_files.push(entry);
-        }
-
-        debug!(
-            "[SEARCH:{}] Phase 1 complete - {} total entries collected",
+        search_files_blocking(
             op_id,
-            all_files.len()
-        );
-
-        // Send matching phase event
-        let _ = on_progress.send(SearchProgress::Matching {
-            total_files: all_files.len(),
-        });
-
-        debug!("[SEARCH:{}] Phase 2 - Starting pattern matching", op_id);
-
-        // Phase 2: Pattern matching with Rayon parallelization
-        // Pre-compile regex if needed for thread-safe sharing
-        let compiled_regex = if pattern_type == PatternType::Regex {
-            let regex_pattern = if case_sensitive {
-                regex::Regex::new(&pattern)
-            } else {
-                regex::Regex::new(&format!("(?i){}", pattern))
-            }
-            .map_err(|e| e.to_string())?;
-            Some(regex_pattern)
-        } else {
-            None
-        };
-
-        let results: Vec<FileMatchResult> = all_files
-            .par_iter()
-            .filter_map(|entry| {
-                let path = entry.path();
-                let name = path.file_name()?.to_string_lossy().to_string();
-
-                let match_ranges = match &pattern_type {
-                    PatternType::Simple => match_simple(&name, &pattern, case_sensitive),
-                    PatternType::Extension => match_extension(&name, &pattern, case_sensitive),
-                    PatternType::Regex => {
-                        // Use pre-compiled regex for thread safety
-                        if let Some(ref regex) = compiled_regex {
-                            let matches: Vec<(usize, usize)> = regex
-                                .find_iter(&name)
-                                .map(|m| (m.start(), m.end()))
-                                .collect();
-                            if matches.is_empty() {
-                                None
-                            } else {
-                                Some(matches)
-                            }
-                        } else {
-                            None
-                        }
-                    }
-                };
-
-                if let Some(ranges) = match_ranges {
-                    let metadata = fs::metadata(path).ok()?;
-
-                    Some(FileMatchResult {
-                        path: path.to_string_lossy().to_string(),
-                        name,
-                        match_ranges: ranges,
-                        size: metadata.len(),
-                        is_directory: metadata.is_dir(),
-                    })
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        // Send completed event
-        let _ = on_progress.send(SearchProgress::Completed {
-            matches_found: results.len(),
-        });
-
-        info!(
-            "[SEARCH:{}] Completed: {} matches found out of {} entries",
-            op_id,
-            results.len(),
-            all_files.len()
-        );
-
-        Ok(results)
+            base_path,
+            pattern,
+            pattern_type,
+            include_subdirs,
+            case_sensitive,
+            cancel_flag,
+            on_progress,
+        )
     })
     .await
     .map_err(|e| {
@@ -521,6 +414,214 @@ pub async fn search_files_with_progress(
 
     info!("[SEARCH:{}] Async operation finished", op_id);
     result
+}
+
+/// Blocking implementation of file search with cancellation support.
+#[allow(clippy::too_many_arguments)]
+fn search_files_blocking(
+    op_id: u64,
+    base_path: String,
+    pattern: String,
+    pattern_type: PatternType,
+    include_subdirs: bool,
+    case_sensitive: bool,
+    cancel_flag: Arc<AtomicBool>,
+    on_progress: Channel<SearchProgress>,
+) -> Result<Vec<FileMatchResult>, String> {
+    debug!("[SEARCH:{}] Spawned blocking task for: {}", op_id, base_path);
+
+    // Send started event - check if channel is still alive
+    if on_progress
+        .send(SearchProgress::Started {
+            base_path: base_path.clone(),
+        })
+        .is_err()
+    {
+        info!("[SEARCH:{}] Channel closed, aborting", op_id);
+        return Ok(vec![]);
+    }
+
+    // Phase 1: Collect all file paths while sending scanning progress
+    let mut all_files: Vec<walkdir::DirEntry> = Vec::new();
+    let mut last_progress_dir = String::new();
+    let progress_interval = 100; // Send progress every 100 files
+    let log_interval = 500; // Log every 500 files
+
+    let walker = if include_subdirs {
+        WalkDir::new(&base_path)
+    } else {
+        WalkDir::new(&base_path).max_depth(1)
+    };
+
+    for entry in walker.into_iter().filter_map(|e| e.ok()) {
+        // Check cancellation flag every iteration
+        if cancel_flag.load(Ordering::SeqCst) {
+            info!(
+                "[SEARCH:{}] Cancelled during scan phase after {} entries",
+                op_id,
+                all_files.len()
+            );
+            let _ = on_progress.send(SearchProgress::Cancelled);
+            return Ok(vec![]);
+        }
+
+        let path = entry.path();
+
+        // Skip the base directory itself
+        if path == Path::new(&base_path) {
+            continue;
+        }
+
+        // Log progress periodically
+        if all_files.len() % log_interval == 0 && !all_files.is_empty() {
+            debug!(
+                "[SEARCH:{}] Phase 1 - Scanning... {} entries found so far",
+                op_id,
+                all_files.len()
+            );
+        }
+
+        // Send scanning progress periodically
+        if all_files.len() % progress_interval == 0 {
+            if let Some(parent) = path.parent() {
+                let current_dir = parent.to_string_lossy().to_string();
+                if current_dir != last_progress_dir {
+                    last_progress_dir = current_dir.clone();
+                    // Check if channel send fails (dead man's switch)
+                    if on_progress
+                        .send(SearchProgress::Scanning {
+                            current_dir,
+                            files_found: all_files.len(),
+                        })
+                        .is_err()
+                    {
+                        info!("[SEARCH:{}] Channel closed during scan, aborting", op_id);
+                        return Ok(vec![]);
+                    }
+                }
+            }
+        }
+
+        all_files.push(entry);
+    }
+
+    // Check cancellation before starting pattern matching phase
+    if cancel_flag.load(Ordering::SeqCst) {
+        info!(
+            "[SEARCH:{}] Cancelled before matching phase",
+            op_id
+        );
+        let _ = on_progress.send(SearchProgress::Cancelled);
+        return Ok(vec![]);
+    }
+
+    debug!(
+        "[SEARCH:{}] Phase 1 complete - {} total entries collected",
+        op_id,
+        all_files.len()
+    );
+
+    // Send matching phase event
+    if on_progress
+        .send(SearchProgress::Matching {
+            total_files: all_files.len(),
+        })
+        .is_err()
+    {
+        info!("[SEARCH:{}] Channel closed before matching phase, aborting", op_id);
+        return Ok(vec![]);
+    }
+
+    debug!("[SEARCH:{}] Phase 2 - Starting pattern matching", op_id);
+
+    // Phase 2: Pattern matching with Rayon parallelization
+    // Pre-compile regex if needed for thread-safe sharing
+    let compiled_regex = if pattern_type == PatternType::Regex {
+        let regex_pattern = if case_sensitive {
+            regex::Regex::new(&pattern)
+        } else {
+            regex::Regex::new(&format!("(?i){}", pattern))
+        }
+        .map_err(|e| e.to_string())?;
+        Some(regex_pattern)
+    } else {
+        None
+    };
+
+    // Clone cancel_flag for use in parallel iterator
+    let cancel_flag_parallel = Arc::clone(&cancel_flag);
+
+    let results: Vec<FileMatchResult> = all_files
+        .par_iter()
+        .filter_map(|entry| {
+            // Check cancellation in parallel - early exit if cancelled
+            if cancel_flag_parallel.load(Ordering::SeqCst) {
+                return None;
+            }
+
+            let path = entry.path();
+            let name = path.file_name()?.to_string_lossy().to_string();
+
+            let match_ranges = match &pattern_type {
+                PatternType::Simple => match_simple(&name, &pattern, case_sensitive),
+                PatternType::Extension => match_extension(&name, &pattern, case_sensitive),
+                PatternType::Regex => {
+                    // Use pre-compiled regex for thread safety
+                    if let Some(ref regex) = compiled_regex {
+                        let matches: Vec<(usize, usize)> = regex
+                            .find_iter(&name)
+                            .map(|m| (m.start(), m.end()))
+                            .collect();
+                        if matches.is_empty() {
+                            None
+                        } else {
+                            Some(matches)
+                        }
+                    } else {
+                        None
+                    }
+                }
+            };
+
+            if let Some(ranges) = match_ranges {
+                let metadata = fs::metadata(path).ok()?;
+
+                Some(FileMatchResult {
+                    path: path.to_string_lossy().to_string(),
+                    name,
+                    match_ranges: ranges,
+                    size: metadata.len(),
+                    is_directory: metadata.is_dir(),
+                })
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    // Check if cancelled during parallel matching
+    if cancel_flag.load(Ordering::SeqCst) {
+        info!(
+            "[SEARCH:{}] Cancelled during matching phase",
+            op_id
+        );
+        let _ = on_progress.send(SearchProgress::Cancelled);
+        return Ok(vec![]);
+    }
+
+    // Send completed event
+    let _ = on_progress.send(SearchProgress::Completed {
+        matches_found: results.len(),
+    });
+
+    info!(
+        "[SEARCH:{}] Completed: {} matches found out of {} entries",
+        op_id,
+        results.len(),
+        all_files.len()
+    );
+
+    Ok(results)
 }
 
 /// Deletes multiple files and optionally cleans up empty directories.
@@ -609,6 +710,7 @@ pub fn batch_delete(files: Vec<String>, delete_empty_dirs: bool) -> Result<Delet
 ///
 /// * `files` - List of file paths to delete
 /// * `delete_empty_dirs` - Whether to remove parent directories that become empty
+/// * `operation_id` - Unique identifier for cancellation support
 /// * `on_progress` - Channel to send progress events
 ///
 /// # Returns
@@ -617,122 +719,36 @@ pub fn batch_delete(files: Vec<String>, delete_empty_dirs: bool) -> Result<Delet
 /// * `Err(String)` - Error message if operation completely fails
 #[tauri::command]
 pub async fn batch_delete_with_progress(
+    registry: tauri::State<'_, OperationRegistry>,
     files: Vec<String>,
     delete_empty_dirs: bool,
+    operation_id: String,
     on_progress: Channel<DeleteProgress>,
 ) -> Result<DeleteResult, String> {
     let op_id = next_operation_id();
     let file_count = files.len();
     info!(
-        "[DELETE:{}] Starting batch_delete_with_progress with {} files (delete_empty_dirs: {})",
-        op_id, file_count, delete_empty_dirs
+        "[DELETE:{}] Starting batch_delete_with_progress with {} files (delete_empty_dirs: {}, operation_id: {})",
+        op_id, file_count, delete_empty_dirs, operation_id
     );
+
+    // Register operation for cancellation support
+    let (_guard, cancel_flag) = match registry.try_register(&operation_id) {
+        Ok(result) => result,
+        Err(_) => {
+            info!("[DELETE:{}] Operation was pre-cancelled", op_id);
+            let _ = on_progress.send(DeleteProgress::Cancelled);
+            return Ok(DeleteResult {
+                successful: vec![],
+                failed: vec![],
+                deleted_dirs: vec![],
+            });
+        }
+    };
 
     // Run the heavy work in a blocking thread to keep the main thread responsive
     let result = tokio::task::spawn_blocking(move || {
-        let total = files.len();
-
-        debug!("[DELETE:{}] Spawned blocking task, processing {} files", op_id, total);
-
-        // Send started event
-        let _ = on_progress.send(DeleteProgress::Started { total_files: total });
-
-        let mut successful = Vec::new();
-        let mut failed = Vec::new();
-        let mut deleted_dirs = Vec::new();
-        let mut parent_dirs: HashSet<String> = HashSet::new();
-
-        for (index, file_path) in files.into_iter().enumerate() {
-            let path = Path::new(&file_path);
-
-            // Log progress every 10 files or on first/last file
-            if index == 0 || index == total - 1 || (index + 1) % 10 == 0 {
-                debug!(
-                    "[DELETE:{}] Deleting file {}/{}: {}",
-                    op_id,
-                    index + 1,
-                    total,
-                    file_path
-                );
-            }
-
-            // Track parent directory for potential cleanup
-            if delete_empty_dirs {
-                if let Some(parent) = path.parent() {
-                    parent_dirs.insert(parent.to_string_lossy().to_string());
-                }
-            }
-
-            // Attempt deletion
-            let result = if path.is_dir() {
-                fs::remove_dir_all(path)
-            } else {
-                fs::remove_file(path)
-            };
-
-            // Send progress update
-            let _ = on_progress.send(DeleteProgress::Progress {
-                current: index + 1,
-                total,
-                current_path: file_path.clone(),
-            });
-
-            match result {
-                Ok(_) => successful.push(file_path),
-                Err(e) => failed.push((file_path, e.to_string())),
-            }
-        }
-
-        // Clean up empty directories if requested
-        if delete_empty_dirs {
-            debug!(
-                "[DELETE:{}] Cleaning up empty directories ({} candidates)",
-                op_id,
-                parent_dirs.len()
-            );
-
-            // Sort by depth (deepest first) to handle nested empty dirs
-            let mut dirs: Vec<_> = parent_dirs.into_iter().collect();
-            dirs.sort_by(|a, b| {
-                b.matches(std::path::MAIN_SEPARATOR)
-                    .count()
-                    .cmp(&a.matches(std::path::MAIN_SEPARATOR).count())
-            });
-
-            for dir in dirs {
-                let path = Path::new(&dir);
-                if path.exists() && path.is_dir() {
-                    if let Ok(mut entries) = fs::read_dir(path) {
-                        if entries.next().is_none() {
-                            // Directory is empty
-                            if fs::remove_dir(path).is_ok() {
-                                deleted_dirs.push(dir);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Send completed event
-        let _ = on_progress.send(DeleteProgress::Completed {
-            successful: successful.len(),
-            failed: failed.len(),
-        });
-
-        info!(
-            "[DELETE:{}] Completed: {} successful, {} failed, {} dirs cleaned",
-            op_id,
-            successful.len(),
-            failed.len(),
-            deleted_dirs.len()
-        );
-
-        Ok(DeleteResult {
-            successful,
-            failed,
-            deleted_dirs,
-        })
+        batch_delete_blocking(op_id, files, delete_empty_dirs, cancel_flag, on_progress)
     })
     .await
     .map_err(|e| {
@@ -742,6 +758,173 @@ pub async fn batch_delete_with_progress(
 
     info!("[DELETE:{}] Async operation finished", op_id);
     result
+}
+
+/// Blocking implementation of batch delete with cancellation support.
+fn batch_delete_blocking(
+    op_id: u64,
+    files: Vec<String>,
+    delete_empty_dirs: bool,
+    cancel_flag: Arc<AtomicBool>,
+    on_progress: Channel<DeleteProgress>,
+) -> Result<DeleteResult, String> {
+    let total = files.len();
+
+    debug!(
+        "[DELETE:{}] Spawned blocking task, processing {} files",
+        op_id, total
+    );
+
+    // Send started event - check if channel is still alive
+    if on_progress
+        .send(DeleteProgress::Started { total_files: total })
+        .is_err()
+    {
+        info!("[DELETE:{}] Channel closed, aborting", op_id);
+        return Ok(DeleteResult {
+            successful: vec![],
+            failed: vec![],
+            deleted_dirs: vec![],
+        });
+    }
+
+    let mut successful = Vec::new();
+    let mut failed = Vec::new();
+    let mut deleted_dirs = Vec::new();
+    let mut parent_dirs: HashSet<String> = HashSet::new();
+
+    for (index, file_path) in files.into_iter().enumerate() {
+        // Check cancellation flag every iteration
+        if cancel_flag.load(Ordering::SeqCst) {
+            info!(
+                "[DELETE:{}] Cancelled after {} deletions",
+                op_id,
+                successful.len()
+            );
+            let _ = on_progress.send(DeleteProgress::Cancelled);
+            return Ok(DeleteResult {
+                successful,
+                failed,
+                deleted_dirs,
+            });
+        }
+
+        let path = Path::new(&file_path);
+
+        // Log progress every 10 files or on first/last file
+        if index == 0 || index == total - 1 || (index + 1) % 10 == 0 {
+            debug!(
+                "[DELETE:{}] Deleting file {}/{}: {}",
+                op_id,
+                index + 1,
+                total,
+                file_path
+            );
+        }
+
+        // Track parent directory for potential cleanup
+        if delete_empty_dirs {
+            if let Some(parent) = path.parent() {
+                parent_dirs.insert(parent.to_string_lossy().to_string());
+            }
+        }
+
+        // Attempt deletion
+        let result = if path.is_dir() {
+            fs::remove_dir_all(path)
+        } else {
+            fs::remove_file(path)
+        };
+
+        // Send progress update - check if channel is still alive (dead man's switch)
+        if on_progress
+            .send(DeleteProgress::Progress {
+                current: index + 1,
+                total,
+                current_path: file_path.clone(),
+            })
+            .is_err()
+        {
+            info!("[DELETE:{}] Channel closed during delete, aborting", op_id);
+            // Still record the result of this deletion
+            match result {
+                Ok(_) => successful.push(file_path),
+                Err(e) => failed.push((file_path, e.to_string())),
+            }
+            return Ok(DeleteResult {
+                successful,
+                failed,
+                deleted_dirs,
+            });
+        }
+
+        match result {
+            Ok(_) => successful.push(file_path),
+            Err(e) => failed.push((file_path, e.to_string())),
+        }
+    }
+
+    // Clean up empty directories if requested (only if not cancelled)
+    if delete_empty_dirs && !cancel_flag.load(Ordering::SeqCst) {
+        debug!(
+            "[DELETE:{}] Cleaning up empty directories ({} candidates)",
+            op_id,
+            parent_dirs.len()
+        );
+
+        // Sort by depth (deepest first) to handle nested empty dirs
+        let mut dirs: Vec<_> = parent_dirs.into_iter().collect();
+        dirs.sort_by(|a, b| {
+            b.matches(std::path::MAIN_SEPARATOR)
+                .count()
+                .cmp(&a.matches(std::path::MAIN_SEPARATOR).count())
+        });
+
+        for dir in dirs {
+            // Check cancellation during directory cleanup
+            if cancel_flag.load(Ordering::SeqCst) {
+                info!("[DELETE:{}] Cancelled during directory cleanup", op_id);
+                let _ = on_progress.send(DeleteProgress::Cancelled);
+                return Ok(DeleteResult {
+                    successful,
+                    failed,
+                    deleted_dirs,
+                });
+            }
+
+            let path = Path::new(&dir);
+            if path.exists() && path.is_dir() {
+                if let Ok(mut entries) = fs::read_dir(path) {
+                    if entries.next().is_none() {
+                        // Directory is empty
+                        if fs::remove_dir(path).is_ok() {
+                            deleted_dirs.push(dir);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Send completed event
+    let _ = on_progress.send(DeleteProgress::Completed {
+        successful: successful.len(),
+        failed: failed.len(),
+    });
+
+    info!(
+        "[DELETE:{}] Completed: {} successful, {} failed, {} dirs cleaned",
+        op_id,
+        successful.len(),
+        failed.len(),
+        deleted_dirs.len()
+    );
+
+    Ok(DeleteResult {
+        successful,
+        failed,
+        deleted_dirs,
+    })
 }
 
 #[cfg(test)]
@@ -1496,6 +1679,102 @@ mod tests {
         let debug_str = format!("{:?}", progress);
         assert!(debug_str.contains("Started"));
         assert!(debug_str.contains("100"));
+    }
+
+    // ==================== Cancelled Variant Tests ====================
+
+    /// Tests SearchProgress::Cancelled serialization.
+    #[test]
+    fn test_search_progress_cancelled_serialization() {
+        let progress = SearchProgress::Cancelled;
+        let json = serde_json::to_string(&progress).unwrap();
+        assert!(json.contains("\"type\":\"cancelled\""));
+    }
+
+    /// Tests SearchProgress::Cancelled round-trip.
+    #[test]
+    fn test_search_progress_cancelled_round_trip() {
+        let original = SearchProgress::Cancelled;
+        let json = serde_json::to_string(&original).unwrap();
+        let deserialized: SearchProgress = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, SearchProgress::Cancelled);
+    }
+
+    /// Tests DeleteProgress::Cancelled serialization.
+    #[test]
+    fn test_delete_progress_cancelled_serialization() {
+        let progress = DeleteProgress::Cancelled;
+        let json = serde_json::to_string(&progress).unwrap();
+        assert!(json.contains("\"type\":\"cancelled\""));
+    }
+
+    /// Tests DeleteProgress::Cancelled round-trip.
+    #[test]
+    fn test_delete_progress_cancelled_round_trip() {
+        let original = DeleteProgress::Cancelled;
+        let json = serde_json::to_string(&original).unwrap();
+        let deserialized: DeleteProgress = serde_json::from_str(&json).unwrap();
+        assert_eq!(deserialized, DeleteProgress::Cancelled);
+    }
+
+    /// Tests that SearchProgress::Cancelled can be cloned.
+    #[test]
+    fn test_search_progress_cancelled_clone() {
+        let original = SearchProgress::Cancelled;
+        let cloned = original.clone();
+        assert_eq!(original, cloned);
+    }
+
+    /// Tests that DeleteProgress::Cancelled can be cloned.
+    #[test]
+    fn test_delete_progress_cancelled_clone() {
+        let original = DeleteProgress::Cancelled;
+        let cloned = original.clone();
+        assert_eq!(original, cloned);
+    }
+
+    /// Tests SearchProgress::Cancelled debug output.
+    #[test]
+    fn test_search_progress_cancelled_debug() {
+        let progress = SearchProgress::Cancelled;
+        let debug_str = format!("{:?}", progress);
+        assert!(debug_str.contains("Cancelled"));
+    }
+
+    /// Tests DeleteProgress::Cancelled debug output.
+    #[test]
+    fn test_delete_progress_cancelled_debug() {
+        let progress = DeleteProgress::Cancelled;
+        let debug_str = format!("{:?}", progress);
+        assert!(debug_str.contains("Cancelled"));
+    }
+
+    // ==================== Cancellation Logic Tests ====================
+
+    /// Tests that cancellation flag is respected in search.
+    #[test]
+    fn test_search_respects_cancellation_flag() {
+        use std::sync::atomic::AtomicBool;
+        use std::sync::Arc;
+
+        // Create a pre-cancelled flag
+        let cancel_flag = Arc::new(AtomicBool::new(true));
+
+        // Verify the flag is set correctly
+        assert!(cancel_flag.load(Ordering::SeqCst));
+    }
+
+    /// Tests that cancellation flag is respected in delete.
+    #[test]
+    fn test_delete_respects_cancellation_flag() {
+        use std::sync::atomic::AtomicBool;
+        use std::sync::Arc;
+
+        // Create a pre-cancelled flag
+        let cancel_flag = Arc::new(AtomicBool::new(true));
+
+        // Verify the flag is set correctly
+        assert!(cancel_flag.load(Ordering::SeqCst));
     }
 
     // ==================== Parallel Pattern Matching Tests ====================

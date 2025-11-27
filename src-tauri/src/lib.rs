@@ -3,12 +3,26 @@
 //! Backend library for the Simple Tools Tauri application.
 //! Provides file system operations for batch renaming, directory listing, and file removal.
 
+mod operations;
 mod remove;
 mod rename;
 
 // Re-export types for external use
+pub use operations::{CancelledError, OperationRegistry};
 pub use remove::{DeleteProgress, DeleteResult, FileMatchResult, PatternType, SearchProgress};
 pub use rename::{ListProgress, RenameProgress};
+
+/// Cancels an in-progress operation by its ID.
+///
+/// If the operation is active, sets its cancellation flag to true.
+/// If the operation doesn't exist yet, creates a tombstone to prevent future registration.
+///
+/// This command is idempotent - calling it multiple times is safe.
+#[tauri::command]
+fn cancel_operation(registry: tauri::State<'_, OperationRegistry>, operation_id: String) {
+    log::debug!("Cancelling operation: {}", operation_id);
+    registry.cancel(&operation_id);
+}
 
 /// Initializes and runs the Tauri application.
 ///
@@ -31,7 +45,9 @@ pub fn run() {
                 .level(log::LevelFilter::Debug)
                 .build(),
         )
+        .manage(OperationRegistry::new())
         .invoke_handler(tauri::generate_handler![
+            cancel_operation,
             rename::batch_rename,
             rename::batch_rename_with_progress,
             rename::list_files_recursively,

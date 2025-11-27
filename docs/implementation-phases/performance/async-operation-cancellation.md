@@ -214,49 +214,49 @@ Order matters to avoid race conditions:
 
 ### Phase 1: Backend Infrastructure
 
-- [ ] Add `dashmap` to Cargo.toml
-- [ ] Create `operations.rs` module with:
-  - [ ] `OperationEntry` enum (Active with flag, or Tombstone with timestamp)
-  - [ ] `OperationRegistry` struct using DashMap
-  - [ ] `OperationGuard` RAII struct with Drop impl
-  - [ ] `try_register()` returning `Result<(Guard, Flag), CancelledError>`
-  - [ ] `cancel()` method with tombstone creation
-  - [ ] Lazy tombstone sweep logic (when size > 100, remove > 1 min old)
-- [ ] Add registry as Tauri managed state in `lib.rs`
-- [ ] Implement `cancel_operation` Tauri command
-- [ ] Write unit tests for registry (including race condition scenarios)
+- [x] Add `dashmap` to Cargo.toml
+- [x] Create `operations.rs` module with:
+  - [x] `OperationEntry` enum (Active with flag, or Tombstone with timestamp)
+  - [x] `OperationRegistry` struct using DashMap
+  - [x] `OperationGuard` RAII struct with Drop impl
+  - [x] `try_register()` returning `Result<(Guard, Flag), CancelledError>`
+  - [x] `cancel()` method with tombstone creation
+  - [x] Lazy tombstone sweep logic (when size > 100, remove > 1 min old)
+- [x] Add registry as Tauri managed state in `lib.rs`
+- [x] Implement `cancel_operation` Tauri command
+- [x] Write unit tests for registry (including race condition scenarios)
 
 ### Phase 2: Update Rename Operations
 
-- [ ] Modify `list_files_with_progress`:
-  - [ ] Accept operation ID parameter
-  - [ ] Call `try_register()` with `?` for early exit if cancelled
-  - [ ] Check cancellation flag AND channel.send() result each iteration
-  - [ ] Return `Cancelled` status when cancelled
-- [ ] Modify `batch_rename_with_progress` similarly
-- [ ] Update existing tests, add cancellation tests
+- [x] Modify `list_files_with_progress`:
+  - [x] Accept operation ID parameter
+  - [x] Call `try_register()` with `?` for early exit if cancelled
+  - [x] Check cancellation flag AND channel.send() result each iteration
+  - [x] Return `Cancelled` status when cancelled
+- [x] Modify `batch_rename_with_progress` similarly
+- [x] Update existing tests, add cancellation tests
 
 ### Phase 3: Update Remove Operations
 
-- [ ] Modify `search_files_with_progress`:
-  - [ ] Accept operation ID parameter
-  - [ ] Call `try_register()` with `?` for early exit
-  - [ ] Check cancellation in scan loop (every iteration)
-  - [ ] Handle parallel match phase cancellation
-  - [ ] Return `Cancelled` status when cancelled
-- [ ] Modify `batch_delete_with_progress` similarly
-- [ ] Update existing tests, add cancellation tests
+- [x] Modify `search_files_with_progress`:
+  - [x] Accept operation ID parameter
+  - [x] Call `try_register()` with `?` for early exit
+  - [x] Check cancellation in scan loop (every iteration)
+  - [x] Handle parallel match phase cancellation
+  - [x] Return `Cancelled` status when cancelled
+- [x] Modify `batch_delete_with_progress` similarly
+- [x] Update existing tests, add cancellation tests
 
 ### Phase 4: Frontend Integration
 
-- [ ] Add `nanoid` to package.json
-- [ ] Update BatchRenamer component:
-  - [ ] Generate ID with `nanoid()` before operation
-  - [ ] Register `onCleanup` before `invoke()`
-  - [ ] Handle `Cancelled` response → info toast
-  - [ ] Handle `Error` response → error toast
-- [ ] Update FileRemover component similarly
-- [ ] Style distinction between cancelled (neutral) and error (red) states
+- [x] Add `nanoid` to package.json
+- [x] Update BatchRenamer component:
+  - [x] Generate ID with `nanoid()` before operation
+  - [x] Register `onCleanup` before `invoke()`
+  - [x] Handle `Cancelled` response → info toast
+  - [x] Handle `Error` response → error toast
+- [x] Update FileRemover component similarly
+- [x] Style distinction between cancelled (neutral) and error (red) states
 
 ### Phase 5: Testing & Polish
 

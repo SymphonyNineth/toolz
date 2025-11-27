@@ -45,7 +45,8 @@ export type SearchProgressEvent =
   | { type: "started"; basePath: string }
   | { type: "scanning"; currentDir: string; filesFound: number }
   | { type: "matching"; totalFiles: number }
-  | { type: "completed"; matchesFound: number };
+  | { type: "completed"; matchesFound: number }
+  | { type: "cancelled" };
 
 /**
  * Progress events for batch delete operations.
@@ -54,13 +55,14 @@ export type SearchProgressEvent =
 export type StreamingDeleteProgress =
   | { type: "started"; totalFiles: number }
   | { type: "progress"; current: number; total: number; currentPath: string }
-  | { type: "completed"; successful: number; failed: number };
+  | { type: "completed"; successful: number; failed: number }
+  | { type: "cancelled" };
 
 /**
  * State for tracking search progress in UI
  */
 export interface SearchProgressState {
-  phase: "idle" | "scanning" | "matching" | "completed";
+  phase: "idle" | "scanning" | "matching" | "completed" | "cancelled";
   currentDir?: string;
   filesFound: number;
   totalFiles?: number;
