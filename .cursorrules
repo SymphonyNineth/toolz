@@ -38,6 +38,7 @@
 
 - Information about the project is available inside the /docs directory
 - Every new feature must be documented either in new file or in the according file if exists
+- Avoid writing code inside docs, you may write very short snippets, function names, api names, etc.git
 
 ## Misc
 
