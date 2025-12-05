@@ -4,7 +4,7 @@ import Checkbox from "../ui/Checkbox";
 import Tooltip from "../ui/Tooltip";
 import Button from "../ui/Button";
 import RegexCheatSheet from "../ui/RegexCheatSheet";
-import { FolderOpenIcon, SearchIcon, ErrorIcon } from "../ui/icons";
+import { FolderOpenIcon, SearchIcon, ErrorIcon, StopIcon } from "../ui/icons";
 import { PatternType } from "./types";
 import { validatePattern } from "./utils";
 
@@ -24,6 +24,7 @@ interface PatternControlsProps {
   basePath: string;
   onSelectFolder: () => void;
   onSearch: () => void;
+  onCancelSearch?: () => void;
   isSearching: boolean;
   canSearch: boolean;
 }
@@ -176,18 +177,32 @@ const PatternControls: Component<PatternControlsProps> = (props) => {
                 onKeyDown={handleKeyDown}
                 placeholder={patternPlaceholder()}
                 class={`w-full ${hasValidationError() ? "input-error" : ""}`}
+                disabled={props.isSearching}
               />
             </div>
-            <Button
-              variant="primary"
-              onClick={props.onSearch}
-              disabled={!props.canSearch || hasValidationError()}
-              loading={props.isSearching}
-              class="gap-2 min-w-[120px]"
+            <Show
+              when={props.isSearching}
+              fallback={
+                <Button
+                  variant="primary"
+                  onClick={props.onSearch}
+                  disabled={!props.canSearch || hasValidationError()}
+                  class="gap-2 min-w-[120px]"
+                >
+                  <SearchIcon size="sm" />
+                  Search
+                </Button>
+              }
             >
-              <SearchIcon size="sm" />
-              Search
-            </Button>
+              <Button
+                variant="warning"
+                onClick={props.onCancelSearch}
+                class="gap-2 min-w-[120px]"
+              >
+                <StopIcon size="sm" />
+                Cancel
+              </Button>
+            </Show>
           </div>
           <Show when={displayError()}>
             <div class="flex items-center gap-1 mt-2 text-error text-sm">

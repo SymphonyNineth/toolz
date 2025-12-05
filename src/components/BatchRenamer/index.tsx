@@ -1,5 +1,5 @@
-import { createSignal, createMemo, Show, onCleanup } from "solid-js";
-import { open } from "@tauri-apps/plugin-dialog";
+import { createSignal, createMemo, Show, onCleanup, batch } from "solid-js";
+import { open, confirm } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { nanoid } from "nanoid";
 import RenamerControls from "./RenamerControls";
@@ -24,6 +24,18 @@ import {
   RenameProgressEvent,
   RenameProgressState,
 } from "./types";
+
+/**
+ * Maximum recommended file count before showing a warning.
+ * Beyond this, performance may degrade significantly.
+ */
+const MAX_RECOMMENDED_FILES = 10000;
+
+/**
+ * Absolute maximum file count to prevent memory exhaustion.
+ * Users cannot load more than this.
+ */
+const ABSOLUTE_MAX_FILES = 1_000_000;
 
 export default function BatchRenamer() {
   const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
@@ -62,6 +74,19 @@ export default function BatchRenamer() {
   let activeListOperationId: string | null = null;
   let activeRenameOperationId: string | null = null;
 
+  /**
+   * Clears all file-related state to release memory.
+   * Called on cancellation and component unmount.
+   */
+  const clearAllState = () => {
+    batch(() => {
+      setSelectedPaths([]);
+      setStatusMap({});
+      setListProgress({ phase: "idle", filesFound: 0 });
+      setRenameProgress({ phase: "idle", current: 0, total: 0 });
+    });
+  };
+
   // Cancel any active operations when component unmounts
   onCleanup(() => {
     if (activeListOperationId) {
@@ -74,6 +99,8 @@ export default function BatchRenamer() {
         operationId: activeRenameOperationId,
       }).catch(() => {});
     }
+    // Clear state to release memory
+    clearAllState();
   });
 
   // Reset status when controls change
@@ -244,6 +271,7 @@ export default function BatchRenamer() {
         const folders = Array.isArray(selected) ? selected : [selected];
         const allFiles: string[] = [];
         let wasCancelled = false;
+        let hitFileLimit = false;
 
         setIsScanning(true);
         setListProgress({ phase: "scanning", filesFound: 0 });
@@ -261,19 +289,30 @@ export default function BatchRenamer() {
               case "started":
                 setListProgress({ phase: "scanning", filesFound: 0 });
                 break;
-              case "scanning":
+              case "scanning": {
+                const currentTotal = allFiles.length + event.filesFound;
                 setListProgress({
                   phase: "scanning",
                   currentDir: event.currentDir,
-                  filesFound: allFiles.length + event.filesFound,
+                  filesFound: currentTotal,
                 });
+                // Check if we're approaching file limits during scan
+                if (currentTotal > ABSOLUTE_MAX_FILES && !hitFileLimit) {
+                  hitFileLimit = true;
+                  // Cancel the operation if we hit the absolute limit
+                  invoke("cancel_operation", { operationId }).catch(() => {});
+                }
                 break;
+              }
               case "completed":
                 // Progress will be updated with actual files count
                 break;
               case "cancelled":
                 wasCancelled = true;
-                setListProgress({ phase: "cancelled", filesFound: allFiles.length });
+                setListProgress({
+                  phase: "cancelled",
+                  filesFound: allFiles.length,
+                });
                 break;
             }
           };
@@ -283,33 +322,100 @@ export default function BatchRenamer() {
             operationId,
             onProgress: progressChannel,
           });
-          
+
           activeListOperationId = null;
-          
+
           // Stop processing if cancelled
           if (wasCancelled) {
             break;
           }
-          
+
+          // Check file limit
+          const potentialTotal = allFiles.length + files.length;
+          if (potentialTotal > ABSOLUTE_MAX_FILES) {
+            const allowedCount = ABSOLUTE_MAX_FILES - allFiles.length;
+            if (allowedCount > 0) {
+              allFiles.push(...files.slice(0, allowedCount));
+            }
+            hitFileLimit = true;
+            break;
+          }
+
           allFiles.push(...files);
+        }
+
+        // Show warning if we hit the file limit
+        if (hitFileLimit) {
+          alert(
+            `Maximum file limit of ${ABSOLUTE_MAX_FILES.toLocaleString()} reached. Some files were not added to prevent memory issues.`
+          );
         }
 
         // Only update if not cancelled
         if (!wasCancelled) {
+          // Check if we're adding a lot of files and warn the user
+          const existingCount = selectedPaths().length;
+          const newTotal = existingCount + allFiles.length;
+
+          if (
+            newTotal > MAX_RECOMMENDED_FILES &&
+            existingCount <= MAX_RECOMMENDED_FILES
+          ) {
+            const shouldContinue = await confirm(
+              `You are about to load ${newTotal.toLocaleString()} files. Loading more than ${MAX_RECOMMENDED_FILES.toLocaleString()} files may cause performance issues. Continue?`,
+              { title: "Large File Count Warning", kind: "warning" }
+            );
+            if (!shouldContinue) {
+              setListProgress({ phase: "idle", filesFound: 0 });
+              setIsScanning(false);
+              return;
+            }
+          }
+
           setListProgress({
             phase: "completed",
             filesFound: allFiles.length,
             totalFiles: allFiles.length,
           });
 
-          const allPaths = [...selectedPaths(), ...allFiles];
-          const uniquePaths = Array.from(new Set(allPaths));
-          setSelectedPaths(uniquePaths);
-          setStatusMap({});
+          // Use more efficient deduplication for large arrays
+          const existingPaths = selectedPaths();
+          const existingSet = new Set(existingPaths);
+          const newPaths: string[] = [];
+
+          for (const file of allFiles) {
+            if (!existingSet.has(file)) {
+              existingSet.add(file);
+              newPaths.push(file);
+            }
+          }
+
+          // Only update if we have new files
+          if (newPaths.length > 0) {
+            // Concatenate arrays efficiently
+            const combined = existingPaths.concat(newPaths);
+            setSelectedPaths(combined);
+            setStatusMap({});
+          }
+        } else {
+          // Clear state on cancellation to release memory
+          clearAllState();
         }
       } catch (error) {
         console.error("Failed to list files:", error);
-        alert(`Failed to list files: ${error}`);
+        // Check if it's a stack overflow or memory error
+        const errorStr = String(error);
+        if (
+          errorStr.includes("Maximum call stack") ||
+          errorStr.includes("memory")
+        ) {
+          alert(
+            `Failed to list files: The directory contains too many files. Try selecting a smaller folder or use the file remover to search for specific files.`
+          );
+          clearAllState();
+        } else {
+          alert(`Failed to list files: ${error}`);
+        }
       } finally {
         activeListOperationId = null;
         setIsScanning(false);
@@ -392,7 +498,7 @@ export default function BatchRenamer() {
           operationId,
           onProgress: progressChannel,
         });
-        
+
         activeRenameOperationId = null;
       } else {
         result = await invoke<string[]>("batch_rename", {
@@ -473,6 +579,30 @@ export default function BatchRenamer() {
     setStatusMap(newStatusMap);
   };
 
+  /**
+   * Cancels the active folder scan operation.
+   */
+  const handleCancelScan = () => {
+    if (activeListOperationId) {
+      invoke("cancel_operation", { operationId: activeListOperationId }).catch(
+        () => {}
+      );
+      activeListOperationId = null;
+    }
+  };
+
+  /**
+   * Cancels the active rename operation.
+   */
+  const handleCancelRename = () => {
+    if (activeRenameOperationId) {
+      invoke("cancel_operation", {
+        operationId: activeRenameOperationId,
+      }).catch(() => {});
+      activeRenameOperationId = null;
+    }
+  };
+
   // Helper function to get list progress label
   function getListProgressLabel(): string {
     const progress = listProgress();
@@ -541,6 +671,8 @@ export default function BatchRenamer() {
           onSelectFiles={selectFiles}
           onSelectFolders={selectFolders}
           onRename={handleRename}
+          onCancelScan={handleCancelScan}
+          onCancelRename={handleCancelRename}
           renameDisabledReason={renameDisabledReason()}
           filesToRenameCount={filesToRenameCount()}
           totalFilesCount={selectedPaths().length}

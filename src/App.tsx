@@ -32,7 +32,9 @@ function App() {
         onToolSelect={setActiveTool}
       />
       <main class="flex-1 overflow-auto">
-        <Switch fallback={<div class="p-8">Select a tool from the sidebar</div>}>
+        <Switch
+          fallback={<div class="p-8">Select a tool from the sidebar</div>}
+        >
           <Match when={activeTool() === "batch-renamer"}>
             <BatchRenamer />
           </Match>

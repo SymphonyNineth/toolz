@@ -1,12 +1,14 @@
 import { Component, Show } from "solid-js";
 import Button from "../ui/Button";
 import Tooltip from "../ui/Tooltip";
-import { FilesIcon, FolderOpenIcon, RefreshIcon } from "../ui/icons";
+import { FilesIcon, FolderOpenIcon, RefreshIcon, StopIcon } from "../ui/icons";
 
 interface ActionButtonsProps {
   onSelectFiles: () => void;
   onSelectFolders: () => void;
   onRename: () => void;
+  onCancelScan?: () => void;
+  onCancelRename?: () => void;
   renameDisabledReason?: string;
   filesToRenameCount?: number;
   totalFilesCount?: number;
@@ -57,36 +59,62 @@ const ActionButtons: Component<ActionButtonsProps> = (props) => {
           <FilesIcon size="sm" />
           Select Files
         </Button>
-        <Button
-          onClick={props.onSelectFolders}
-          variant="secondary"
-          class="gap-2"
-          disabled={isOperationInProgress()}
-          loading={props.isScanning}
-        >
-          <FolderOpenIcon size="sm" />
-          {props.isScanning ? "Scanning..." : "Select Folders"}
-        </Button>
-        <Tooltip
-          content={props.renameDisabledReason || ""}
-          show={!!props.renameDisabledReason && !isOperationInProgress()}
+        <Show
+          when={props.isScanning}
+          fallback={
+            <Button
+              onClick={props.onSelectFolders}
+              variant="secondary"
+              class="gap-2"
+              disabled={isOperationInProgress()}
+            >
+              <FolderOpenIcon size="sm" />
+              Select Folders
+            </Button>
+          }
         >
           <Button
-            onClick={props.onRename}
-            disabled={!!props.renameDisabledReason || isOperationInProgress()}
-            loading={props.isRenaming}
-            variant={isRenameReady() ? "success" : "primary"}
+            onClick={props.onCancelScan}
+            variant="warning"
             class="gap-2"
           >
-            <RefreshIcon size="sm" />
-            {props.isRenaming ? "Renaming..." : "Rename Files"}
-            <Show when={isRenameReady() && !props.isRenaming}>
-              <span class="badge badge-sm badge-neutral ml-1">
-                {props.filesToRenameCount}
-              </span>
-            </Show>
+            <StopIcon size="sm" />
+            Cancel Scan
           </Button>
-        </Tooltip>
+        </Show>
+        <Show
+          when={props.isRenaming}
+          fallback={
+            <Tooltip
+              content={props.renameDisabledReason || ""}
+              show={!!props.renameDisabledReason && !isOperationInProgress()}
+            >
+              <Button
+                onClick={props.onRename}
+                disabled={!!props.renameDisabledReason || isOperationInProgress()}
+                variant={isRenameReady() ? "success" : "primary"}
+                class="gap-2"
+              >
+                <RefreshIcon size="sm" />
+                Rename Files
+                <Show when={isRenameReady()}>
+                  <span class="badge badge-sm badge-neutral ml-1">
+                    {props.filesToRenameCount}
+                  </span>
+                </Show>
+              </Button>
+            </Tooltip>
+          }
+        >
+          <Button
+            onClick={props.onCancelRename}
+            variant="warning"
+            class="gap-2"
+          >
+            <StopIcon size="sm" />
+            Cancel Rename
+          </Button>
+        </Show>
       </div>
     </div>
   );

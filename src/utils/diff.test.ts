@@ -186,5 +186,102 @@ describe('computeDiff', () => {
       }
     });
   });
+
+  describe('Long String Handling', () => {
+    it('should handle very long strings without stack overflow', () => {
+      // Create strings longer than MAX_DIFF_LENGTH (500)
+      const original = 'prefix_' + 'a'.repeat(600) + '_suffix.txt';
+      const modified = 'prefix_' + 'b'.repeat(600) + '_suffix.txt';
+      
+      // This should not throw an error
+      const result = computeDiff(original, modified);
+      
+      // Should still produce valid segments
+      expect(result.length).toBeGreaterThan(0);
+      
+      // Reconstruct and verify
+      const reconstructedOriginal = result
+        .filter(s => s.type === 'unchanged' || s.type === 'removed')
+        .map(s => s.text)
+        .join('');
+      const reconstructedModified = result
+        .filter(s => s.type === 'unchanged' || s.type === 'added')
+        .map(s => s.text)
+        .join('');
+      
+      expect(reconstructedOriginal).toBe(original);
+      expect(reconstructedModified).toBe(modified);
+    });
+
+    it('should use simple diff for very long strings', () => {
+      // Create strings longer than MAX_DIFF_LENGTH
+      const original = 'start_' + 'x'.repeat(300) + '_end';
+      const modified = 'start_' + 'y'.repeat(300) + '_end';
+      
+      const result = computeDiff(original, modified);
+      
+      // Simple diff should find common prefix and suffix
+      const unchangedSegments = result.filter(s => s.type === 'unchanged');
+      expect(unchangedSegments.some(s => s.text.includes('start_'))).toBe(true);
+      expect(unchangedSegments.some(s => s.text.includes('_end'))).toBe(true);
+    });
+
+    it('should handle extremely long identical strings', () => {
+      const longString = 'a'.repeat(10000);
+      const result = computeDiff(longString, longString);
+      
+      expect(result).toEqual([{ type: 'unchanged', text: longString }]);
+    });
+
+    it('should handle long string with small change at start', () => {
+      const original = 'A' + 'x'.repeat(600);
+      const modified = 'B' + 'x'.repeat(600);
+      
+      const result = computeDiff(original, modified);
+      
+      // Should detect the change at the start
+      const removedSegment = result.find(s => s.type === 'removed');
+      const addedSegment = result.find(s => s.type === 'added');
+      
+      expect(removedSegment?.text).toBe('A');
+      expect(addedSegment?.text).toBe('B');
+    });
+
+    it('should handle long string with small change at end', () => {
+      const original = 'x'.repeat(600) + 'A';
+      const modified = 'x'.repeat(600) + 'B';
+      
+      const result = computeDiff(original, modified);
+      
+      // Should detect the change at the end
+      const removedSegment = result.find(s => s.type === 'removed');
+      const addedSegment = result.find(s => s.type === 'added');
+      
+      expect(removedSegment?.text).toBe('A');
+      expect(addedSegment?.text).toBe('B');
+    });
+
+    it('should handle long string with change in middle', () => {
+      const prefix = 'x'.repeat(200);
+      const suffix = 'y'.repeat(200);
+      const original = prefix + 'OLD' + suffix;
+      const modified = prefix + 'NEW' + suffix;
+      
+      const result = computeDiff(original, modified);
+      
+      // Should produce valid output
+      const reconstructedOriginal = result
+        .filter(s => s.type === 'unchanged' || s.type === 'removed')
+        .map(s => s.text)
+        .join('');
+      const reconstructedModified = result
+        .filter(s => s.type === 'unchanged' || s.type === 'added')
+        .map(s => s.text)
+        .join('');
+      
+      expect(reconstructedOriginal).toBe(original);
+      expect(reconstructedModified).toBe(modified);
+    });
+  });
 });
 

@@ -1,5 +1,12 @@
-import { createSignal, createMemo, onMount, onCleanup, Show } from "solid-js";
-import { open } from "@tauri-apps/plugin-dialog";
+import {
+  createSignal,
+  createMemo,
+  onMount,
+  onCleanup,
+  Show,
+  batch,
+} from "solid-js";
+import { open, confirm } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { nanoid } from "nanoid";
 import PatternControls from "./PatternControls";
@@ -19,6 +26,17 @@ import {
 } from "./types";
 import { validatePattern, checkDangerousOperation } from "./utils";
 import Header from "../ui/Header";
+
+/**
+ * Maximum recommended match count before showing a warning.
+ * Beyond this, performance may degrade significantly.
+ */
+const MAX_RECOMMENDED_MATCHES = 10000;
+
+/**
+ * Absolute maximum match count to prevent memory exhaustion.
+ */
+const ABSOLUTE_MAX_MATCHES = 5_000_000;
 
 // localStorage keys for preferences
 const STORAGE_KEYS = {
@@ -66,6 +84,18 @@ export default function FileRemover() {
   let activeSearchOperationId: string | null = null;
   let activeDeleteOperationId: string | null = null;
 
+  /**
+   * Clears all file-related state to release memory.
+   * Called on cancellation and component unmount.
+   */
+  const clearFileState = () => {
+    batch(() => {
+      setFiles([]);
+      setSearchProgress({ phase: "idle", filesFound: 0 });
+      setDeleteProgress(null);
+    });
+  };
+
   // Cancel any active operations when component unmounts
   onCleanup(() => {
     if (activeSearchOperationId) {
@@ -78,6 +108,8 @@ export default function FileRemover() {
         operationId: activeDeleteOperationId,
       }).catch(() => {});
     }
+    // Clear state to release memory
+    clearFileState();
   });
 
   // Computed
@@ -238,6 +270,29 @@ export default function FileRemover() {
 
       // Only update files if not cancelled
       if (!wasCancelled) {
+        // Check if we have too many results
+        if (results.length > ABSOLUTE_MAX_MATCHES) {
+          const shouldContinue = await confirm(
+            `Found ${results.length.toLocaleString()} matching files, which exceeds the maximum of ${ABSOLUTE_MAX_MATCHES.toLocaleString()}. Only the first ${ABSOLUTE_MAX_MATCHES.toLocaleString()} files will be shown. Consider using a more specific pattern.`,
+            { title: "Too Many Matches", kind: "warning" }
+          );
+          if (!shouldContinue) {
+            clearFileState();
+            return;
+          }
+          // Limit results to prevent memory issues
+          results.length = ABSOLUTE_MAX_MATCHES;
+        } else if (results.length > MAX_RECOMMENDED_MATCHES) {
+          const shouldContinue = await confirm(
+            `Found ${results.length.toLocaleString()} matching files. Loading this many files may cause performance issues. Continue?`,
+            { title: "Large Result Set Warning", kind: "warning" }
+          );
+          if (!shouldContinue) {
+            clearFileState();
+            return;
+          }
+        }
+
         setFiles(
           results.map((r) => ({
             path: r.path,
@@ -248,10 +303,25 @@ export default function FileRemover() {
             selected: true,
           }))
         );
+      } else {
+        // Clear state on cancellation to release memory
+        clearFileState();
       }
     } catch (error) {
-      setPatternError(String(error));
-      setFiles([]);
+      const errorStr = String(error);
+      // Check if it's a stack overflow or memory error
+      if (
+        errorStr.includes("Maximum call stack") ||
+        errorStr.includes("memory")
+      ) {
+        setPatternError(
+          "The search returned too many files. Try a more specific pattern or search a smaller directory."
+        );
+        clearFileState();
+      } else {
+        setPatternError(errorStr);
+        setFiles([]);
+      }
     } finally {
       activeSearchOperationId = null;
       setIsSearching(false);
@@ -261,6 +331,18 @@ export default function FileRemover() {
       }, 500);
     }
   }
+
+  /**
+   * Cancels the active search operation.
+   */
+  const handleCancelSearch = () => {
+    if (activeSearchOperationId) {
+      invoke("cancel_operation", {
+        operationId: activeSearchOperationId,
+      }).catch(() => {});
+      activeSearchOperationId = null;
+    }
+  };
 
   function toggleSelect(path: string) {
     setFiles((prev) =>
@@ -426,6 +508,7 @@ export default function FileRemover() {
             basePath={basePath()}
             onSelectFolder={selectFolder}
             onSearch={searchFiles}
+            onCancelSearch={handleCancelSearch}
             isSearching={isSearching()}
             canSearch={canSearch()}
           />

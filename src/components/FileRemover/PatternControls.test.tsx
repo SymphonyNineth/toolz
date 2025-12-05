@@ -306,12 +306,8 @@ describe("PatternControls", () => {
       expect(searchBtn).not.toBeDisabled();
     });
 
-    it("shows loading state on Search button when searching", () => {
-      render(() => <PatternControls {...defaultProps} isSearching={true} canSearch={true} />);
-
-      const searchBtn = screen.getByText("Search").closest("button");
-      expect(searchBtn).toHaveClass("loading");
-    });
+    // Note: When searching, the Cancel button is shown instead of Search button
+    // The loading/cancel behavior is tested in "Cancel Search Button" describe block
 
     it("shows warning when pattern entered but no folder selected", () => {
       render(() => (
@@ -333,6 +329,61 @@ describe("PatternControls", () => {
       render(() => <PatternControls {...defaultProps} patternType="simple" />);
 
       expect(screen.queryByText("Regex Quick Reference")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Cancel Search Button", () => {
+    it("shows Cancel button when searching", () => {
+      render(() => (
+        <PatternControls {...defaultProps} isSearching={true} canSearch={true} />
+      ));
+
+      expect(screen.getByText("Cancel")).toBeInTheDocument();
+      expect(screen.queryByText("Search")).not.toBeInTheDocument();
+    });
+
+    it("calls onCancelSearch when Cancel is clicked", async () => {
+      const onCancelSearch = vi.fn();
+      render(() => (
+        <PatternControls
+          {...defaultProps}
+          isSearching={true}
+          canSearch={true}
+          onCancelSearch={onCancelSearch}
+        />
+      ));
+
+      const cancelBtn = screen.getByText("Cancel").closest("button");
+      await fireEvent.click(cancelBtn!);
+
+      expect(onCancelSearch).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows Search button when not searching", () => {
+      render(() => (
+        <PatternControls {...defaultProps} isSearching={false} canSearch={true} />
+      ));
+
+      expect(screen.getByText("Search")).toBeInTheDocument();
+      expect(screen.queryByText("Cancel")).not.toBeInTheDocument();
+    });
+
+    it("disables pattern input when searching", () => {
+      render(() => (
+        <PatternControls {...defaultProps} isSearching={true} canSearch={true} />
+      ));
+
+      const input = screen.getByPlaceholderText("Enter text to match in file names...");
+      expect(input).toBeDisabled();
+    });
+
+    it("shows warning variant for cancel button", () => {
+      render(() => (
+        <PatternControls {...defaultProps} isSearching={true} canSearch={true} />
+      ));
+
+      const cancelBtn = screen.getByText("Cancel").closest("button");
+      expect(cancelBtn).toHaveClass("btn-warning");
     });
   });
 });
