@@ -4,7 +4,7 @@ This document tracks the implementation of the backend diffing refactor for the 
 
 > [!NOTE]
 > All backend changes should be verified with `cargo test`.
-> All frontend changes should be verified with `npm test`.
+> All frontend changes should be verified with `bun run test --run`.
 
 ## Phase 1: Backend Infrastructure & Core Logic
 

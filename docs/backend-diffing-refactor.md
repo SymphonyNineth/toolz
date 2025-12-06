@@ -345,7 +345,7 @@ pub fn get_remover_results(
 cd src-tauri && cargo test diff::tests
 
 # Frontend tests  
-npm test
+bun run test --run
 
 # Manual: Select folder, test both modes
 # 1. Simple find/replace → verify diff highlighting
