@@ -10,10 +10,18 @@ export interface DiffSegment {
   text: string;
 }
 
-/** Regex segment - either plain text or a capture group */
-export type RegexSegment =
-  | { type: "text"; content: string }
-  | { type: "group"; id: number; content: string };
+/**
+ * Regex segment - matches backend `RegexSegment` enum (serde rename_all + tag/content)
+ * Text variant uses `value` while capture groups use `id` + `text`.
+ */
+
+export type RegexSegmentText = { type: "text"; value: string };
+export type RegexSegmentGroup = { type: "group"; id: number; text: string };
+export type RegexSegment = RegexSegmentText | RegexSegmentGroup;
+
+export function isRegexSegmentGroup(segment: RegexSegment): segment is RegexSegmentGroup {
+  return segment.type === "group";
+}
 
 /** Options for computing file rename previews */
 export interface DiffOptions {

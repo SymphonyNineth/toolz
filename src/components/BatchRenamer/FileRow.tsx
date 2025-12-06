@@ -3,8 +3,9 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import StatusIcon from "./StatusIcon";
 import Checkbox from "../ui/Checkbox";
 import { FolderIcon, WarningIcon } from "../ui/icons";
-import { DiffSegment, FileRowData } from "./types";
+import { DiffSegment, FileRowData, RegexSegment } from "./types";
 import OriginalNameWithDiff from "../FileRow/OriginalNameWithDiff";
+import OriginalNameWithRegex from "../FileRow/OriginalNameWithRegex";
 import NewNameWithDiff from "../FileRow/NewNameWithDiff";
 import NumberedFileName from "../FileRow/NumberedFileName";
 
@@ -56,7 +57,12 @@ const FileRow: Component<FileRowProps> = (props) => {
             when={props.file.originalSegments && props.file.originalSegments.length > 0}
             fallback={<span class="font-mono text-sm">{props.file.name}</span>}
           >
-            <OriginalNameWithDiff segments={props.file.originalSegments as DiffSegment[]} />
+            <Show
+              when={props.file.previewType === "regexGroups"}
+              fallback={<OriginalNameWithDiff segments={props.file.originalSegments as DiffSegment[]} />}
+            >
+              <OriginalNameWithRegex segments={props.file.originalSegments as RegexSegment[]} />
+            </Show>
           </Show>
         </div>
       </td>

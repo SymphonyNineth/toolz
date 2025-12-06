@@ -1,13 +1,26 @@
 import { defineConfig } from "vitest/config";
 import solid from "vite-plugin-solid";
-import tailwindcss from '@tailwindcss/vite'
-import path from "path"
+import tailwindcss from "@tailwindcss/vite";
+import devtools from "solid-devtools/vite";
+import { TargetIDE } from "@solid-devtools/debugger/types";
 
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  plugins: [tailwindcss() as any, solid()],
+  plugins: [
+    tailwindcss() as any,
+    devtools({
+      autoname: true,
+      locator: {
+        targetIDE: "cursor" as TargetIDE,
+        componentLocation: true,
+        jsxLocation: true,
+      },
+    }),
+
+    solid(),
+  ],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
@@ -31,9 +44,9 @@ export default defineConfig(async () => ({
     },
   },
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true, // allows using describe, it, expect without importing
-    setupFiles: ['./src/setupTests.ts'],
+    setupFiles: ["./src/setupTests.ts"],
     // Critical for SolidJS: ensures reactivity works in tests
     server: {
       deps: {
@@ -46,6 +59,6 @@ export default defineConfig(async () => ({
     },
   },
   resolve: {
-    conditions: ['development', 'browser'],
+    conditions: ["development", "browser"],
   },
 }));

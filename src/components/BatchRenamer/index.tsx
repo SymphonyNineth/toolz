@@ -37,7 +37,8 @@ const MAX_RECOMMENDED_FILES = 10000;
 const ABSOLUTE_MAX_FILES = 1_000_000;
 
 export default function BatchRenamer() {
-  const [selectedPaths, setSelectedPaths] = createSignal<string[]>([]);
+  // Backend-managed files currently loaded into the session
+  const [filePaths, setFilePaths] = createSignal<string[]>([]);
   const [findText, setFindText] = createSignal("");
   const [replaceText, setReplaceText] = createSignal("");
   const [caseSensitive, setCaseSensitive] = createSignal(false);
@@ -74,8 +75,7 @@ export default function BatchRenamer() {
 
   // Compute previews from backend when inputs change
   createEffect(() => {
-    // Access all reactive dependencies
-    const files = selectedPaths();
+    const files = filePaths();
     const find = findText();
     const replace = replaceText();
     const caseSens = caseSensitive();
@@ -83,13 +83,11 @@ export default function BatchRenamer() {
     const firstOnly = replaceFirstOnly();
     const inclExt = includeExt();
 
-    // Skip if no files loaded
     if (files.length === 0) {
       setFilePreviews([]);
       return;
     }
 
-    // Build options matching DiffOptions type
     const options: DiffOptions = {
       find,
       replace,
@@ -99,21 +97,13 @@ export default function BatchRenamer() {
       includeExt: inclExt,
     };
 
-    // Call backend to compute previews with file paths
-    console.log("[DEBUG] Calling compute_previews with", files.length, "files");
     invoke<FilePreviewResult[]>("compute_previews", { files, options })
       .then((results) => {
-        // console.log("[DEBUG] compute_previews returned", results.length, "results");
-        // console.log("[DEBUG] Raw results:", JSON.stringify(results, null, 2));
-        // console.log("[DEBUG] First result keys:", Object.keys(results[0]));
-        console.log("[DEBUG] Options:", options);
-        console.log("[DEBUG] First result:", results?.[0]);
         setFilePreviews(results);
         setRegexError(undefined);
       })
       .catch((error) => {
         console.error("[DEBUG] Failed to compute previews:", error);
-        // Handle regex errors
         if (regex && String(error).includes("regex")) {
           setRegexError(String(error));
         }
@@ -132,7 +122,7 @@ export default function BatchRenamer() {
    */
   const clearAllState = () => {
     batch(() => {
-      setSelectedPaths([]);
+      setFilePaths([]);
       setStatusMap({});
       setListProgress({ phase: "idle", filesFound: 0 });
       setRenameProgress({ phase: "idle", current: 0, total: 0 });
@@ -228,9 +218,9 @@ export default function BatchRenamer() {
 
     if (selected) {
       const newPaths = Array.isArray(selected) ? selected : [selected];
-      const allPaths = [...selectedPaths(), ...newPaths];
+      const allPaths = [...filePaths(), ...newPaths];
       const uniquePaths = Array.from(new Set(allPaths));
-      setSelectedPaths(uniquePaths);
+      setFilePaths(uniquePaths);
       setStatusMap({});
     }
   }
@@ -329,7 +319,7 @@ export default function BatchRenamer() {
         // Only update if not cancelled
         if (!wasCancelled) {
           // Check if we're adding a lot of files and warn the user
-          const existingCount = selectedPaths().length;
+          const existingCount = filePaths().length;
           const newTotal = existingCount + allFiles.length;
 
           if (
@@ -347,14 +337,7 @@ export default function BatchRenamer() {
             }
           }
 
-          setListProgress({
-            phase: "completed",
-            filesFound: allFiles.length,
-            totalFiles: allFiles.length,
-          });
-
-          // Use more efficient deduplication for large arrays
-          const existingPaths = selectedPaths();
+          const existingPaths = filePaths();
           const existingSet = new Set(existingPaths);
           const newPaths: string[] = [];
 
@@ -367,11 +350,17 @@ export default function BatchRenamer() {
 
           // Only update if we have new files
           if (newPaths.length > 0) {
-            // Concatenate arrays efficiently
             const combined = existingPaths.concat(newPaths);
-            setSelectedPaths(combined);
+            setFilePaths(combined);
             setStatusMap({});
           }
+
+          const finalCount = (existingPaths.length + newPaths.length);
+          setListProgress({
+            phase: "completed",
+            filesFound: finalCount,
+            totalFiles: finalCount,
+          });
         } else {
           // Clear state on cancellation to release memory
           clearAllState();
@@ -488,7 +477,7 @@ export default function BatchRenamer() {
         const newPathsMap = new Map(filesToRename);
         const newStatusMap: Record<string, "idle" | "success" | "error"> = {};
 
-        const updatedPaths = selectedPaths().map((path) => {
+        const updatedPaths = filePaths().map((path) => {
           const newPath = newPathsMap.get(path);
           if (newPath) {
             newStatusMap[newPath] = "success";
@@ -497,7 +486,7 @@ export default function BatchRenamer() {
           return path;
         });
 
-        setSelectedPaths(updatedPaths);
+        setFilePaths(updatedPaths);
         setStatusMap(newStatusMap);
       }
     } catch (error) {
@@ -544,8 +533,8 @@ export default function BatchRenamer() {
 
   const handleRemoveFiles = (pathsToRemove: string[]) => {
     const pathsSet = new Set(pathsToRemove);
-    const newPaths = selectedPaths().filter((path) => !pathsSet.has(path));
-    setSelectedPaths(newPaths);
+    const newPaths = filePaths().filter((path) => !pathsSet.has(path));
+    setFilePaths(newPaths);
 
     const newStatusMap = { ...statusMap() };
     pathsToRemove.forEach((path) => {
@@ -649,7 +638,7 @@ export default function BatchRenamer() {
           onCancelRename={handleCancelRename}
           renameDisabledReason={renameDisabledReason()}
           filesToRenameCount={filesToRenameCount()}
-          totalFilesCount={selectedPaths().length}
+          totalFilesCount={filePaths().length}
           isScanning={isScanning()}
           isRenaming={isRenaming()}
         />

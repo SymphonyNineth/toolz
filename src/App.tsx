@@ -4,6 +4,12 @@ import BatchRenamer from "./components/BatchRenamer";
 import FileRemover from "./components/FileRemover";
 import Sidebar, { ToolItem } from "./components/ui/Sidebar";
 import { RenameIcon, TrashIcon } from "./components/ui/icons";
+import "solid-devtools";
+import { attachDevtoolsOverlay } from "@solid-devtools/overlay";
+
+attachDevtoolsOverlay({
+  noPadding: true,
+});
 
 // Define available tools
 const tools: ToolItem[] = [
