@@ -1,3 +1,51 @@
+// ==================== Backend Preview Types ====================
+// These match the backend Rust types from rename.rs, serialized with camelCase
+
+/** Segment type for text diffs */
+export type DiffSegmentType = "added" | "removed" | "unchanged";
+
+/** A single segment in a diff result */
+export interface DiffSegment {
+  segmentType: DiffSegmentType;
+  text: string;
+}
+
+/** Regex segment - either plain text or a capture group */
+export type RegexSegment =
+  | { type: "text"; content: string }
+  | { type: "group"; id: number; content: string };
+
+/** Options for computing file rename previews */
+export interface DiffOptions {
+  find: string;
+  replace: string;
+  caseSensitive: boolean;
+  regexMode: boolean;
+  replaceFirstOnly: boolean;
+  includeExt: boolean;
+}
+
+/** Result of computing a file preview - either standard diff or regex groups */
+export type FilePreviewResult =
+  | {
+    type: "diff";
+    path: string;
+    name: string;
+    newName: string;
+    originalSegments: DiffSegment[];
+    modifiedSegments: DiffSegment[];
+    hasCollision: boolean;
+  }
+  | {
+    type: "regexGroups";
+    path: string;
+    name: string;
+    newName: string;
+    originalSegments: RegexSegment[];
+    modifiedSegments: DiffSegment[];
+    hasCollision: boolean;
+  };
+
 // ==================== Streaming Progress Types ====================
 // These match the backend Rust enum variants serialized with camelCase
 

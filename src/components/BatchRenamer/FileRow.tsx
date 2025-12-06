@@ -1,12 +1,10 @@
 import { Component, Show, For, createMemo } from "solid-js";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import DiffText from "./DiffText";
-import RegexHighlightText from "./RegexHighlightText";
 import StatusIcon from "./StatusIcon";
 import Checkbox from "../ui/Checkbox";
 import { FolderIcon, WarningIcon } from "../ui/icons";
-import { RegexMatch, NumberingInfo } from "./renamingUtils";
-import { computeDiff, DiffSegment } from "../../utils/diff";
+import { NumberingInfo } from "./renamingUtils";
+import { DiffSegment, RegexSegment } from "./types";
 
 export interface FileRowData {
   path: string;
@@ -16,9 +14,13 @@ export interface FileRowData {
   nameAfterReplace?: string;
   status: "idle" | "success" | "error";
   hasCollision?: boolean;
-  regexMatches?: RegexMatch[];
-  newNameRegexMatches?: RegexMatch[];
   numberingInfo?: NumberingInfo;
+  /** Backend-computed segments for original name (diff or regex highlights) */
+  originalSegments?: DiffSegment[] | RegexSegment[];
+  /** Backend-computed segments for modified name (always DiffSegment) */
+  modifiedSegments?: DiffSegment[];
+  /** Type of preview: "diff" or "regexGroups" */
+  previewType?: "diff" | "regexGroups";
 }
 
 interface FileRowProps {
@@ -61,31 +63,57 @@ const ColoredNumber: Component<ColoredNumberProps> = (props) => {
   );
 };
 
-/** Helper component to render text with diff highlighting (only "added" shown in green) */
-interface DiffHighlightedTextProps {
-  original: string;
-  modified: string;
+/** Helper component to render original name with "removed" parts highlighted in red */
+interface OriginalNameWithDiffProps {
+  segments: DiffSegment[];
 }
 
-const DiffHighlightedText: Component<DiffHighlightedTextProps> = (props) => {
-  const segments = () => computeDiff(props.original, props.modified);
-
+const OriginalNameWithDiff: Component<OriginalNameWithDiffProps> = (props) => {
   return (
-    <For each={segments()}>
-      {(segment: DiffSegment) => {
-        if (segment.type === "added") {
-          return (
-            <span class="bg-success/20 text-success font-semibold">
-              {segment.text}
-            </span>
-          );
-        } else if (segment.type === "unchanged") {
-          return <span>{segment.text}</span>;
-        }
-        // Don't show 'removed' segments in the new name
-        return null;
-      }}
-    </For>
+    <span class="font-mono text-sm">
+      <For each={props.segments}>
+        {(segment: DiffSegment) => {
+          if (segment.segmentType === "removed") {
+            return (
+              <span class="bg-error/20 text-error line-through">
+                {segment.text}
+              </span>
+            );
+          } else if (segment.segmentType === "unchanged") {
+            return <span>{segment.text}</span>;
+          }
+          // Don't show 'added' segments in the original name
+          return null;
+        }}
+      </For>
+    </span>
+  );
+};
+
+/** Helper component to render new name with "added" parts highlighted in green */
+interface NewNameWithDiffProps {
+  segments: DiffSegment[];
+}
+
+const NewNameWithDiff: Component<NewNameWithDiffProps> = (props) => {
+  return (
+    <span class="font-mono text-sm">
+      <For each={props.segments}>
+        {(segment: DiffSegment) => {
+          if (segment.segmentType === "added") {
+            return (
+              <span class="bg-success/20 text-success font-semibold">
+                {segment.text}
+              </span>
+            );
+          } else if (segment.segmentType === "unchanged") {
+            return <span>{segment.text}</span>;
+          }
+          // Don't show 'removed' segments in the new name
+          return null;
+        }}
+      </For>
+    </span>
   );
 };
 
@@ -213,10 +241,7 @@ const NumberedFileName: Component<NumberedFileNameProps> = (props) => {
   return (
     <span class="font-mono text-sm">
       <Show when={parts().textBefore}>
-        <DiffHighlightedText
-          original={originalParts().originalBefore}
-          modified={parts().textBefore}
-        />
+        <span>{parts().textBefore}</span>
       </Show>
       <Show
         when={props.numberingInfo.position !== "start" && parts().textBefore}
@@ -233,10 +258,7 @@ const NumberedFileName: Component<NumberedFileNameProps> = (props) => {
         <span class="seq-separator">{props.numberingInfo.separator}</span>
       </Show>
       <Show when={parts().textAfter}>
-        <DiffHighlightedText
-          original={originalParts().originalAfter}
-          modified={parts().textAfter}
-        />
+        <span>{parts().textAfter}</span>
       </Show>
       <span>{parts().extension}</span>
     </span>
@@ -281,19 +303,12 @@ const FileRow: Component<FileRowProps> = (props) => {
       </td>
       <td class="truncate max-w-lg" title={props.file.path}>
         <div class="flex flex-col gap-1">
-          {props.file.regexMatches && props.file.regexMatches.length > 0 ? (
-            <RegexHighlightText
-              text={props.file.name}
-              matches={props.file.regexMatches}
-              mode="original"
-            />
-          ) : (
-            <DiffText
-              original={props.file.name}
-              modified={props.file.newName}
-              mode="original"
-            />
-          )}
+          <Show
+            when={props.file.originalSegments && props.file.originalSegments.length > 0}
+            fallback={<span class="font-mono text-sm">{props.file.name}</span>}
+          >
+            <OriginalNameWithDiff segments={props.file.originalSegments as DiffSegment[]} />
+          </Show>
         </div>
       </td>
       <td class="truncate max-w-lg flex items-center gap-2">
@@ -309,18 +324,13 @@ const FileRow: Component<FileRowProps> = (props) => {
               newName={props.file.newName}
               numberingInfo={props.file.numberingInfo}
             />
-          ) : props.file.newNameRegexMatches ? (
-            <RegexHighlightText
-              text={props.file.newName}
-              matches={props.file.newNameRegexMatches}
-              mode="modified"
-            />
           ) : (
-            <DiffText
-              original={props.file.name}
-              modified={props.file.newName}
-              mode="modified"
-            />
+            <Show
+              when={props.file.modifiedSegments && props.file.modifiedSegments.length > 0}
+              fallback={<span class="font-mono text-sm">{props.file.newName || props.file.name}</span>}
+            >
+              <NewNameWithDiff segments={props.file.modifiedSegments as DiffSegment[]} />
+            </Show>
           )}
         </span>
         {props.file.hasCollision && (

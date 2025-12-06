@@ -1,4 +1,4 @@
-import { createSignal, createMemo, Show, onCleanup, batch } from "solid-js";
+import { createSignal, createMemo, createEffect, Show, onCleanup, batch } from "solid-js";
 import { open, confirm } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { nanoid } from "nanoid";
@@ -9,20 +9,19 @@ import Header from "../ui/Header";
 import ActionButtons from "./ActionButtons";
 import ProgressBar from "../ui/ProgressBar";
 import {
-  calculateNewName,
-  getRegexMatches,
-  getReplacementSegments,
   applyNumbering,
   getNumberingInfo,
   NumberingOptions,
   DEFAULT_NUMBERING_OPTIONS,
 } from "./renamingUtils";
-import { getFileName, getDirectory, joinPath } from "../../utils/path";
+import { getDirectory, joinPath } from "../../utils/path";
 import {
   ListProgressEvent,
   ListProgressState,
   RenameProgressEvent,
   RenameProgressState,
+  FilePreviewResult,
+  DiffOptions,
 } from "./types";
 
 /**
@@ -70,6 +69,60 @@ export default function BatchRenamer() {
     }
   );
 
+  // Backend file previews - computed by backend compute_previews command
+  const [filePreviews, setFilePreviews] = createSignal<FilePreviewResult[]>([]);
+
+  // Compute previews from backend when inputs change
+  createEffect(() => {
+    // Access all reactive dependencies
+    const files = selectedPaths();
+    const find = findText();
+    const replace = replaceText();
+    const caseSens = caseSensitive();
+    const regex = regexMode();
+    const firstOnly = replaceFirstOnly();
+    const inclExt = includeExt();
+
+    // Skip if no files loaded
+    if (files.length === 0) {
+      setFilePreviews([]);
+      return;
+    }
+
+    // Build options matching DiffOptions type
+    const options: DiffOptions = {
+      find,
+      replace,
+      caseSensitive: caseSens,
+      regexMode: regex,
+      replaceFirstOnly: firstOnly,
+      includeExt: inclExt,
+    };
+
+    // Call backend to compute previews with file paths
+    console.log("[DEBUG] Calling compute_previews with", files.length, "files");
+    invoke<FilePreviewResult[]>("compute_previews", { files, options })
+      .then((results) => {
+        console.log("[DEBUG] compute_previews returned", results.length, "results");
+        console.log("[DEBUG] Raw results:", JSON.stringify(results, null, 2));
+        if (results.length > 0) {
+          console.log("[DEBUG] First result keys:", Object.keys(results[0]));
+          console.log("[DEBUG] First result:", results[0]);
+        }
+        setFilePreviews(results);
+        setRegexError(undefined);
+      })
+      .catch((error) => {
+        console.error("[DEBUG] Failed to compute previews:", error);
+        // Handle regex errors
+        if (regex && String(error).includes("regex")) {
+          setRegexError(String(error));
+        }
+        setFilePreviews([]);
+      });
+  });
+
+
   // Track active operation IDs for cancellation
   let activeListOperationId: string | null = null;
   let activeRenameOperationId: string | null = null;
@@ -91,13 +144,13 @@ export default function BatchRenamer() {
   onCleanup(() => {
     if (activeListOperationId) {
       invoke("cancel_operation", { operationId: activeListOperationId }).catch(
-        () => {}
+        () => { }
       );
     }
     if (activeRenameOperationId) {
       invoke("cancel_operation", {
         operationId: activeRenameOperationId,
-      }).catch(() => {});
+      }).catch(() => { });
     }
     // Clear state to release memory
     clearAllState();
@@ -142,106 +195,29 @@ export default function BatchRenamer() {
   };
 
   const fileItems = createMemo(() => {
-    const paths = selectedPaths();
+    const previews = filePreviews();
     const currentStatus = statusMap();
     const numOptions = numberingOptions();
 
-    // First pass: calculate new names
-    const items = paths.map((path, index) => {
-      const name = getFileName(path);
-      let newName = name;
-
-      const result = calculateNewName(
-        name,
-        findText(),
-        replaceText(),
-        caseSensitive(),
-        regexMode(),
-        replaceFirstOnly(),
-        includeExt()
-      );
-
-      newName = result.newName;
-
-      if (result.error) {
-        if (regexMode()) {
-          setRegexError(result.error);
-        }
-        console.error("Renaming error", result.error);
-      } else if (regexMode()) {
-        setRegexError(undefined);
-      }
-
-      // Store name after find/replace (before numbering) for diff display
-      const nameAfterReplace = newName;
-
-      // Get numbering info before applying (for color-coded preview)
-      const numberingInfo = getNumberingInfo(newName, index, numOptions);
-
-      // Apply numbering after find/replace
-      newName = applyNumbering(newName, index, numOptions);
-
-      let regexMatches;
-      let newNameRegexMatches;
-      if (!result.error && regexMode() && findText()) {
-        try {
-          const flags = caseSensitive()
-            ? replaceFirstOnly()
-              ? ""
-              : "g"
-            : replaceFirstOnly()
-            ? "i"
-            : "gi";
-          const regex = new RegExp(findText(), flags);
-
-          let targetText = name;
-          if (!includeExt()) {
-            const lastDotIndex = name.lastIndexOf(".");
-            if (lastDotIndex > 0) {
-              targetText = name.substring(0, lastDotIndex);
-            }
-          }
-
-          regexMatches = getRegexMatches(targetText, regex);
-
-          const replacementResult = getReplacementSegments(
-            targetText,
-            regex,
-            replaceText()
-          );
-          newNameRegexMatches = replacementResult.segments;
-        } catch {
-          // Ignore errors, they are handled above
-        }
-      }
+    // Merge backend previews with numbering and status
+    return previews.map((preview, index) => {
+      // Apply numbering after backend find/replace
+      const numberingInfo = getNumberingInfo(preview.newName, index, numOptions);
+      const finalNewName = applyNumbering(preview.newName, index, numOptions);
 
       return {
-        path,
-        name,
-        newName,
-        nameAfterReplace,
-        regexMatches,
-        newNameRegexMatches,
+        path: preview.path,
+        name: preview.name,
+        newName: finalNewName,
+        nameAfterReplace: preview.newName,
+        status: currentStatus[preview.path] || "idle",
+        hasCollision: preview.hasCollision,
         numberingInfo,
-      };
-    });
-
-    // Check for collisions
-    const newNameCounts = new Map<string, number>();
-    items.forEach((item) => {
-      const fullNewPath = item.path.replace(item.name, item.newName);
-      newNameCounts.set(fullNewPath, (newNameCounts.get(fullNewPath) || 0) + 1);
-    });
-
-    return items.map((item) => {
-      const fullNewPath = item.path.replace(item.name, item.newName);
-      const hasCollision = newNameCounts.get(fullNewPath)! > 1;
-
-      return {
-        ...item,
-        status: currentStatus[item.path] || "idle",
-        hasCollision,
-      } as FileItem & { hasCollision: boolean };
+        // Pass backend segments for rendering
+        originalSegments: preview.originalSegments,
+        modifiedSegments: preview.modifiedSegments,
+        previewType: preview.type,
+      } as FileItem;
     });
   });
 
@@ -300,7 +276,7 @@ export default function BatchRenamer() {
                 if (currentTotal > ABSOLUTE_MAX_FILES && !hitFileLimit) {
                   hitFileLimit = true;
                   // Cancel the operation if we hit the absolute limit
-                  invoke("cancel_operation", { operationId }).catch(() => {});
+                  invoke("cancel_operation", { operationId }).catch(() => { });
                 }
                 break;
               }
@@ -585,7 +561,7 @@ export default function BatchRenamer() {
   const handleCancelScan = () => {
     if (activeListOperationId) {
       invoke("cancel_operation", { operationId: activeListOperationId }).catch(
-        () => {}
+        () => { }
       );
       activeListOperationId = null;
     }
@@ -598,7 +574,7 @@ export default function BatchRenamer() {
     if (activeRenameOperationId) {
       invoke("cancel_operation", {
         operationId: activeRenameOperationId,
-      }).catch(() => {});
+      }).catch(() => { });
       activeRenameOperationId = null;
     }
   };
@@ -615,10 +591,9 @@ export default function BatchRenamer() {
         }
         return `Scanning directories... (${progress.filesFound.toLocaleString()} files found)`;
       case "completed":
-        return `Found ${
-          progress.totalFiles?.toLocaleString() ??
+        return `Found ${progress.totalFiles?.toLocaleString() ??
           progress.filesFound.toLocaleString()
-        } files`;
+          } files`;
       default:
         return "";
     }

@@ -27,8 +27,36 @@ describe("BatchRenamer", () => {
     const mockOpen = vi.mocked(dialog.open);
     mockOpen.mockResolvedValue(["/path/to/file1.txt", "/path/to/file2.txt"]);
 
-    // Mock rename invoke
-    mockInvoke.mockResolvedValue(["file1_new.txt", "file2.txt"]);
+    // Mock invoke calls - compute_previews and batch_rename
+    mockInvoke.mockImplementation((cmd: string, args?: Record<string, unknown>) => {
+      if (cmd === "compute_previews") {
+        // Return preview results matching the stored file paths
+        return Promise.resolve([
+          {
+            type: "diff",
+            path: "/path/to/file1.txt",
+            name: "file1.txt",
+            newName: "test1.txt",
+            originalSegments: [{ segmentType: "unchanged", text: "file1.txt" }],
+            modifiedSegments: [{ segmentType: "unchanged", text: "test1.txt" }],
+            hasCollision: false,
+          },
+          {
+            type: "diff",
+            path: "/path/to/file2.txt",
+            name: "file2.txt",
+            newName: "test2.txt",
+            originalSegments: [{ segmentType: "unchanged", text: "file2.txt" }],
+            modifiedSegments: [{ segmentType: "unchanged", text: "test2.txt" }],
+            hasCollision: false,
+          },
+        ]);
+      }
+      if (cmd === "batch_rename") {
+        return Promise.resolve(["/path/to/test1.txt", "/path/to/test2.txt"]);
+      }
+      return Promise.resolve([]);
+    });
 
     render(() => <BatchRenamer />);
 

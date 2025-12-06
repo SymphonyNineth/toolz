@@ -120,7 +120,11 @@ pub struct DiffOptions {
 
 /// Result of computing a file preview - either standard diff or regex groups.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase", tag = "type")]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum FilePreviewResult {
     /// Standard diff mode - show added/removed/unchanged segments
     Diff {
@@ -476,14 +480,13 @@ pub async fn list_files_with_progress(
     result
 }
 
-/// Computes rename previews for all files stored in FileState.
+/// Computes rename previews for provided files.
 ///
 /// Returns diff segments or regex group highlights based on the options.
-/// Uses the files previously stored by `list_files_with_progress`.
 ///
 /// # Arguments
 ///
-/// * `file_state` - The file state containing files to preview
+/// * `files` - List of file paths to compute previews for
 /// * `options` - Options controlling the search/replace behavior
 ///
 /// # Returns
@@ -491,11 +494,9 @@ pub async fn list_files_with_progress(
 /// A vector of `FilePreviewResult` for each file with computed diffs/highlights.
 #[tauri::command]
 pub fn compute_previews(
-    file_state: tauri::State<'_, FileState>,
+    files: Vec<String>,
     options: DiffOptions,
 ) -> Result<Vec<FilePreviewResult>, String> {
-    let files = file_state.get_files();
-
     if files.is_empty() {
         return Ok(vec![]);
     }

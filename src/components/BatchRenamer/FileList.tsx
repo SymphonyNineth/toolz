@@ -1,10 +1,10 @@
-import { Component, For, Show, createMemo } from "solid-js";
+import { Component, For, createMemo } from "solid-js";
 import Button from "../ui/Button";
 import Checkbox from "../ui/Checkbox";
 import FileRow, { FileRowData } from "./FileRow";
 import { useFileSelection } from "../../hooks/useFileSelection";
 
-export interface FileItem extends FileRowData {}
+export interface FileItem extends FileRowData { }
 
 interface FileListProps {
   files: FileItem[];
@@ -44,6 +44,10 @@ const FileList: Component<FileListProps> = (props) => {
   const renamedCount = createMemo(
     () => props.files.filter((f) => f.status === "success").length
   );
+
+  // createEffect(() => {
+  //   console.log("files", props.files);
+  // });
 
   return (
     <div class="w-full mt-6 bg-base-100 rounded-box shadow flex flex-col max-h-[60vh]">
