@@ -1,7 +1,8 @@
 import { Component, For, createMemo } from "solid-js";
 import Button from "../ui/Button";
 import Checkbox from "../ui/Checkbox";
-import FileRow, { FileRowData } from "./FileRow";
+import FileRow from "./FileRow";
+import { FileRowData } from "./types";
 import { useFileSelection } from "../../hooks/useFileSelection";
 
 export interface FileItem extends FileRowData { }

@@ -79,6 +79,9 @@ export interface ListProgressState {
   totalFiles?: number;
 }
 
+
+// ... previous content ...
+
 /**
  * State for tracking rename operation progress in UI
  */
@@ -89,3 +92,23 @@ export interface RenameProgressState {
   currentPath?: string;
 }
 
+// ==================== Component Types ====================
+
+import { NumberingInfo } from "./renamingUtils";
+
+export interface FileRowData {
+  path: string;
+  name: string;
+  newName: string;
+  /** Name after find/replace but before numbering - used for diff display */
+  nameAfterReplace?: string;
+  status: "idle" | "success" | "error";
+  hasCollision?: boolean;
+  numberingInfo?: NumberingInfo;
+  /** Backend-computed segments for original name (diff or regex highlights) */
+  originalSegments?: DiffSegment[] | RegexSegment[];
+  /** Backend-computed segments for modified name (always DiffSegment) */
+  modifiedSegments?: DiffSegment[];
+  /** Type of preview: "diff" or "regexGroups" */
+  previewType?: "diff" | "regexGroups";
+}

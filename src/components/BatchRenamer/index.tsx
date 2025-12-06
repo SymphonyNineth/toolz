@@ -103,12 +103,11 @@ export default function BatchRenamer() {
     console.log("[DEBUG] Calling compute_previews with", files.length, "files");
     invoke<FilePreviewResult[]>("compute_previews", { files, options })
       .then((results) => {
-        console.log("[DEBUG] compute_previews returned", results.length, "results");
-        console.log("[DEBUG] Raw results:", JSON.stringify(results, null, 2));
-        if (results.length > 0) {
-          console.log("[DEBUG] First result keys:", Object.keys(results[0]));
-          console.log("[DEBUG] First result:", results[0]);
-        }
+        // console.log("[DEBUG] compute_previews returned", results.length, "results");
+        // console.log("[DEBUG] Raw results:", JSON.stringify(results, null, 2));
+        // console.log("[DEBUG] First result keys:", Object.keys(results[0]));
+        console.log("[DEBUG] Options:", options);
+        console.log("[DEBUG] First result:", results?.[0]);
         setFilePreviews(results);
         setRegexError(undefined);
       })
