@@ -3,11 +3,18 @@
 //! Backend library for the Simple Tools Tauri application.
 //! Provides file system operations for batch renaming, directory listing, and file removal.
 
+mod diff;
+mod file_state;
 mod operations;
 mod remove;
 mod rename;
 
 // Re-export types for external use
+pub use diff::{
+    compute_diff, get_regex_highlights, has_capture_groups, DiffSegment, DiffSegmentType,
+    RegexSegment,
+};
+pub use file_state::FileState;
 pub use operations::{CancelledError, OperationRegistry};
 pub use remove::{DeleteProgress, DeleteResult, FileMatchResult, PatternType, SearchProgress};
 pub use rename::{ListProgress, RenameProgress};
@@ -46,6 +53,7 @@ pub fn run() {
                 .build(),
         )
         .manage(OperationRegistry::new())
+        .manage(FileState::new())
         .invoke_handler(tauri::generate_handler![
             cancel_operation,
             rename::batch_rename,

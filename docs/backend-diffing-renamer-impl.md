@@ -6,30 +6,30 @@ This document tracks the implementation of the backend diffing refactor for the 
 > All backend changes should be verified with `cargo test`.
 > All frontend changes should be verified with `bun run test --run`.
 
-## Phase 1: Backend Infrastructure & Core Logic
+## Phase 1: Backend Infrastructure & Core Logic ✓
 
 Set up the fundamental Rust modules and state management.
 
-- [ ] **1.1. Add Dependencies**
-    - [ ] Update `src-tauri/Cargo.toml` with `dissimilar` and `regex`.
-- [ ] **1.2. Implement `diff.rs`**
-    - [ ] Create `src-tauri/src/diff.rs`.
-    - [ ] Implement `DiffSegment`, `DiffSegmentType` types.
-    - [ ] Implement `RegexSegment` enum (`Text(String)` / `Group { id, text }`).
-    - [ ] Implement `compute_diff` using `dissimilar`.
-    - [ ] Implement `get_regex_highlights` - returns FULL segmented string with gaps (not just matches).
-    - [ ] Implement `has_capture_groups` using `Regex::captures_len() > 1` (robust, not string heuristic).
-    - [ ] **TEST**: Unit tests in `diff.rs` covering:
+- [x] **1.1. Add Dependencies**
+    - [x] Update `src-tauri/Cargo.toml` with `dissimilar` and `regex`.
+- [x] **1.2. Implement `diff.rs`**
+    - [x] Create `src-tauri/src/diff.rs`.
+    - [x] Implement `DiffSegment`, `DiffSegmentType` types.
+    - [x] Implement `RegexSegment` enum (`Text(String)` / `Group { id, text }`).
+    - [x] Implement `compute_diff` using `dissimilar`.
+    - [x] Implement `get_regex_highlights` - returns FULL segmented string with gaps (not just matches).
+    - [x] Implement `has_capture_groups` using `Regex::captures_len() > 1` (robust, not string heuristic).
+    - [x] **TEST**: Unit tests in `diff.rs` covering:
         - Simple string diffs (insert/delete/equal).
         - `get_regex_highlights` returns Text segments for non-matching parts.
         - `get_regex_highlights` handles multiple capture groups.
         - `has_capture_groups` returns false for `(?:)`, `\(`, `[(]`.
-- [ ] **1.3. Implement `file_state.rs`**
-    - [ ] Create `src-tauri/src/file_state.rs`.
-    - [ ] Implement `FileState` struct with `renamer_files: RwLock<Vec<String>>`.
-    - [ ] Implement getters/setters.
-    - [ ] Register `FileState` in `lib.rs` using `manage()`.
-    - [ ] **TEST**: Write unit tests in `file_state.rs` covering:
+- [x] **1.3. Implement `file_state.rs`**
+    - [x] Create `src-tauri/src/file_state.rs`.
+    - [x] Implement `FileState` struct with `renamer_files: RwLock<Vec<String>>`.
+    - [x] Implement getters/setters.
+    - [x] Register `FileState` in `lib.rs` using `manage()`.
+    - [x] **TEST**: Write unit tests in `file_state.rs` covering:
         - Concurrent access (read/write).
         - State clearing.
 
