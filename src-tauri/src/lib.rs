@@ -60,6 +60,7 @@ pub fn run() {
             rename::batch_rename_with_progress,
             rename::list_files_recursively,
             rename::list_files_with_progress,
+            rename::compute_previews,
             remove::search_files_by_pattern,
             remove::search_files_with_progress,
             remove::batch_delete,

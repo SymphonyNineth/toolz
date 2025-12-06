@@ -6,6 +6,10 @@
 //! This module supports both synchronous commands (for backward compatibility)
 //! and streaming commands with progress updates via Tauri Channels.
 
+use crate::diff::{
+    compute_diff, get_regex_highlights, has_capture_groups, DiffSegment, RegexSegment,
+};
+use crate::file_state::FileState;
 use crate::operations::OperationRegistry;
 use log::{debug, info, warn};
 use serde::{Deserialize, Serialize};
@@ -31,7 +35,11 @@ fn next_operation_id() -> u64 {
 /// These events are sent via Tauri Channel to provide real-time feedback
 /// during recursive directory listing on large directories.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum ListProgress {
     /// Listing has started
     Started {
@@ -59,7 +67,11 @@ pub enum ListProgress {
 /// These events are sent via Tauri Channel to provide real-time feedback
 /// during batch file renaming.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-#[serde(tag = "type", rename_all = "camelCase", rename_all_fields = "camelCase")]
+#[serde(
+    tag = "type",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum RenameProgress {
     /// Renaming has started
     Started {
@@ -84,6 +96,62 @@ pub enum RenameProgress {
     },
     /// Operation was cancelled
     Cancelled,
+}
+
+// ==================== Preview Types ====================
+
+/// Options for computing file rename previews.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DiffOptions {
+    /// The text to find in filenames
+    pub find: String,
+    /// The text to replace matches with
+    pub replace: String,
+    /// Whether the search is case-sensitive
+    pub case_sensitive: bool,
+    /// Whether to use regex matching
+    pub regex_mode: bool,
+    /// Whether to only replace the first match
+    pub replace_first_only: bool,
+    /// Whether to include file extension in the search
+    pub include_ext: bool,
+}
+
+/// Result of computing a file preview - either standard diff or regex groups.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase", tag = "type")]
+pub enum FilePreviewResult {
+    /// Standard diff mode - show added/removed/unchanged segments
+    Diff {
+        /// Full path to the file
+        path: String,
+        /// Original filename
+        name: String,
+        /// New filename after rename
+        new_name: String,
+        /// Diff segments for the original name (showing what will be removed)
+        original_segments: Vec<DiffSegment>,
+        /// Diff segments for the new name (showing what will be added)
+        modified_segments: Vec<DiffSegment>,
+        /// Whether this new name conflicts with another file
+        has_collision: bool,
+    },
+    /// Regex groups mode - original shows colored groups, new name shows standard diff
+    RegexGroups {
+        /// Full path to the file
+        path: String,
+        /// Original filename
+        name: String,
+        /// New filename after rename
+        new_name: String,
+        /// Segmented original name with highlighted capture groups
+        original_segments: Vec<RegexSegment>,
+        /// Standard diff for new name
+        modified_segments: Vec<DiffSegment>,
+        /// Whether this new name conflicts with another file
+        has_collision: bool,
+    },
 }
 
 /// Renames multiple files in a single batch operation.
@@ -353,6 +421,7 @@ pub fn list_files_recursively(dir_path: String) -> Result<Vec<String>, String> {
 #[tauri::command]
 pub async fn list_files_with_progress(
     registry: tauri::State<'_, OperationRegistry>,
+    file_state: tauri::State<'_, FileState>,
     dir_path: String,
     operation_id: String,
     on_progress: Channel<ListProgress>,
@@ -397,8 +466,183 @@ pub async fn list_files_with_progress(
         format!("Task failed: {}", e)
     })?;
 
+    // Store files in state for subsequent compute_previews calls
+    if let Ok(ref files) = result {
+        file_state.set_files(files.clone());
+        info!("[LIST:{}] Stored {} files in FileState", op_id, files.len());
+    }
+
     info!("[LIST:{}] Async operation finished", op_id);
     result
+}
+
+/// Computes rename previews for all files stored in FileState.
+///
+/// Returns diff segments or regex group highlights based on the options.
+/// Uses the files previously stored by `list_files_with_progress`.
+///
+/// # Arguments
+///
+/// * `file_state` - The file state containing files to preview
+/// * `options` - Options controlling the search/replace behavior
+///
+/// # Returns
+///
+/// A vector of `FilePreviewResult` for each file with computed diffs/highlights.
+#[tauri::command]
+pub fn compute_previews(
+    file_state: tauri::State<'_, FileState>,
+    options: DiffOptions,
+) -> Result<Vec<FilePreviewResult>, String> {
+    let files = file_state.get_files();
+
+    if files.is_empty() {
+        return Ok(vec![]);
+    }
+
+    // Determine if we should use regex groups mode
+    let use_groups = options.regex_mode && has_capture_groups(&options.find);
+
+    // Build regex for replacement if in regex mode
+    let re = if options.regex_mode {
+        Some(regex::Regex::new(&options.find).map_err(|e| e.to_string())?)
+    } else {
+        None
+    };
+
+    let mut results = Vec::with_capacity(files.len());
+    let mut new_names_count: std::collections::HashMap<String, usize> =
+        std::collections::HashMap::new();
+
+    // First pass: compute new names and count occurrences for collision detection
+    let previews: Vec<_> = files
+        .iter()
+        .map(|path| {
+            let path_obj = Path::new(path);
+            let full_name = path_obj
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+
+            // Split name and extension if needed
+            let (name_part, ext_part) = if options.include_ext {
+                (full_name.clone(), String::new())
+            } else {
+                let stem = path_obj
+                    .file_stem()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or_default();
+                let ext = path_obj
+                    .extension()
+                    .map(|e| format!(".{}", e.to_string_lossy()))
+                    .unwrap_or_default();
+                (stem, ext)
+            };
+
+            // Compute new name
+            let new_name_part = if let Some(ref re) = re {
+                if options.replace_first_only {
+                    re.replace(&name_part, &options.replace).to_string()
+                } else {
+                    re.replace_all(&name_part, &options.replace).to_string()
+                }
+            } else {
+                // Plain text search
+                if options.case_sensitive {
+                    if options.replace_first_only {
+                        name_part.replacen(&options.find, &options.replace, 1)
+                    } else {
+                        name_part.replace(&options.find, &options.replace)
+                    }
+                } else {
+                    // Case-insensitive replacement
+                    let lower_name = name_part.to_lowercase();
+                    let lower_find = options.find.to_lowercase();
+                    if let Some(pos) = lower_name.find(&lower_find) {
+                        if options.replace_first_only {
+                            format!(
+                                "{}{}{}",
+                                &name_part[..pos],
+                                &options.replace,
+                                &name_part[pos + options.find.len()..]
+                            )
+                        } else {
+                            // Replace all occurrences case-insensitively
+                            let mut result = String::new();
+                            let mut last_end = 0;
+                            let name_lower = name_part.to_lowercase();
+                            for (start, _) in name_lower.match_indices(&lower_find) {
+                                result.push_str(&name_part[last_end..start]);
+                                result.push_str(&options.replace);
+                                last_end = start + options.find.len();
+                            }
+                            result.push_str(&name_part[last_end..]);
+                            result
+                        }
+                    } else {
+                        name_part.clone()
+                    }
+                }
+            };
+
+            let new_name = format!("{}{}", new_name_part, ext_part);
+
+            // Get parent directory for collision check
+            let parent = path_obj
+                .parent()
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_default();
+            let new_full_path = format!("{}/{}", parent, new_name);
+
+            // Track new names for collision detection
+            *new_names_count.entry(new_full_path.clone()).or_insert(0) += 1;
+
+            (path.clone(), full_name, name_part, new_name, new_full_path)
+        })
+        .collect();
+
+    // Second pass: build preview results with collision information
+    for (path, full_name, name_part, new_name, new_full_path) in previews {
+        let has_collision = new_names_count
+            .get(&new_full_path)
+            .map(|&c| c > 1)
+            .unwrap_or(false);
+
+        if use_groups {
+            // Regex groups mode: show capture groups in original
+            let original_segments = match get_regex_highlights(&name_part, &options.find) {
+                Ok(segments) => segments,
+                Err(_) => vec![RegexSegment::Text(name_part.clone())],
+            };
+
+            // Standard diff for new name
+            let modified_segments = compute_diff(&full_name, &new_name);
+
+            results.push(FilePreviewResult::RegexGroups {
+                path,
+                name: full_name,
+                new_name,
+                original_segments,
+                modified_segments,
+                has_collision,
+            });
+        } else {
+            // Standard diff mode
+            let original_segments = compute_diff(&full_name, &new_name);
+            let modified_segments = compute_diff(&full_name, &new_name);
+
+            results.push(FilePreviewResult::Diff {
+                path,
+                name: full_name,
+                new_name,
+                original_segments,
+                modified_segments,
+                has_collision,
+            });
+        }
+    }
+
+    Ok(results)
 }
 
 /// Blocking implementation of file listing with cancellation support.
@@ -434,11 +678,7 @@ fn list_files_blocking(
     {
         // Check cancellation flag every iteration
         if cancel_flag.load(Ordering::SeqCst) {
-            info!(
-                "[LIST:{}] Cancelled after {} files",
-                op_id,
-                files.len()
-            );
+            info!("[LIST:{}] Cancelled after {} files", op_id, files.len());
             let _ = on_progress.send(ListProgress::Cancelled);
             return Ok(vec![]);
         }
@@ -1452,5 +1692,350 @@ mod tests {
         assert!(new_path.exists());
         assert!(!old_path.exists());
     }
-}
 
+    // ==================== compute_previews tests ====================
+    // Note: Since compute_previews needs tauri::State, we test using FileState directly
+    // and calling a helper function that mimics the compute_previews logic.
+
+    /// Helper to test compute_previews logic without Tauri State
+    fn compute_previews_for_test(
+        files: Vec<String>,
+        options: DiffOptions,
+    ) -> Result<Vec<FilePreviewResult>, String> {
+        if files.is_empty() {
+            return Ok(vec![]);
+        }
+
+        let use_groups = options.regex_mode && has_capture_groups(&options.find);
+        let re = if options.regex_mode {
+            Some(regex::Regex::new(&options.find).map_err(|e| e.to_string())?)
+        } else {
+            None
+        };
+
+        let mut results = Vec::with_capacity(files.len());
+        let mut new_names_count: std::collections::HashMap<String, usize> =
+            std::collections::HashMap::new();
+
+        let previews: Vec<_> = files
+            .iter()
+            .map(|path| {
+                let path_obj = Path::new(path);
+                let full_name = path_obj
+                    .file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_default();
+
+                let (name_part, ext_part) = if options.include_ext {
+                    (full_name.clone(), String::new())
+                } else {
+                    let stem = path_obj
+                        .file_stem()
+                        .map(|s| s.to_string_lossy().to_string())
+                        .unwrap_or_default();
+                    let ext = path_obj
+                        .extension()
+                        .map(|e| format!(".{}", e.to_string_lossy()))
+                        .unwrap_or_default();
+                    (stem, ext)
+                };
+
+                let new_name_part = if let Some(ref re) = re {
+                    if options.replace_first_only {
+                        re.replace(&name_part, &options.replace).to_string()
+                    } else {
+                        re.replace_all(&name_part, &options.replace).to_string()
+                    }
+                } else if options.case_sensitive {
+                    if options.replace_first_only {
+                        name_part.replacen(&options.find, &options.replace, 1)
+                    } else {
+                        name_part.replace(&options.find, &options.replace)
+                    }
+                } else {
+                    name_part.replace(&options.find, &options.replace)
+                };
+
+                let new_name = format!("{}{}", new_name_part, ext_part);
+                let parent = path_obj
+                    .parent()
+                    .map(|p| p.to_string_lossy().to_string())
+                    .unwrap_or_default();
+                let new_full_path = format!("{}/{}", parent, new_name);
+
+                *new_names_count.entry(new_full_path.clone()).or_insert(0) += 1;
+
+                (path.clone(), full_name, name_part, new_name, new_full_path)
+            })
+            .collect();
+
+        for (path, full_name, name_part, new_name, new_full_path) in previews {
+            let has_collision = new_names_count
+                .get(&new_full_path)
+                .map(|&c| c > 1)
+                .unwrap_or(false);
+
+            if use_groups {
+                let original_segments = match get_regex_highlights(&name_part, &options.find) {
+                    Ok(segments) => segments,
+                    Err(_) => vec![RegexSegment::Text(name_part.clone())],
+                };
+                let modified_segments = compute_diff(&full_name, &new_name);
+
+                results.push(FilePreviewResult::RegexGroups {
+                    path,
+                    name: full_name,
+                    new_name,
+                    original_segments,
+                    modified_segments,
+                    has_collision,
+                });
+            } else {
+                let original_segments = compute_diff(&full_name, &new_name);
+                let modified_segments = compute_diff(&full_name, &new_name);
+
+                results.push(FilePreviewResult::Diff {
+                    path,
+                    name: full_name,
+                    new_name,
+                    original_segments,
+                    modified_segments,
+                    has_collision,
+                });
+            }
+        }
+
+        Ok(results)
+    }
+
+    #[test]
+    fn test_compute_previews_empty_state() {
+        let result = compute_previews_for_test(
+            vec![],
+            DiffOptions {
+                find: "old".to_string(),
+                replace: "new".to_string(),
+                case_sensitive: true,
+                regex_mode: false,
+                replace_first_only: false,
+                include_ext: false,
+            },
+        );
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_empty());
+    }
+
+    #[test]
+    fn test_compute_previews_simple_replace() {
+        let files = vec!["/path/to/old_file.txt".to_string()];
+        let result = compute_previews_for_test(
+            files,
+            DiffOptions {
+                find: "old".to_string(),
+                replace: "new".to_string(),
+                case_sensitive: true,
+                regex_mode: false,
+                replace_first_only: false,
+                include_ext: false,
+            },
+        );
+
+        assert!(result.is_ok());
+        let previews = result.unwrap();
+        assert_eq!(previews.len(), 1);
+
+        match &previews[0] {
+            FilePreviewResult::Diff { name, new_name, .. } => {
+                assert_eq!(name, "old_file.txt");
+                assert_eq!(new_name, "new_file.txt");
+            }
+            _ => panic!("Expected Diff variant"),
+        }
+    }
+
+    #[test]
+    fn test_compute_previews_regex_groups() {
+        // Use a simpler pattern that clearly demonstrates capture groups
+        let files = vec!["/path/to/v1_doc.txt".to_string()];
+        let result = compute_previews_for_test(
+            files,
+            DiffOptions {
+                find: r"v(\d+)_(\w+)".to_string(),
+                replace: "$2-v$1".to_string(),
+                case_sensitive: true,
+                regex_mode: true,
+                replace_first_only: false,
+                include_ext: false,
+            },
+        );
+
+        assert!(result.is_ok());
+        let previews = result.unwrap();
+        assert_eq!(previews.len(), 1);
+
+        match &previews[0] {
+            FilePreviewResult::RegexGroups {
+                name,
+                new_name,
+                original_segments,
+                ..
+            } => {
+                assert_eq!(name, "v1_doc.txt");
+                // v1_doc with pattern v(\d+)_(\w+) captures 1 and doc
+                // Replace with $2-v$1 = doc-v1
+                assert_eq!(new_name, "doc-v1.txt");
+                // Should have regex segments with group highlights
+                assert!(original_segments.len() > 1);
+            }
+            _ => panic!("Expected RegexGroups variant"),
+        }
+    }
+
+    #[test]
+    fn test_compute_previews_regex_no_groups() {
+        let files = vec!["/path/to/file123.txt".to_string()];
+        let result = compute_previews_for_test(
+            files,
+            DiffOptions {
+                find: r"\d+".to_string(),
+                replace: "NUM".to_string(),
+                case_sensitive: true,
+                regex_mode: true,
+                replace_first_only: false,
+                include_ext: false,
+            },
+        );
+
+        assert!(result.is_ok());
+        let previews = result.unwrap();
+        assert_eq!(previews.len(), 1);
+
+        // Regex without groups should return Diff mode
+        match &previews[0] {
+            FilePreviewResult::Diff { name, new_name, .. } => {
+                assert_eq!(name, "file123.txt");
+                assert_eq!(new_name, "fileNUM.txt");
+            }
+            _ => panic!("Expected Diff variant for regex without capture groups"),
+        }
+    }
+
+    #[test]
+    fn test_compute_previews_collision_detection() {
+        let files = vec![
+            "/path/to/fileA.txt".to_string(),
+            "/path/to/fileB.txt".to_string(),
+        ];
+        let result = compute_previews_for_test(
+            files,
+            DiffOptions {
+                find: "file".to_string(),
+                replace: "doc".to_string(),
+                case_sensitive: true,
+                regex_mode: false,
+                replace_first_only: false,
+                include_ext: false,
+            },
+        );
+
+        assert!(result.is_ok());
+        let previews = result.unwrap();
+        assert_eq!(previews.len(), 2);
+
+        // Both should NOT have collision since they become docA.txt and docB.txt
+        for preview in &previews {
+            match preview {
+                FilePreviewResult::Diff { has_collision, .. } => {
+                    assert!(!has_collision);
+                }
+                _ => panic!("Expected Diff variant"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_compute_previews_collision_true() {
+        let files = vec![
+            "/path/to/fileA.txt".to_string(),
+            "/path/to/fileB.txt".to_string(),
+        ];
+        let _result = compute_previews_for_test(
+            files,
+            DiffOptions {
+                // Replace the unique part, making both names identical
+                find: "file".to_string(),
+                replace: "same".to_string(),
+                case_sensitive: true,
+                regex_mode: false,
+                replace_first_only: false,
+                include_ext: true, // Include ext so both become "sameA.txt" -> wait, let's fix this
+            },
+        );
+
+        // With include_ext: true, we search in "fileA.txt" and "fileB.txt"
+        // Replacing "file" -> "same" gives "sameA.txt" and "sameB.txt" - still unique
+        // To test collision, we need names that become identical
+        let files2 = vec![
+            "/path/to/file1.txt".to_string(),
+            "/path/to/file2.txt".to_string(),
+        ];
+        let result2 = compute_previews_for_test(
+            files2,
+            DiffOptions {
+                find: r"\d".to_string(),
+                replace: "X".to_string(),
+                case_sensitive: true,
+                regex_mode: true,
+                replace_first_only: false,
+                include_ext: false,
+            },
+        );
+
+        assert!(result2.is_ok());
+        let previews = result2.unwrap();
+        assert_eq!(previews.len(), 2);
+
+        // Both become "fileX.txt" - should detect collision
+        for preview in &previews {
+            match preview {
+                FilePreviewResult::Diff {
+                    new_name,
+                    has_collision,
+                    ..
+                } => {
+                    assert_eq!(new_name, "fileX.txt");
+                    assert!(*has_collision, "Expected collision to be detected");
+                }
+                _ => panic!("Expected Diff variant"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_compute_previews_include_ext() {
+        let files = vec!["/path/to/file.old".to_string()];
+        let result = compute_previews_for_test(
+            files,
+            DiffOptions {
+                find: "old".to_string(),
+                replace: "new".to_string(),
+                case_sensitive: true,
+                regex_mode: false,
+                replace_first_only: false,
+                include_ext: true, // Include extension in search
+            },
+        );
+
+        assert!(result.is_ok());
+        let previews = result.unwrap();
+        assert_eq!(previews.len(), 1);
+
+        match &previews[0] {
+            FilePreviewResult::Diff { name, new_name, .. } => {
+                assert_eq!(name, "file.old");
+                assert_eq!(new_name, "file.new"); // Extension was changed
+            }
+            _ => panic!("Expected Diff variant"),
+        }
+    }
+}

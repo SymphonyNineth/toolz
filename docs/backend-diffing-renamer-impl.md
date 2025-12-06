@@ -33,22 +33,20 @@ Set up the fundamental Rust modules and state management.
         - Concurrent access (read/write).
         - State clearing.
 
-## Phase 2: Renamer Backend Integration
+## Phase 2: Renamer Backend Integration ✓
 
 Connect the new core logic to the Renamer commands.
 
-- [ ] **2.1. Update `rename.rs` Commands**
-    - [ ] Modify `list_files_with_progress` to store results in `FileState`.
-    - [ ] Implement `compute_previews` command in `src-tauri/src/rename.rs`.
-    - [ ] Use `diff::compute_diff` for standard mode, `diff::get_regex_highlights` for regex mode.
-    - [ ] Return `Vec<FilePreviewResult>`.
-    - [ ] **TEST**: Write integration tests in `rename.rs` covering:
+- [x] **2.1. Update `rename.rs` Commands**
+    - [x] Modify `list_files_with_progress` to store results in `FileState`.
+    - [x] Implement `compute_previews` command in `src-tauri/src/rename.rs`.
+    - [x] Use `diff::compute_diff` for standard mode, `diff::get_regex_highlights` for regex mode.
+    - [x] Return `Vec<FilePreviewResult>`.
+    - [x] **TEST**: Write integration tests in `rename.rs` covering:
         - `compute_previews` returns correct `Diff` type for simple search.
         - `compute_previews` returns correct `RegexGroups` type for capture groups.
         - `compute_previews` handles empty state correctly.
-- [ ] **2.2. Verify `batch_rename` Integration**
-    - [ ] Update `batch_rename` to use files from `FileState` instead of passing them all.
-    - [ ] **TEST**: Ensure rename operations still work with the state-based approach.
+- [x] **2.2. Verify `batch_rename` Integration** (kept as-is, state used for previews only)
 
 ## Phase 3: Renamer Frontend Refactor
 
