@@ -70,3 +70,7 @@ Update the frontend to use the new "backend state" model.
 - [x] **3.4. Cleanup**
   - [x] Remove unused `src/utils/diff.ts`.
   - [x] Remove unused regex helpers in `renamingUtils.ts`.
+
+## Frontend UX Notes
+
+- Added a 300ms debounce to Find/Replace inputs before invoking `compute_previews` to reduce backend churn while typing.

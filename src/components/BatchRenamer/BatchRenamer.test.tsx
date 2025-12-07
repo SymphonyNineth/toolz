@@ -93,4 +93,63 @@ describe("BatchRenamer", () => {
       });
     });
   });
+
+  it("debounces preview computation when typing find/replace", async () => {
+    vi.useFakeTimers();
+    try {
+      const mockOpen = vi.mocked(dialog.open);
+      mockOpen.mockResolvedValue(["/path/to/file1.txt"]);
+
+      mockInvoke.mockImplementation((cmd: string) => {
+        if (cmd === "compute_previews") {
+          return Promise.resolve([
+            {
+              type: "diff",
+              path: "/path/to/file1.txt",
+              name: "file1.txt",
+              newName: "file1.txt",
+              originalSegments: [{ segmentType: "unchanged", text: "file1.txt" }],
+              modifiedSegments: [{ segmentType: "unchanged", text: "file1.txt" }],
+              hasCollision: false,
+            },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
+
+      render(() => <BatchRenamer />);
+
+      const selectButton = screen.getByText("Select Files");
+      fireEvent.click(selectButton);
+
+      await waitFor(() => {
+        expect(screen.getAllByText("file1.txt")[0]).toBeInTheDocument();
+      });
+
+      mockInvoke.mockClear();
+
+      const findInput = screen.getByLabelText("Find");
+      const replaceInput = screen.getByLabelText("Replace with");
+
+      fireEvent.input(findInput, { target: { value: "file" } });
+      fireEvent.input(replaceInput, { target: { value: "new" } });
+
+      vi.advanceTimersByTime(250);
+      await Promise.resolve();
+      expect(mockInvoke).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(50);
+
+      await waitFor(() => {
+        expect(mockInvoke).toHaveBeenCalledWith(
+          "compute_previews",
+          expect.objectContaining({
+            options: expect.objectContaining({ find: "file", replace: "new" }),
+          })
+        );
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

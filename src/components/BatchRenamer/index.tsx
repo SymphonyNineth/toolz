@@ -1,4 +1,12 @@
-import { createSignal, createMemo, createEffect, Show, onCleanup, batch } from "solid-js";
+import {
+  createSignal,
+  createMemo,
+  createEffect,
+  Show,
+  onCleanup,
+  batch,
+  on,
+} from "solid-js";
 import { open, confirm } from "@tauri-apps/plugin-dialog";
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { nanoid } from "nanoid";
@@ -15,6 +23,7 @@ import {
   DEFAULT_NUMBERING_OPTIONS,
 } from "./renamingUtils";
 import { getDirectory, joinPath } from "../../utils/path";
+import { debounce } from "../../utils/debounce.util";
 import {
   ListProgressEvent,
   ListProgressState,
@@ -72,12 +81,30 @@ export default function BatchRenamer() {
 
   // Backend file previews - computed by backend compute_previews command
   const [filePreviews, setFilePreviews] = createSignal<FilePreviewResult[]>([]);
+  const [debouncedInputs, setDebouncedInputs] = createSignal({
+    find: "",
+    replace: "",
+  });
+
+  const updateDebouncedInputs = debounce(
+    (next: { find: string; replace: string }) => setDebouncedInputs(next),
+    300
+  );
+
+  createEffect(
+    on(
+      [findText, replaceText],
+      ([find, replace]) => {
+        updateDebouncedInputs({ find, replace });
+      },
+      { defer: true }
+    )
+  );
 
   // Compute previews from backend when inputs change
   createEffect(() => {
     const files = filePaths();
-    const find = findText();
-    const replace = replaceText();
+    const { find, replace } = debouncedInputs();
     const caseSens = caseSensitive();
     const regex = regexMode();
     const firstOnly = replaceFirstOnly();
@@ -111,7 +138,6 @@ export default function BatchRenamer() {
       });
   });
 
-
   // Track active operation IDs for cancellation
   let activeListOperationId: string | null = null;
   let activeRenameOperationId: string | null = null;
@@ -133,13 +159,13 @@ export default function BatchRenamer() {
   onCleanup(() => {
     if (activeListOperationId) {
       invoke("cancel_operation", { operationId: activeListOperationId }).catch(
-        () => { }
+        () => {}
       );
     }
     if (activeRenameOperationId) {
       invoke("cancel_operation", {
         operationId: activeRenameOperationId,
-      }).catch(() => { });
+      }).catch(() => {});
     }
     // Clear state to release memory
     clearAllState();
@@ -191,7 +217,11 @@ export default function BatchRenamer() {
     // Merge backend previews with numbering and status
     return previews.map((preview, index) => {
       // Apply numbering after backend find/replace
-      const numberingInfo = getNumberingInfo(preview.newName, index, numOptions);
+      const numberingInfo = getNumberingInfo(
+        preview.newName,
+        index,
+        numOptions
+      );
       const finalNewName = applyNumbering(preview.newName, index, numOptions);
 
       return {
@@ -265,7 +295,7 @@ export default function BatchRenamer() {
                 if (currentTotal > ABSOLUTE_MAX_FILES && !hitFileLimit) {
                   hitFileLimit = true;
                   // Cancel the operation if we hit the absolute limit
-                  invoke("cancel_operation", { operationId }).catch(() => { });
+                  invoke("cancel_operation", { operationId }).catch(() => {});
                 }
                 break;
               }
@@ -355,7 +385,7 @@ export default function BatchRenamer() {
             setStatusMap({});
           }
 
-          const finalCount = (existingPaths.length + newPaths.length);
+          const finalCount = existingPaths.length + newPaths.length;
           setListProgress({
             phase: "completed",
             filesFound: finalCount,
@@ -549,7 +579,7 @@ export default function BatchRenamer() {
   const handleCancelScan = () => {
     if (activeListOperationId) {
       invoke("cancel_operation", { operationId: activeListOperationId }).catch(
-        () => { }
+        () => {}
       );
       activeListOperationId = null;
     }
@@ -562,7 +592,7 @@ export default function BatchRenamer() {
     if (activeRenameOperationId) {
       invoke("cancel_operation", {
         operationId: activeRenameOperationId,
-      }).catch(() => { });
+      }).catch(() => {});
       activeRenameOperationId = null;
     }
   };
@@ -579,9 +609,10 @@ export default function BatchRenamer() {
         }
         return `Scanning directories... (${progress.filesFound.toLocaleString()} files found)`;
       case "completed":
-        return `Found ${progress.totalFiles?.toLocaleString() ??
+        return `Found ${
+          progress.totalFiles?.toLocaleString() ??
           progress.filesFound.toLocaleString()
-          } files`;
+        } files`;
       default:
         return "";
     }
