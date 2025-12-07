@@ -1,0 +1,786 @@
+Դեկ 08 06:00:08 fedora kernel: ACPI: bus type drm_connector registered
+Դեկ 08 06:00:08 fedora kernel: simple-framebuffer simple-framebuffer.0: [drm] Registered 1 planes with drm panic
+Դեկ 08 06:00:08 fedora kernel: [drm] Initialized simpledrm 1.0.0 for simple-framebuffer.0 on minor 0
+Դեկ 08 06:00:08 fedora kernel: simple-framebuffer simple-framebuffer.0: [drm] fb0: simpledrmdrmfb frame buffer device
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] Found alderlake_s/raptorlake_s (device ID a788) integrated display version 12.00 stepping D0
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] VT-d active for gfx access
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] Using Transparent Hugepages
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] Finished loading DMC firmware i915/adls_dmc_ver2_01.bin (v2.1)
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] GT0: GuC firmware i915/tgl_guc_70.bin version 70.49.4
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] GT0: HuC firmware i915/tgl_huc.bin version 7.9.3
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] GT0: HuC: authenticated for all workloads
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] GT0: GUC: submission enabled
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] GT0: GUC: SLPC enabled
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] GT0: GUC: RC enabled
+Դեկ 08 06:00:09 fedora kernel: i915 0000:00:02.0: [drm] Protected Xe Path (PXP) protected content support initialized
+Դեկ 08 06:00:11 fedora kernel: i915 0000:00:02.0: [drm] Registered 4 planes with drm panic
+Դեկ 08 06:00:11 fedora kernel: [drm] Initialized i915 1.6.0 for 0000:00:02.0 on minor 1
+Դեկ 08 06:00:11 fedora kernel: fbcon: i915drmfb (fb0) is primary device
+Դեկ 08 06:00:11 fedora kernel: i915 0000:00:02.0: [drm] fb0: i915drmfb frame buffer device
+Դեկ 08 02:00:12 fedora systemd[1]: modprobe@drm.service - Load Kernel Module drm was skipped because of an unmet condition check (ConditionKernelModuleLoaded=!drm).
+Դեկ 08 02:00:13 fedora systemd[1]: Started nvidia-powerd.service - nvidia-powerd service.
+Դեկ 08 02:00:13 fedora audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=nvidia-powerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:13 fedora nvidia-powerd[1556]: nvidia-powerd version:2.0 (build 1)
+Դեկ 08 02:00:14 fedora kernel: nvidia: loading out-of-tree module taints kernel.
+Դեկ 08 02:00:14 fedora kernel: nvidia: module verification failed: signature and/or required key missing - tainting kernel
+Դեկ 08 02:00:14 fedora kernel: nvidia-nvlink: Nvlink Core is being initialized, major device number 509
+Դեկ 08 02:00:14 fedora kernel: nvidia 0000:01:00.0: enabling device (0000 -> 0003)
+Դեկ 08 02:00:14 fedora kernel: nvidia 0000:01:00.0: vgaarb: VGA decodes changed: olddecodes=io+mem,decodes=none:owns=none
+Դեկ 08 02:00:14 fedora systemd[1]: nvidia-fallback.service - Fallback to nouveau as nvidia did not load was skipped because of an unmet condition check (ConditionPathExists=!/sys/module/nvidia).
+Դեկ 08 02:00:15 fedora systemd[1]: Starting gdm.service - GNOME Display Manager...
+Դեկ 08 02:00:15 fedora systemd[1]: Started gdm.service - GNOME Display Manager.
+Դեկ 08 02:00:15 fedora audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:15 fedora audit[1915]: AUDIT1100 pid=1915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[1915]: AUDIT1101 pid=1915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[1915]: AUDIT1103 pid=1915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora systemd-logind[1600]: New session 'c1' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:15 fedora audit[1933]: AUDIT1101 pid=1933 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:15 fedora audit[1933]: AUDIT1103 pid=1933 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:15 fedora systemd-logind[1600]: New session '1' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:15 fedora (systemd)[1933]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60578) by gdm-greeter(uid=0)
+Դեկ 08 02:00:15 fedora audit[1933]: AUDIT1105 pid=1933 uid=0 auid=60578 ses=1 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:15 fedora systemd[1]: Started session-c1.scope - Session c1 of User gdm-greeter.
+Դեկ 08 02:00:15 fedora gdm-launch-environment][1915]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60578) by (uid=0)
+Դեկ 08 02:00:15 fedora audit[1915]: AUDIT1105 pid=1915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora nvidia-powerd[1556]: DBus Connection is established
+Դեկ 08 02:00:15 fedora gnome-shell[2058]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:15 fedora systemd[1933]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60578/gnome-shell-disable-extensions).
+Դեկ 08 02:00:15 fedora gdm-launch-environment][1915]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:15 fedora audit[1915]: AUDIT1106 pid=1915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[1915]: AUDIT1104 pid=1915 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: Child process -1981 was already dead.
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: Child process -1981 was already dead.
+Դեկ 08 02:00:15 fedora audit[2158]: AUDIT1100 pid=2158 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[2158]: AUDIT1101 pid=2158 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[2158]: AUDIT1103 pid=2158 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora systemd-logind[1600]: New session 'c2' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:15 fedora audit[2194]: AUDIT1101 pid=2194 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:15 fedora audit[2194]: AUDIT1103 pid=2194 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:15 fedora systemd-logind[1600]: New session '2' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:15 fedora (systemd)[2194]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60579) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:15 fedora audit[2194]: AUDIT1105 pid=2194 uid=0 auid=60579 ses=2 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:15 fedora systemd[1]: Started session-c2.scope - Session c2 of User gdm-greeter-2.
+Դեկ 08 02:00:15 fedora gdm-launch-environment][2158]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60579) by (uid=0)
+Դեկ 08 02:00:15 fedora audit[2158]: AUDIT1105 pid=2158 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora gnome-shell[2460]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:15 fedora systemd[2194]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60579/gnome-shell-disable-extensions).
+Դեկ 08 02:00:15 fedora gdm-launch-environment][2158]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:15 fedora audit[2158]: AUDIT1106 pid=2158 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[2158]: AUDIT1104 pid=2158 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: Child process -2363 was already dead.
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:15 fedora gdm[1869]: Gdm: Child process -2363 was already dead.
+Դեկ 08 02:00:15 fedora audit[2522]: AUDIT1100 pid=2522 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[2522]: AUDIT1101 pid=2522 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora audit[2522]: AUDIT1103 pid=2522 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:15 fedora systemd-logind[1600]: New session 'c3' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:15 fedora audit[2556]: AUDIT1101 pid=2556 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:15 fedora audit[2556]: AUDIT1103 pid=2556 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:15 fedora systemd-logind[1600]: New session '3' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:15 fedora (systemd)[2556]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60580) by gdm-greeter(uid=0)
+Դեկ 08 02:00:15 fedora audit[2556]: AUDIT1105 pid=2556 uid=0 auid=60580 ses=3 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:16 fedora systemd[1]: Started session-c3.scope - Session c3 of User gdm-greeter.
+Դեկ 08 02:00:16 fedora gdm-launch-environment][2522]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60580) by (uid=0)
+Դեկ 08 02:00:16 fedora audit[2522]: AUDIT1105 pid=2522 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora gnome-shell[2728]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:16 fedora systemd[2556]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60580/gnome-shell-disable-extensions).
+Դեկ 08 02:00:16 fedora gdm-launch-environment][2522]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:16 fedora audit[2522]: AUDIT1106 pid=2522 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora audit[2522]: AUDIT1104 pid=2522 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: Child process -2615 was already dead.
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: Child process -2615 was already dead.
+Դեկ 08 02:00:16 fedora audit[2771]: AUDIT1100 pid=2771 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora audit[2771]: AUDIT1101 pid=2771 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora audit[2771]: AUDIT1103 pid=2771 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora systemd-logind[1600]: New session 'c4' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:16 fedora audit[2797]: AUDIT1101 pid=2797 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:16 fedora audit[2797]: AUDIT1103 pid=2797 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:16 fedora systemd-logind[1600]: New session '4' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:16 fedora (systemd)[2797]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60581) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:16 fedora audit[2797]: AUDIT1105 pid=2797 uid=0 auid=60581 ses=4 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:16 fedora systemd[1]: Started session-c4.scope - Session c4 of User gdm-greeter-2.
+Դեկ 08 02:00:16 fedora gdm-launch-environment][2771]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60581) by (uid=0)
+Դեկ 08 02:00:16 fedora audit[2771]: AUDIT1105 pid=2771 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora gnome-shell[2985]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:16 fedora systemd[2797]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60581/gnome-shell-disable-extensions).
+Դեկ 08 02:00:16 fedora gdm-launch-environment][2771]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:16 fedora audit[2771]: AUDIT1106 pid=2771 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora audit[2771]: AUDIT1104 pid=2771 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: Child process -2909 was already dead.
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:16 fedora gdm[1869]: Gdm: Child process -2909 was already dead.
+Դեկ 08 02:00:16 fedora polkitd[1688]: Error evaluating admin rules: Error: Helper exited with non-zero exit status 1, stdout=`', stderr=`pkla-check-authorization: Invalid user `gdm-greeter-2': No UNIX user with name gdm-greeter-2: Success
+Դեկ 08 02:00:16 fedora audit[3048]: AUDIT1100 pid=3048 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora audit[3048]: AUDIT1101 pid=3048 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora audit[3048]: AUDIT1103 pid=3048 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:16 fedora systemd-logind[1600]: New session 'c5' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:16 fedora audit[3086]: AUDIT1101 pid=3086 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:16 fedora audit[3086]: AUDIT1103 pid=3086 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:16 fedora systemd-logind[1600]: New session '5' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:16 fedora (systemd)[3086]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60582) by gdm-greeter(uid=0)
+Դեկ 08 02:00:16 fedora audit[3086]: AUDIT1105 pid=3086 uid=0 auid=60582 ses=5 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:17 fedora systemd[1]: Started session-c5.scope - Session c5 of User gdm-greeter.
+Դեկ 08 02:00:17 fedora gdm-launch-environment][3048]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60582) by (uid=0)
+Դեկ 08 02:00:17 fedora audit[3048]: AUDIT1105 pid=3048 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora gnome-shell[3135]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:17 fedora systemd[3086]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60582/gnome-shell-disable-extensions).
+Դեկ 08 02:00:17 fedora gdm-launch-environment][3048]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:17 fedora audit[3048]: AUDIT1106 pid=3048 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora audit[3048]: AUDIT1104 pid=3048 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:17 fedora gdm[1869]: Gdm: Child process -3105 was already dead.
+Դեկ 08 02:00:17 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:17 fedora gdm[1869]: Gdm: Child process -3105 was already dead.
+Դեկ 08 02:00:17 fedora polkitd[1688]: Error evaluating admin rules: Error: Helper exited with non-zero exit status 1, stdout=`', stderr=`pkla-check-authorization: Invalid user `gdm-greeter': No UNIX user with name gdm-greeter: Success
+Դեկ 08 02:00:17 fedora audit[3176]: AUDIT1100 pid=3176 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora audit[3176]: AUDIT1101 pid=3176 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora audit[3176]: AUDIT1103 pid=3176 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora systemd-logind[1600]: New session 'c6' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:17 fedora audit[3195]: AUDIT1101 pid=3195 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:17 fedora audit[3195]: AUDIT1103 pid=3195 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:17 fedora systemd-logind[1600]: New session '6' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:17 fedora (systemd)[3195]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60583) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:17 fedora audit[3195]: AUDIT1105 pid=3195 uid=0 auid=60583 ses=6 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:17 fedora systemd[1]: Started session-c6.scope - Session c6 of User gdm-greeter-2.
+Դեկ 08 02:00:17 fedora gdm-launch-environment][3176]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60583) by (uid=0)
+Դեկ 08 02:00:17 fedora audit[3176]: AUDIT1105 pid=3176 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora gnome-shell[3263]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:17 fedora systemd[3195]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60583/gnome-shell-disable-extensions).
+Դեկ 08 02:00:17 fedora gdm-launch-environment][3176]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:17 fedora audit[3176]: AUDIT1106 pid=3176 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora audit[3176]: AUDIT1104 pid=3176 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:17 fedora gdm[1869]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:17 fedora gdm[1869]: Gdm: Child process -3213 was already dead.
+Դեկ 08 02:00:28 fedora audit[3417]: AUDIT1100 pid=3417 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:28 fedora audit[3417]: AUDIT1101 pid=3417 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:28 fedora audit[3417]: AUDIT1103 pid=3417 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:28 fedora systemd-logind[1600]: New session 'c7' of user 'gdm-greeter' with class 'greeter' and type 'x11'.
+Դեկ 08 02:00:28 fedora audit[3449]: AUDIT1101 pid=3449 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:28 fedora audit[3449]: AUDIT1103 pid=3449 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:28 fedora systemd-logind[1600]: New session '7' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:28 fedora (systemd)[3449]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60584) by gdm-greeter(uid=0)
+Դեկ 08 02:00:28 fedora audit[3449]: AUDIT1105 pid=3449 uid=0 auid=60584 ses=7 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:28 fedora systemd[1]: Started session-c7.scope - Session c7 of User gdm-greeter.
+Դեկ 08 02:00:28 fedora gdm-launch-environment][3417]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60584) by (uid=0)
+Դեկ 08 02:00:28 fedora audit[3417]: AUDIT1105 pid=3417 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:28 fedora gdm[1869]: Gdm: GdmSession: no session desktop files installed, aborting...
+Դեկ 08 02:00:28 fedora audit[1869]: ANOM_ABEND auid=4294967295 uid=0 gid=0 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 pid=1869 comm="gdm" exe="/usr/bin/gdm" sig=5 res=1
+Դեկ 08 02:00:28 fedora kernel: traps: gdm[1869] trap int3 ip:7f11ebd6e138 sp:7ffdb98bcb90 error:0 in libglib-2.0.so.0.8600.2[47138,7f11ebd27000+a6000]
+Դեկ 08 02:00:28 fedora systemd-coredump[3469]: Process 1869 (gdm) of user 0 terminated abnormally with signal 5/TRAP, processing...
+Դեկ 08 02:00:28 fedora systemd-coredump[3470]: Process 1869 (gdm) of user 0 dumped core.
+                                                  Module /usr/bin/gdm from rpm gdm-49.2-2.fc43.x86_64
+                                                  #2  0x0000560f6764c253 get_fallback_session_name (/usr/bin/gdm + 0x2c253)
+                                                  #3  0x0000560f67655ba5 gdm_session_start_session (/usr/bin/gdm + 0x35ba5)
+                                                  #11 0x0000560f676519a1 on_opened (/usr/bin/gdm + 0x319a1)
+                                                  #24 0x0000560f67626565 main (/usr/bin/gdm + 0x6565)
+                                                  #27 0x0000560f676268b5 _start (/usr/bin/gdm + 0x68b5)
+                                                  #7  0x0000560f676356a7 gdm_dynamic_user_varlink_worker (/usr/bin/gdm + 0x156a7)
+Դեկ 08 02:00:28 fedora audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:28 fedora systemd[1]: gdm.service: Main process exited, code=dumped, status=5/TRAP
+Դեկ 08 02:00:28 fedora systemd[1]: gdm.service: Failed with result 'core-dump'.
+Դեկ 08 02:00:28 fedora systemd[1]: gdm.service: Triggering OnFailure= dependencies.
+Դեկ 08 02:00:29 fedora systemd[1]: gdm.service: Scheduled restart job, restart counter is at 1.
+Դեկ 08 02:00:29 fedora systemd[1]: Starting gdm.service - GNOME Display Manager...
+Դեկ 08 02:00:29 fedora systemd[1]: Started gdm.service - GNOME Display Manager.
+Դեկ 08 02:00:29 fedora audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:29 fedora audit[3487]: AUDIT1100 pid=3487 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora audit[3487]: AUDIT1101 pid=3487 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora audit[3487]: AUDIT1103 pid=3487 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora systemd-logind[1600]: New session 'c8' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:29 fedora audit[3496]: AUDIT1101 pid=3496 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:29 fedora audit[3496]: AUDIT1103 pid=3496 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:29 fedora systemd-logind[1600]: New session '8' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:29 fedora (systemd)[3496]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60578) by gdm-greeter(uid=0)
+Դեկ 08 02:00:29 fedora audit[3496]: AUDIT1105 pid=3496 uid=0 auid=60578 ses=8 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:29 fedora systemd[1]: Started session-c8.scope - Session c8 of User gdm-greeter.
+Դեկ 08 02:00:29 fedora gdm-launch-environment][3487]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60578) by (uid=0)
+Դեկ 08 02:00:29 fedora audit[3487]: AUDIT1105 pid=3487 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora gnome-shell[3564]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:29 fedora systemd[3496]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60578/gnome-shell-disable-extensions).
+Դեկ 08 02:00:29 fedora gdm-launch-environment][3487]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:29 fedora audit[3487]: AUDIT1106 pid=3487 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora audit[3487]: AUDIT1104 pid=3487 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:29 fedora gdm[3481]: Gdm: Child process -3514 was already dead.
+Դեկ 08 02:00:29 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:29 fedora gdm[3481]: Gdm: Child process -3514 was already dead.
+Դեկ 08 02:00:29 fedora audit[3588]: AUDIT1100 pid=3588 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora audit[3588]: AUDIT1101 pid=3588 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora audit[3588]: AUDIT1103 pid=3588 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:29 fedora systemd-logind[1600]: New session 'c9' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:29 fedora audit[3607]: AUDIT1101 pid=3607 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:29 fedora audit[3607]: AUDIT1103 pid=3607 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:29 fedora systemd-logind[1600]: New session '9' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:29 fedora (systemd)[3607]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60579) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:29 fedora audit[3607]: AUDIT1105 pid=3607 uid=0 auid=60579 ses=9 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:30 fedora systemd[1]: Started session-c9.scope - Session c9 of User gdm-greeter-2.
+Դեկ 08 02:00:30 fedora gdm-launch-environment][3588]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60579) by (uid=0)
+Դեկ 08 02:00:30 fedora audit[3588]: AUDIT1105 pid=3588 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora gnome-shell[3656]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:30 fedora systemd[3607]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60579/gnome-shell-disable-extensions).
+Դեկ 08 02:00:30 fedora gdm-launch-environment][3588]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:30 fedora audit[3588]: AUDIT1106 pid=3588 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora audit[3588]: AUDIT1104 pid=3588 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: Child process -3625 was already dead.
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: Child process -3625 was already dead.
+Դեկ 08 02:00:30 fedora audit[3698]: AUDIT1100 pid=3698 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora audit[3698]: AUDIT1101 pid=3698 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora audit[3698]: AUDIT1103 pid=3698 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora systemd-logind[1600]: New session 'c10' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:30 fedora audit[3713]: AUDIT1101 pid=3713 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:30 fedora audit[3713]: AUDIT1103 pid=3713 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:30 fedora systemd-logind[1600]: New session '10' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:30 fedora (systemd)[3713]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60580) by gdm-greeter(uid=0)
+Դեկ 08 02:00:30 fedora audit[3713]: AUDIT1105 pid=3713 uid=0 auid=60580 ses=10 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:30 fedora systemd[1]: Started session-c10.scope - Session c10 of User gdm-greeter.
+Դեկ 08 02:00:30 fedora gdm-launch-environment][3698]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60580) by (uid=0)
+Դեկ 08 02:00:30 fedora audit[3698]: AUDIT1105 pid=3698 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora gnome-shell[3783]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:30 fedora systemd[3713]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60580/gnome-shell-disable-extensions).
+Դեկ 08 02:00:30 fedora gdm-launch-environment][3698]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:30 fedora audit[3698]: AUDIT1106 pid=3698 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora audit[3698]: AUDIT1104 pid=3698 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: Child process -3733 was already dead.
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:30 fedora gdm[3481]: Gdm: Child process -3733 was already dead.
+Դեկ 08 02:00:30 fedora audit[3806]: AUDIT1100 pid=3806 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora audit[3806]: AUDIT1101 pid=3806 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora audit[3806]: AUDIT1103 pid=3806 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:30 fedora systemd-logind[1600]: New session 'c11' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:30 fedora audit[3820]: AUDIT1101 pid=3820 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:30 fedora audit[3820]: AUDIT1103 pid=3820 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:30 fedora systemd-logind[1600]: New session '11' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:30 fedora (systemd)[3820]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60581) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:30 fedora audit[3820]: AUDIT1105 pid=3820 uid=0 auid=60581 ses=11 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:31 fedora systemd[1]: Started session-c11.scope - Session c11 of User gdm-greeter-2.
+Դեկ 08 02:00:31 fedora gdm-launch-environment][3806]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60581) by (uid=0)
+Դեկ 08 02:00:31 fedora audit[3806]: AUDIT1105 pid=3806 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora gnome-shell[3870]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:31 fedora systemd[3820]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60581/gnome-shell-disable-extensions).
+Դեկ 08 02:00:31 fedora gdm-launch-environment][3806]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:31 fedora audit[3806]: AUDIT1106 pid=3806 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora audit[3806]: AUDIT1104 pid=3806 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: Child process -3838 was already dead.
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: Child process -3838 was already dead.
+Դեկ 08 02:00:31 fedora audit[3911]: AUDIT1100 pid=3911 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora audit[3911]: AUDIT1101 pid=3911 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora audit[3911]: AUDIT1103 pid=3911 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora systemd-logind[1600]: New session 'c12' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:31 fedora audit[3927]: AUDIT1101 pid=3927 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:31 fedora audit[3927]: AUDIT1103 pid=3927 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:31 fedora systemd-logind[1600]: New session '12' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:31 fedora (systemd)[3927]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60582) by gdm-greeter(uid=0)
+Դեկ 08 02:00:31 fedora audit[3927]: AUDIT1105 pid=3927 uid=0 auid=60582 ses=12 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:31 fedora systemd[1]: Started session-c12.scope - Session c12 of User gdm-greeter.
+Դեկ 08 02:00:31 fedora gdm-launch-environment][3911]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60582) by (uid=0)
+Դեկ 08 02:00:31 fedora audit[3911]: AUDIT1105 pid=3911 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora gnome-shell[3996]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:31 fedora systemd[3927]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60582/gnome-shell-disable-extensions).
+Դեկ 08 02:00:31 fedora gdm-launch-environment][3911]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:31 fedora audit[3911]: AUDIT1106 pid=3911 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora audit[3911]: AUDIT1104 pid=3911 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: Child process -3944 was already dead.
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:31 fedora gdm[3481]: Gdm: Child process -3944 was already dead.
+Դեկ 08 02:00:31 fedora audit[4019]: AUDIT1100 pid=4019 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora audit[4019]: AUDIT1101 pid=4019 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:31 fedora audit[4019]: AUDIT1103 pid=4019 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:32 fedora systemd-logind[1600]: New session 'c13' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:32 fedora audit[4034]: AUDIT1101 pid=4034 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:32 fedora audit[4034]: AUDIT1103 pid=4034 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:32 fedora systemd-logind[1600]: New session '13' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:32 fedora (systemd)[4034]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60583) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:32 fedora audit[4034]: AUDIT1105 pid=4034 uid=0 auid=60583 ses=13 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:32 fedora systemd[1]: Started session-c13.scope - Session c13 of User gdm-greeter-2.
+Դեկ 08 02:00:32 fedora gdm-launch-environment][4019]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60583) by (uid=0)
+Դեկ 08 02:00:32 fedora audit[4019]: AUDIT1105 pid=4019 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:32 fedora gnome-shell[4085]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:32 fedora systemd[4034]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60583/gnome-shell-disable-extensions).
+Դեկ 08 02:00:32 fedora gdm-launch-environment][4019]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:32 fedora audit[4019]: AUDIT1106 pid=4019 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:32 fedora audit[4019]: AUDIT1104 pid=4019 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:32 fedora gdm[3481]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:32 fedora gdm[3481]: Gdm: Child process -4055 was already dead.
+Դեկ 08 02:00:42 fedora audit[4154]: AUDIT1100 pid=4154 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora audit[4154]: AUDIT1101 pid=4154 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora audit[4154]: AUDIT1103 pid=4154 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora systemd-logind[1600]: New session 'c14' of user 'gdm-greeter' with class 'greeter' and type 'x11'.
+Դեկ 08 02:00:42 fedora systemd[1]: Started session-c14.scope - Session c14 of User gdm-greeter.
+Դեկ 08 02:00:42 fedora gdm-launch-environment][4154]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60584) by (uid=0)
+Դեկ 08 02:00:42 fedora audit[4154]: AUDIT1105 pid=4154 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora gdm[3481]: Gdm: GdmSession: no session desktop files installed, aborting...
+Դեկ 08 02:00:42 fedora audit[3481]: ANOM_ABEND auid=4294967295 uid=0 gid=0 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 pid=3481 comm="gdm" exe="/usr/bin/gdm" sig=5 res=1
+Դեկ 08 02:00:42 fedora kernel: traps: gdm[3481] trap int3 ip:7f81ac9cc138 sp:7ffd329db2d0 error:0 in libglib-2.0.so.0.8600.2[47138,7f81ac985000+a6000]
+Դեկ 08 02:00:42 fedora systemd-coredump[4183]: Process 3481 (gdm) of user 0 terminated abnormally with signal 5/TRAP, processing...
+Դեկ 08 02:00:42 fedora systemd-coredump[4184]: Process 3481 (gdm) of user 0 dumped core.
+                                                  Module /usr/bin/gdm from rpm gdm-49.2-2.fc43.x86_64
+                                                  #2  0x000055d3457f6253 get_fallback_session_name (/usr/bin/gdm + 0x2c253)
+                                                  #3  0x000055d3457ffba5 gdm_session_start_session (/usr/bin/gdm + 0x35ba5)
+                                                  #11 0x000055d3457fb9a1 on_opened (/usr/bin/gdm + 0x319a1)
+                                                  #24 0x000055d3457d0565 main (/usr/bin/gdm + 0x6565)
+                                                  #27 0x000055d3457d08b5 _start (/usr/bin/gdm + 0x68b5)
+                                                  #7  0x000055d3457df6a7 gdm_dynamic_user_varlink_worker (/usr/bin/gdm + 0x156a7)
+Դեկ 08 02:00:42 fedora systemd[1]: gdm.service: Main process exited, code=dumped, status=5/TRAP
+Դեկ 08 02:00:42 fedora audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:42 fedora systemd[1]: gdm.service: Failed with result 'core-dump'.
+Դեկ 08 02:00:42 fedora systemd[1]: gdm.service: Triggering OnFailure= dependencies.
+Դեկ 08 02:00:42 fedora systemd[1]: gdm.service: Scheduled restart job, restart counter is at 2.
+Դեկ 08 02:00:42 fedora systemd[1]: Starting gdm.service - GNOME Display Manager...
+Դեկ 08 02:00:42 fedora systemd[1]: Started gdm.service - GNOME Display Manager.
+Դեկ 08 02:00:42 fedora audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:42 fedora audit[4205]: AUDIT1100 pid=4205 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora audit[4205]: AUDIT1101 pid=4205 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora audit[4205]: AUDIT1103 pid=4205 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:42 fedora systemd-logind[1600]: New session 'c15' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:42 fedora audit[4215]: AUDIT1101 pid=4215 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:42 fedora audit[4215]: AUDIT1103 pid=4215 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:42 fedora systemd-logind[1600]: New session '14' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:42 fedora (systemd)[4215]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60578) by gdm-greeter(uid=0)
+Դեկ 08 02:00:42 fedora audit[4215]: AUDIT1105 pid=4215 uid=0 auid=60578 ses=14 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:43 fedora systemd[1]: Started session-c15.scope - Session c15 of User gdm-greeter.
+Դեկ 08 02:00:43 fedora gdm-launch-environment][4205]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60578) by (uid=0)
+Դեկ 08 02:00:43 fedora audit[4205]: AUDIT1105 pid=4205 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora gnome-shell[4286]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:43 fedora systemd[4215]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60578/gnome-shell-disable-extensions).
+Դեկ 08 02:00:43 fedora gdm-launch-environment][4205]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:43 fedora audit[4205]: AUDIT1106 pid=4205 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora audit[4205]: AUDIT1104 pid=4205 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: Child process -4234 was already dead.
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: Child process -4234 was already dead.
+Դեկ 08 02:00:43 fedora audit[4309]: AUDIT1100 pid=4309 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora audit[4309]: AUDIT1101 pid=4309 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora audit[4309]: AUDIT1103 pid=4309 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora systemd-logind[1600]: New session 'c16' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:43 fedora audit[4323]: AUDIT1101 pid=4323 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:43 fedora audit[4323]: AUDIT1103 pid=4323 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:43 fedora systemd-logind[1600]: New session '15' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:43 fedora (systemd)[4323]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60579) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:43 fedora audit[4323]: AUDIT1105 pid=4323 uid=0 auid=60579 ses=15 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:43 fedora systemd[1]: Started session-c16.scope - Session c16 of User gdm-greeter-2.
+Դեկ 08 02:00:43 fedora gdm-launch-environment][4309]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60579) by (uid=0)
+Դեկ 08 02:00:43 fedora audit[4309]: AUDIT1105 pid=4309 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora gnome-shell[4372]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:43 fedora systemd[4323]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60579/gnome-shell-disable-extensions).
+Դեկ 08 02:00:43 fedora audit[4309]: AUDIT1106 pid=4309 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora audit[4309]: AUDIT1104 pid=4309 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora gdm-launch-environment][4309]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: Child process -4342 was already dead.
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:43 fedora gdm[4199]: Gdm: Child process -4342 was already dead.
+Դեկ 08 02:00:43 fedora audit[4415]: AUDIT1100 pid=4415 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora audit[4415]: AUDIT1101 pid=4415 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora audit[4415]: AUDIT1103 pid=4415 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:43 fedora systemd-logind[1600]: New session 'c17' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:43 fedora audit[4432]: AUDIT1101 pid=4432 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:43 fedora audit[4432]: AUDIT1103 pid=4432 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:43 fedora systemd-logind[1600]: New session '16' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:43 fedora (systemd)[4432]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60580) by gdm-greeter(uid=0)
+Դեկ 08 02:00:43 fedora audit[4432]: AUDIT1105 pid=4432 uid=0 auid=60580 ses=16 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:44 fedora systemd[1]: Started session-c17.scope - Session c17 of User gdm-greeter.
+Դեկ 08 02:00:44 fedora gdm-launch-environment][4415]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60580) by (uid=0)
+Դեկ 08 02:00:44 fedora audit[4415]: AUDIT1105 pid=4415 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora gnome-shell[4504]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:44 fedora systemd[4432]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60580/gnome-shell-disable-extensions).
+Դեկ 08 02:00:44 fedora gdm-launch-environment][4415]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:44 fedora audit[4415]: AUDIT1106 pid=4415 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora audit[4415]: AUDIT1104 pid=4415 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: Child process -4449 was already dead.
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: Child process -4449 was already dead.
+Դեկ 08 02:00:44 fedora audit[4527]: AUDIT1100 pid=4527 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora audit[4527]: AUDIT1101 pid=4527 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora audit[4527]: AUDIT1103 pid=4527 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora systemd-logind[1600]: New session 'c18' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:44 fedora audit[4541]: AUDIT1101 pid=4541 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:44 fedora audit[4541]: AUDIT1103 pid=4541 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:44 fedora systemd-logind[1600]: New session '17' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:44 fedora (systemd)[4541]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60581) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:44 fedora audit[4541]: AUDIT1105 pid=4541 uid=0 auid=60581 ses=17 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:44 fedora systemd[1]: Started session-c18.scope - Session c18 of User gdm-greeter-2.
+Դեկ 08 02:00:44 fedora gdm-launch-environment][4527]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60581) by (uid=0)
+Դեկ 08 02:00:44 fedora audit[4527]: AUDIT1105 pid=4527 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora gnome-shell[4589]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:44 fedora systemd[4541]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60581/gnome-shell-disable-extensions).
+Դեկ 08 02:00:44 fedora audit[4527]: AUDIT1106 pid=4527 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora audit[4527]: AUDIT1104 pid=4527 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora gdm-launch-environment][4527]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: Child process -4559 was already dead.
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:44 fedora gdm[4199]: Gdm: Child process -4559 was already dead.
+Դեկ 08 02:00:44 fedora audit[4634]: AUDIT1100 pid=4634 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora audit[4634]: AUDIT1101 pid=4634 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:44 fedora audit[4634]: AUDIT1103 pid=4634 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora systemd-logind[1600]: New session 'c19' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:45 fedora audit[4649]: AUDIT1101 pid=4649 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:45 fedora audit[4649]: AUDIT1103 pid=4649 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:45 fedora systemd-logind[1600]: New session '18' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:45 fedora (systemd)[4649]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60582) by gdm-greeter(uid=0)
+Դեկ 08 02:00:45 fedora audit[4649]: AUDIT1105 pid=4649 uid=0 auid=60582 ses=18 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:45 fedora systemd[1]: Started session-c19.scope - Session c19 of User gdm-greeter.
+Դեկ 08 02:00:45 fedora gdm-launch-environment][4634]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60582) by (uid=0)
+Դեկ 08 02:00:45 fedora audit[4634]: AUDIT1105 pid=4634 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora gnome-shell[4716]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:45 fedora systemd[4649]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60582/gnome-shell-disable-extensions).
+Դեկ 08 02:00:45 fedora gdm-launch-environment][4634]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:45 fedora audit[4634]: AUDIT1106 pid=4634 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora audit[4634]: AUDIT1104 pid=4634 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:45 fedora gdm[4199]: Gdm: Child process -4666 was already dead.
+Դեկ 08 02:00:45 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:45 fedora gdm[4199]: Gdm: Child process -4666 was already dead.
+Դեկ 08 02:00:45 fedora audit[4739]: AUDIT1100 pid=4739 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora audit[4739]: AUDIT1101 pid=4739 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora audit[4739]: AUDIT1103 pid=4739 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:45 fedora systemd-logind[1600]: New session 'c20' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:45 fedora audit[4756]: AUDIT1101 pid=4756 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:45 fedora audit[4756]: AUDIT1103 pid=4756 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:45 fedora systemd-logind[1600]: New session '19' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:45 fedora (systemd)[4756]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60583) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:45 fedora audit[4756]: AUDIT1105 pid=4756 uid=0 auid=60583 ses=19 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:45 fedora systemd[1]: Started session-c20.scope - Session c20 of User gdm-greeter-2.
+Դեկ 08 02:00:45 fedora gdm-launch-environment][4739]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60583) by (uid=0)
+Դեկ 08 02:00:45 fedora audit[4739]: AUDIT1105 pid=4739 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:46 fedora gnome-shell[4805]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:46 fedora systemd[4756]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60583/gnome-shell-disable-extensions).
+Դեկ 08 02:00:46 fedora gdm-launch-environment][4739]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:46 fedora audit[4739]: AUDIT1106 pid=4739 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:46 fedora audit[4739]: AUDIT1104 pid=4739 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:46 fedora gdm[4199]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:46 fedora gdm[4199]: Gdm: Child process -4775 was already dead.
+Դեկ 08 02:00:56 fedora audit[4878]: AUDIT1100 pid=4878 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora audit[4878]: AUDIT1101 pid=4878 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora audit[4878]: AUDIT1103 pid=4878 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora systemd-logind[1600]: New session 'c21' of user 'gdm-greeter' with class 'greeter' and type 'x11'.
+Դեկ 08 02:00:56 fedora systemd[1]: Started session-c21.scope - Session c21 of User gdm-greeter.
+Դեկ 08 02:00:56 fedora gdm-launch-environment][4878]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60584) by (uid=0)
+Դեկ 08 02:00:56 fedora audit[4878]: AUDIT1105 pid=4878 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora gdm[4199]: Gdm: GdmSession: no session desktop files installed, aborting...
+Դեկ 08 02:00:56 fedora audit[4199]: ANOM_ABEND auid=4294967295 uid=0 gid=0 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 pid=4199 comm="gdm" exe="/usr/bin/gdm" sig=5 res=1
+Դեկ 08 02:00:56 fedora kernel: traps: gdm[4199] trap int3 ip:7f37c8f63138 sp:7fff0516fdf0 error:0 in libglib-2.0.so.0.8600.2[47138,7f37c8f1c000+a6000]
+Դեկ 08 02:00:56 fedora systemd-coredump[4907]: Process 4199 (gdm) of user 0 terminated abnormally with signal 5/TRAP, processing...
+Դեկ 08 02:00:56 fedora systemd-coredump[4908]: Process 4199 (gdm) of user 0 dumped core.
+                                                  Module /usr/bin/gdm from rpm gdm-49.2-2.fc43.x86_64
+                                                  #2  0x000055e6d092e253 get_fallback_session_name (/usr/bin/gdm + 0x2c253)
+                                                  #3  0x000055e6d0937ba5 gdm_session_start_session (/usr/bin/gdm + 0x35ba5)
+                                                  #11 0x000055e6d09339a1 on_opened (/usr/bin/gdm + 0x319a1)
+                                                  #24 0x000055e6d0908565 main (/usr/bin/gdm + 0x6565)
+                                                  #27 0x000055e6d09088b5 _start (/usr/bin/gdm + 0x68b5)
+                                                  #7  0x000055e6d09176a7 gdm_dynamic_user_varlink_worker (/usr/bin/gdm + 0x156a7)
+Դեկ 08 02:00:56 fedora audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:56 fedora systemd[1]: gdm.service: Main process exited, code=dumped, status=5/TRAP
+Դեկ 08 02:00:56 fedora systemd[1]: gdm.service: Failed with result 'core-dump'.
+Դեկ 08 02:00:56 fedora systemd[1]: gdm.service: Triggering OnFailure= dependencies.
+Դեկ 08 02:00:56 fedora systemd[1]: gdm.service: Scheduled restart job, restart counter is at 3.
+Դեկ 08 02:00:56 fedora systemd[1]: Starting gdm.service - GNOME Display Manager...
+Դեկ 08 02:00:56 fedora systemd[1]: Started gdm.service - GNOME Display Manager.
+Դեկ 08 02:00:56 fedora audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:56 fedora audit[4925]: AUDIT1100 pid=4925 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora audit[4925]: AUDIT1101 pid=4925 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora audit[4925]: AUDIT1103 pid=4925 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:56 fedora systemd-logind[1600]: New session 'c22' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:56 fedora audit[4934]: AUDIT1101 pid=4934 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:56 fedora audit[4934]: AUDIT1103 pid=4934 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:56 fedora systemd-logind[1600]: New session '20' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:56 fedora (systemd)[4934]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60578) by gdm-greeter(uid=0)
+Դեկ 08 02:00:56 fedora audit[4934]: AUDIT1105 pid=4934 uid=0 auid=60578 ses=20 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:57 fedora systemd[1]: Started session-c22.scope - Session c22 of User gdm-greeter.
+Դեկ 08 02:00:57 fedora gdm-launch-environment][4925]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60578) by (uid=0)
+Դեկ 08 02:00:57 fedora audit[4925]: AUDIT1105 pid=4925 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora gnome-shell[5004]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:57 fedora systemd[4934]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60578/gnome-shell-disable-extensions).
+Դեկ 08 02:00:57 fedora gdm-launch-environment][4925]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:57 fedora audit[4925]: AUDIT1106 pid=4925 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora audit[4925]: AUDIT1104 pid=4925 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: Child process -4954 was already dead.
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: Child process -4954 was already dead.
+Դեկ 08 02:00:57 fedora audit[5026]: AUDIT1100 pid=5026 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora audit[5026]: AUDIT1101 pid=5026 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora audit[5026]: AUDIT1103 pid=5026 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora systemd-logind[1600]: New session 'c23' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:57 fedora audit[5041]: AUDIT1101 pid=5041 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:57 fedora audit[5041]: AUDIT1103 pid=5041 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:57 fedora systemd-logind[1600]: New session '21' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:57 fedora (systemd)[5041]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60579) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:57 fedora audit[5041]: AUDIT1105 pid=5041 uid=0 auid=60579 ses=21 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:57 fedora systemd[1]: Started session-c23.scope - Session c23 of User gdm-greeter-2.
+Դեկ 08 02:00:57 fedora gdm-launch-environment][5026]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60579) by (uid=0)
+Դեկ 08 02:00:57 fedora audit[5026]: AUDIT1105 pid=5026 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora gnome-shell[5088]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:57 fedora systemd[5041]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60579/gnome-shell-disable-extensions).
+Դեկ 08 02:00:57 fedora gdm-launch-environment][5026]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:57 fedora audit[5026]: AUDIT1106 pid=5026 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora audit[5026]: AUDIT1104 pid=5026 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: Child process -5058 was already dead.
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:57 fedora gdm[4919]: Gdm: Child process -5058 was already dead.
+Դեկ 08 02:00:57 fedora audit[5130]: AUDIT1100 pid=5130 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora audit[5130]: AUDIT1101 pid=5130 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora audit[5130]: AUDIT1103 pid=5130 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:57 fedora systemd-logind[1600]: New session 'c24' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:57 fedora audit[5148]: AUDIT1101 pid=5148 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:57 fedora audit[5148]: AUDIT1103 pid=5148 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:58 fedora systemd-logind[1600]: New session '22' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:58 fedora (systemd)[5148]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60580) by gdm-greeter(uid=0)
+Դեկ 08 02:00:58 fedora audit[5148]: AUDIT1105 pid=5148 uid=0 auid=60580 ses=22 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:58 fedora systemd[1]: Started session-c24.scope - Session c24 of User gdm-greeter.
+Դեկ 08 02:00:58 fedora gdm-launch-environment][5130]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60580) by (uid=0)
+Դեկ 08 02:00:58 fedora audit[5130]: AUDIT1105 pid=5130 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:58 fedora gnome-shell[5215]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:58 fedora systemd[5148]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60580/gnome-shell-disable-extensions).
+Դեկ 08 02:00:58 fedora gdm-launch-environment][5130]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:58 fedora audit[5130]: AUDIT1106 pid=5130 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:58 fedora audit[5130]: AUDIT1104 pid=5130 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:58 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:58 fedora gdm[4919]: Gdm: Child process -5165 was already dead.
+Դեկ 08 02:00:58 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:58 fedora gdm[4919]: Gdm: Child process -5165 was already dead.
+Դեկ 08 02:00:58 fedora audit[5238]: AUDIT1100 pid=5238 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:58 fedora audit[5238]: AUDIT1101 pid=5238 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:58 fedora audit[5238]: AUDIT1103 pid=5238 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:58 fedora systemd-logind[1600]: New session 'c25' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:58 fedora audit[5252]: AUDIT1101 pid=5252 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:58 fedora audit[5252]: AUDIT1103 pid=5252 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:58 fedora systemd-logind[1600]: New session '23' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:58 fedora (systemd)[5252]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60581) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:58 fedora audit[5252]: AUDIT1105 pid=5252 uid=0 auid=60581 ses=23 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:58 fedora systemd[1]: Started session-c25.scope - Session c25 of User gdm-greeter-2.
+Դեկ 08 02:00:58 fedora gdm-launch-environment][5238]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60581) by (uid=0)
+Դեկ 08 02:00:58 fedora audit[5238]: AUDIT1105 pid=5238 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora gnome-shell[5304]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:59 fedora systemd[5252]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60581/gnome-shell-disable-extensions).
+Դեկ 08 02:00:59 fedora gdm-launch-environment][5238]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:00:59 fedora audit[5238]: AUDIT1106 pid=5238 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora audit[5238]: AUDIT1104 pid=5238 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: Child process -5274 was already dead.
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: Child process -5274 was already dead.
+Դեկ 08 02:00:59 fedora audit[5344]: AUDIT1100 pid=5344 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora audit[5344]: AUDIT1101 pid=5344 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora audit[5344]: AUDIT1103 pid=5344 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora systemd-logind[1600]: New session 'c26' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:59 fedora audit[5361]: AUDIT1101 pid=5361 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:59 fedora audit[5361]: AUDIT1103 pid=5361 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:59 fedora systemd-logind[1600]: New session '24' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:59 fedora (systemd)[5361]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60582) by gdm-greeter(uid=0)
+Դեկ 08 02:00:59 fedora audit[5361]: AUDIT1105 pid=5361 uid=0 auid=60582 ses=24 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:59 fedora systemd[1]: Started session-c26.scope - Session c26 of User gdm-greeter.
+Դեկ 08 02:00:59 fedora gdm-launch-environment][5344]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60582) by (uid=0)
+Դեկ 08 02:00:59 fedora audit[5344]: AUDIT1105 pid=5344 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora gnome-shell[5428]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:00:59 fedora systemd[5361]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60582/gnome-shell-disable-extensions).
+Դեկ 08 02:00:59 fedora gdm-launch-environment][5344]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:00:59 fedora audit[5344]: AUDIT1106 pid=5344 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora audit[5344]: AUDIT1104 pid=5344 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: Child process -5378 was already dead.
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:00:59 fedora gdm[4919]: Gdm: Child process -5378 was already dead.
+Դեկ 08 02:00:59 fedora audit[5451]: AUDIT1100 pid=5451 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora audit[5451]: AUDIT1101 pid=5451 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora audit[5451]: AUDIT1103 pid=5451 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:00:59 fedora systemd-logind[1600]: New session 'c27' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:00:59 fedora audit[5465]: AUDIT1101 pid=5465 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:59 fedora audit[5465]: AUDIT1103 pid=5465 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:00:59 fedora systemd-logind[1600]: New session '25' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:00:59 fedora (systemd)[5465]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60583) by gdm-greeter-2(uid=0)
+Դեկ 08 02:00:59 fedora audit[5465]: AUDIT1105 pid=5465 uid=0 auid=60583 ses=25 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:00:59 fedora systemd[1]: Started session-c27.scope - Session c27 of User gdm-greeter-2.
+Դեկ 08 02:00:59 fedora gdm-launch-environment][5451]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60583) by (uid=0)
+Դեկ 08 02:00:59 fedora audit[5451]: AUDIT1105 pid=5451 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:00 fedora gnome-shell[5532]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:00 fedora systemd[5465]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60583/gnome-shell-disable-extensions).
+Դեկ 08 02:01:00 fedora gdm-launch-environment][5451]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:01:00 fedora audit[5451]: AUDIT1106 pid=5451 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:00 fedora audit[5451]: AUDIT1104 pid=5451 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:00 fedora gdm[4919]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:00 fedora gdm[4919]: Gdm: Child process -5485 was already dead.
+Դեկ 08 02:01:10 fedora audit[5607]: AUDIT1100 pid=5607 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora audit[5607]: AUDIT1101 pid=5607 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora audit[5607]: AUDIT1103 pid=5607 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora systemd-logind[1600]: New session 'c28' of user 'gdm-greeter' with class 'greeter' and type 'x11'.
+Դեկ 08 02:01:10 fedora systemd[1]: Started session-c28.scope - Session c28 of User gdm-greeter.
+Դեկ 08 02:01:10 fedora gdm-launch-environment][5607]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60584) by (uid=0)
+Դեկ 08 02:01:10 fedora audit[5607]: AUDIT1105 pid=5607 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora gdm[4919]: Gdm: GdmSession: no session desktop files installed, aborting...
+Դեկ 08 02:01:10 fedora audit[4919]: ANOM_ABEND auid=4294967295 uid=0 gid=0 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 pid=4919 comm="gdm" exe="/usr/bin/gdm" sig=5 res=1
+Դեկ 08 02:01:10 fedora kernel: traps: gdm[4919] trap int3 ip:7f6ee8ec7138 sp:7fff5d2cfd10 error:0 in libglib-2.0.so.0.8600.2[47138,7f6ee8e80000+a6000]
+Դեկ 08 02:01:10 fedora systemd-coredump[5636]: Process 4919 (gdm) of user 0 terminated abnormally with signal 5/TRAP, processing...
+Դեկ 08 02:01:10 fedora systemd-coredump[5637]: Process 4919 (gdm) of user 0 dumped core.
+                                                  Module /usr/bin/gdm from rpm gdm-49.2-2.fc43.x86_64
+                                                  #2  0x000055a5cfa6f253 get_fallback_session_name (/usr/bin/gdm + 0x2c253)
+                                                  #3  0x000055a5cfa78ba5 gdm_session_start_session (/usr/bin/gdm + 0x35ba5)
+                                                  #11 0x000055a5cfa749a1 on_opened (/usr/bin/gdm + 0x319a1)
+                                                  #24 0x000055a5cfa49565 main (/usr/bin/gdm + 0x6565)
+                                                  #27 0x000055a5cfa498b5 _start (/usr/bin/gdm + 0x68b5)
+                                                  #7  0x000055a5cfa586a7 gdm_dynamic_user_varlink_worker (/usr/bin/gdm + 0x156a7)
+Դեկ 08 02:01:10 fedora audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:10 fedora systemd[1]: gdm.service: Main process exited, code=dumped, status=5/TRAP
+Դեկ 08 02:01:10 fedora systemd[1]: gdm.service: Failed with result 'core-dump'.
+Դեկ 08 02:01:10 fedora systemd[1]: gdm.service: Triggering OnFailure= dependencies.
+Դեկ 08 02:01:10 fedora systemd[1]: gdm.service: Scheduled restart job, restart counter is at 4.
+Դեկ 08 02:01:10 fedora systemd[1]: Starting gdm.service - GNOME Display Manager...
+Դեկ 08 02:01:10 fedora systemd[1]: Started gdm.service - GNOME Display Manager.
+Դեկ 08 02:01:10 fedora audit[1]: SERVICE_START pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:10 fedora audit[5654]: AUDIT1100 pid=5654 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora audit[5654]: AUDIT1101 pid=5654 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora audit[5654]: AUDIT1103 pid=5654 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:10 fedora systemd-logind[1600]: New session 'c29' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:01:10 fedora audit[5663]: AUDIT1101 pid=5663 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:10 fedora audit[5663]: AUDIT1103 pid=5663 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:10 fedora systemd-logind[1600]: New session '26' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:01:10 fedora (systemd)[5663]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60578) by gdm-greeter(uid=0)
+Դեկ 08 02:01:10 fedora audit[5663]: AUDIT1105 pid=5663 uid=0 auid=60578 ses=26 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:11 fedora systemd[1]: Started session-c29.scope - Session c29 of User gdm-greeter.
+Դեկ 08 02:01:11 fedora gdm-launch-environment][5654]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60578) by (uid=0)
+Դեկ 08 02:01:11 fedora audit[5654]: AUDIT1105 pid=5654 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora gnome-shell[5734]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:11 fedora systemd[5663]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60578/gnome-shell-disable-extensions).
+Դեկ 08 02:01:11 fedora gdm-launch-environment][5654]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:01:11 fedora audit[5654]: AUDIT1106 pid=5654 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora audit[5654]: AUDIT1104 pid=5654 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: Child process -5684 was already dead.
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: Child process -5684 was already dead.
+Դեկ 08 02:01:11 fedora audit[5757]: AUDIT1100 pid=5757 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora audit[5757]: AUDIT1101 pid=5757 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora audit[5757]: AUDIT1103 pid=5757 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora systemd-logind[1600]: New session 'c30' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:01:11 fedora audit[5772]: AUDIT1101 pid=5772 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:11 fedora audit[5772]: AUDIT1103 pid=5772 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:11 fedora systemd-logind[1600]: New session '27' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:01:11 fedora (systemd)[5772]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60579) by gdm-greeter-2(uid=0)
+Դեկ 08 02:01:11 fedora audit[5772]: AUDIT1105 pid=5772 uid=0 auid=60579 ses=27 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:11 fedora systemd[1]: Started session-c30.scope - Session c30 of User gdm-greeter-2.
+Դեկ 08 02:01:11 fedora gdm-launch-environment][5757]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60579) by (uid=0)
+Դեկ 08 02:01:11 fedora audit[5757]: AUDIT1105 pid=5757 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora gnome-shell[5819]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:11 fedora systemd[5772]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60579/gnome-shell-disable-extensions).
+Դեկ 08 02:01:11 fedora gdm-launch-environment][5757]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:01:11 fedora audit[5757]: AUDIT1106 pid=5757 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora audit[5757]: AUDIT1104 pid=5757 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: Child process -5789 was already dead.
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:11 fedora gdm[5648]: Gdm: Child process -5789 was already dead.
+Դեկ 08 02:01:11 fedora audit[5862]: AUDIT1100 pid=5862 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora audit[5862]: AUDIT1101 pid=5862 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora audit[5862]: AUDIT1103 pid=5862 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:11 fedora systemd-logind[1600]: New session 'c31' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:01:12 fedora audit[5876]: AUDIT1101 pid=5876 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:12 fedora audit[5876]: AUDIT1103 pid=5876 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:12 fedora systemd-logind[1600]: New session '28' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:01:12 fedora (systemd)[5876]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60580) by gdm-greeter(uid=0)
+Դեկ 08 02:01:12 fedora audit[5876]: AUDIT1105 pid=5876 uid=0 auid=60580 ses=28 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:12 fedora systemd[1]: Started session-c31.scope - Session c31 of User gdm-greeter.
+Դեկ 08 02:01:12 fedora gdm-launch-environment][5862]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60580) by (uid=0)
+Դեկ 08 02:01:12 fedora audit[5862]: AUDIT1105 pid=5862 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:12 fedora gnome-shell[5947]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:12 fedora systemd[5876]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60580/gnome-shell-disable-extensions).
+Դեկ 08 02:01:12 fedora gdm-launch-environment][5862]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:01:12 fedora audit[5862]: AUDIT1106 pid=5862 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:12 fedora audit[5862]: AUDIT1104 pid=5862 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:12 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:12 fedora gdm[5648]: Gdm: Child process -5897 was already dead.
+Դեկ 08 02:01:12 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:12 fedora gdm[5648]: Gdm: Child process -5897 was already dead.
+Դեկ 08 02:01:12 fedora audit[5970]: AUDIT1100 pid=5970 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:12 fedora audit[5970]: AUDIT1101 pid=5970 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:12 fedora audit[5970]: AUDIT1103 pid=5970 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:12 fedora systemd-logind[1600]: New session 'c32' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:01:12 fedora audit[5986]: AUDIT1101 pid=5986 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:12 fedora audit[5986]: AUDIT1103 pid=5986 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:12 fedora systemd-logind[1600]: New session '29' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:01:12 fedora (systemd)[5986]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60581) by gdm-greeter-2(uid=0)
+Դեկ 08 02:01:12 fedora audit[5986]: AUDIT1105 pid=5986 uid=0 auid=60581 ses=29 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:12 fedora systemd[1]: Started session-c32.scope - Session c32 of User gdm-greeter-2.
+Դեկ 08 02:01:12 fedora gdm-launch-environment][5970]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60581) by (uid=0)
+Դեկ 08 02:01:12 fedora audit[5970]: AUDIT1105 pid=5970 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora gnome-shell[6036]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:13 fedora systemd[5986]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60581/gnome-shell-disable-extensions).
+Դեկ 08 02:01:13 fedora gdm-launch-environment][5970]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:01:13 fedora audit[5970]: AUDIT1106 pid=5970 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora audit[5970]: AUDIT1104 pid=5970 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: Child process -6004 was already dead.
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: Child process -6004 was already dead.
+Դեկ 08 02:01:13 fedora audit[6078]: AUDIT1100 pid=6078 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora audit[6078]: AUDIT1101 pid=6078 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora audit[6078]: AUDIT1103 pid=6078 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora systemd-logind[1600]: New session 'c33' of user 'gdm-greeter' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:01:13 fedora audit[6095]: AUDIT1101 pid=6095 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:13 fedora audit[6095]: AUDIT1103 pid=6095 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:13 fedora systemd-logind[1600]: New session '30' of user 'gdm-greeter' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:01:13 fedora (systemd)[6095]: pam_unix(systemd-user:session): session opened for user gdm-greeter(uid=60582) by gdm-greeter(uid=0)
+Դեկ 08 02:01:13 fedora audit[6095]: AUDIT1105 pid=6095 uid=0 auid=60582 ses=30 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:13 fedora systemd[1]: Started session-c33.scope - Session c33 of User gdm-greeter.
+Դեկ 08 02:01:13 fedora gdm-launch-environment][6078]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter(uid=60582) by (uid=0)
+Դեկ 08 02:01:13 fedora audit[6078]: AUDIT1105 pid=6078 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora gnome-shell[6163]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:13 fedora systemd[6095]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60582/gnome-shell-disable-extensions).
+Դեկ 08 02:01:13 fedora gdm-launch-environment][6078]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter
+Դեկ 08 02:01:13 fedora audit[6078]: AUDIT1106 pid=6078 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora audit[6078]: AUDIT1104 pid=6078 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: Child process -6112 was already dead.
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:13 fedora gdm[5648]: Gdm: Child process -6112 was already dead.
+Դեկ 08 02:01:13 fedora audit[6186]: AUDIT1100 pid=6186 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:authentication grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora audit[6186]: AUDIT1101 pid=6186 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:accounting grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora audit[6186]: AUDIT1103 pid=6186 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:13 fedora systemd-logind[1600]: New session 'c34' of user 'gdm-greeter-2' with class 'greeter' and type 'wayland'.
+Դեկ 08 02:01:13 fedora audit[6200]: AUDIT1101 pid=6200 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:accounting grantors=pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:13 fedora audit[6200]: AUDIT1103 pid=6200 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='op=PAM:setcred grantors=? acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=failed'
+Դեկ 08 02:01:13 fedora systemd-logind[1600]: New session '31' of user 'gdm-greeter-2' with class 'manager-early' and type 'unspecified'.
+Դեկ 08 02:01:13 fedora (systemd)[6200]: pam_unix(systemd-user:session): session opened for user gdm-greeter-2(uid=60583) by gdm-greeter-2(uid=0)
+Դեկ 08 02:01:13 fedora audit[6200]: AUDIT1105 pid=6200 uid=0 auid=60583 ses=31 subj=system_u:system_r:init_t:s0 msg='op=PAM:session_open grantors=pam_selinux,pam_selinux,pam_loginuid,pam_keyinit,pam_namespace,pam_systemd_home,pam_umask,pam_keyinit,pam_limits,pam_systemd,pam_unix acct="gdm-greeter-2" exe="/usr/lib/systemd/systemd-executor" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:13 fedora systemd[1]: Started session-c34.scope - Session c34 of User gdm-greeter-2.
+Դեկ 08 02:01:13 fedora gdm-launch-environment][6186]: pam_unix(gdm-launch-environment:session): session opened for user gdm-greeter-2(uid=60583) by (uid=0)
+Դեկ 08 02:01:14 fedora audit[6186]: AUDIT1105 pid=6186 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_open grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:14 fedora gnome-shell[6251]: /usr/bin/gnome-shell: error while loading shared libraries: libEGL.so.1: cannot open shared object file: No such file or directory
+Դեկ 08 02:01:14 fedora systemd[6200]: org.gnome.Shell-disable-extensions.service - Disable GNOME Shell extensions after failure was skipped because of an unmet condition check (ConditionPathExists=/run/user/60583/gnome-shell-disable-extensions).
+Դեկ 08 02:01:14 fedora gdm-launch-environment][6186]: pam_unix(gdm-launch-environment:session): session closed for user gdm-greeter-2
+Դեկ 08 02:01:14 fedora audit[6186]: AUDIT1106 pid=6186 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:session_close grantors=pam_keyinit,pam_keyinit,pam_limits,pam_systemd,pam_unix,pam_umask acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:14 fedora audit[6186]: AUDIT1104 pid=6186 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:xdm_t:s0-s0:c0.c1023 msg='op=PAM:setcred grantors=pam_permit acct="gdm-greeter-2" exe="/usr/libexec/gdm-session-worker" hostname=fedora addr=? terminal=/dev/tty1 res=success'
+Դեկ 08 02:01:14 fedora gdm[5648]: Gdm: GdmDisplay: Session never registered, failing
+Դեկ 08 02:01:14 fedora gdm[5648]: Gdm: Child process -6220 was already dead.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopping session-c14.scope - Session c14 of User gdm-greeter...
+Դեկ 08 02:01:21 fedora systemd[1]: Stopping session-c21.scope - Session c21 of User gdm-greeter...
+Դեկ 08 02:01:21 fedora systemd[1]: Stopping session-c28.scope - Session c28 of User gdm-greeter...
+Դեկ 08 02:01:21 fedora systemd[1]: Stopping session-c7.scope - Session c7 of User gdm-greeter...
+Դեկ 08 02:01:21 fedora systemd[1]: Stopping gdm.service - GNOME Display Manager...
+Դեկ 08 02:01:21 fedora systemd[1]: gdm.service: Deactivated successfully.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopped gdm.service - GNOME Display Manager.
+Դեկ 08 02:01:21 fedora audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=gdm comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'
+Դեկ 08 02:01:21 fedora systemd[1]: Stopped session-c7.scope - Session c7 of User gdm-greeter.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopped session-c28.scope - Session c28 of User gdm-greeter.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopped session-c21.scope - Session c21 of User gdm-greeter.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopped session-c14.scope - Session c14 of User gdm-greeter.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopping nvidia-powerd.service - nvidia-powerd service...
+Դեկ 08 02:01:21 fedora nvidia-powerd[1556]: Quit successfully
+Դեկ 08 02:01:21 fedora systemd[1]: nvidia-powerd.service: Deactivated successfully.
+Դեկ 08 02:01:21 fedora systemd[1]: Stopped nvidia-powerd.service - nvidia-powerd service.
+Դեկ 08 02:01:21 fedora systemd[1]: nvidia-powerd.service: Consumed 1.731s CPU time, 105.5M memory peak.
+Դեկ 08 02:01:21 fedora audit[1]: SERVICE_STOP pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=nvidia-powerd comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=success'

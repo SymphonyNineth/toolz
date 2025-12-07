@@ -126,6 +126,7 @@ export default function BatchRenamer() {
 
     invoke<FilePreviewResult[]>("compute_previews", { files, options })
       .then((results) => {
+        console.log("[DEBUG] Computed preview results:", results);
         setFilePreviews(results);
         setRegexError(undefined);
       })
