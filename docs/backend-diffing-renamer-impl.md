@@ -11,62 +11,62 @@ This document tracks the implementation of the backend diffing refactor for the 
 Set up the fundamental Rust modules and state management.
 
 - [x] **1.1. Add Dependencies**
-    - [x] Update `src-tauri/Cargo.toml` with `dissimilar` and `regex`.
+  - [x] Update `src-tauri/Cargo.toml` with `dissimilar` and `regex`.
 - [x] **1.2. Implement `diff.rs`**
-    - [x] Create `src-tauri/src/diff.rs`.
-    - [x] Implement `DiffSegment`, `DiffSegmentType` types.
-    - [x] Implement `RegexSegment` enum (`Text(String)` / `Group { id, text }`).
-    - [x] Implement `compute_diff` using `dissimilar`.
-    - [x] Implement `get_regex_highlights` - returns FULL segmented string with gaps (not just matches).
-    - [x] Implement `has_capture_groups` using `Regex::captures_len() > 1` (robust, not string heuristic).
-    - [x] **TEST**: Unit tests in `diff.rs` covering:
-        - Simple string diffs (insert/delete/equal).
-        - `get_regex_highlights` returns Text segments for non-matching parts.
-        - `get_regex_highlights` handles multiple capture groups.
-        - `has_capture_groups` returns false for `(?:)`, `\(`, `[(]`.
+  - [x] Create `src-tauri/src/diff.rs`.
+  - [x] Implement `DiffSegment`, `DiffSegmentType` types.
+  - [x] Implement `RegexSegment` enum (`Text(String)` / `Group { id, text }`).
+  - [x] Implement `compute_diff` using `dissimilar`.
+  - [x] Implement `get_regex_highlights` - returns FULL segmented string with gaps (not just matches).
+  - [x] Implement `has_capture_groups` using `Regex::captures_len() > 1` (robust, not string heuristic).
+  - [x] **TEST**: Unit tests in `diff.rs` covering:
+    - Simple string diffs (insert/delete/equal).
+    - `get_regex_highlights` returns Text segments for non-matching parts.
+    - `get_regex_highlights` handles multiple capture groups.
+    - `has_capture_groups` returns false for `(?:)`, `\(`, `[(]`.
 - [x] **1.3. Implement `file_state.rs`**
-    - [x] Create `src-tauri/src/file_state.rs`.
-    - [x] Implement `FileState` struct with `renamer_files: RwLock<Vec<String>>`.
-    - [x] Implement getters/setters.
-    - [x] Register `FileState` in `lib.rs` using `manage()`.
-    - [x] **TEST**: Write unit tests in `file_state.rs` covering:
-        - Concurrent access (read/write).
-        - State clearing.
+  - [x] Create `src-tauri/src/file_state.rs`.
+  - [x] Implement `FileState` struct with `renamer_files: RwLock<Vec<String>>`.
+  - [x] Implement getters/setters.
+  - [x] Register `FileState` in `lib.rs` using `manage()`.
+  - [x] **TEST**: Write unit tests in `file_state.rs` covering:
+    - Concurrent access (read/write).
+    - State clearing.
 
 ## Phase 2: Renamer Backend Integration ✓
 
 Connect the new core logic to the Renamer commands.
 
 - [x] **2.1. Update `rename.rs` Commands**
-    - [x] Modify `list_files_with_progress` to store results in `FileState`.
-    - [x] Implement `compute_previews` command in `src-tauri/src/rename.rs`.
-    - [x] Use `diff::compute_diff` for standard mode, `diff::get_regex_highlights` for regex mode.
-    - [x] Return `Vec<FilePreviewResult>`.
-    - [x] **TEST**: Write integration tests in `rename.rs` covering:
-        - `compute_previews` returns correct `Diff` type for simple search.
-        - `compute_previews` returns correct `RegexGroups` type for capture groups.
-        - `compute_previews` handles empty state correctly.
+  - [x] Modify `list_files_with_progress` to store results in `FileState`.
+  - [x] Implement `compute_previews` command in `src-tauri/src/rename.rs`.
+  - [x] Use `diff::compute_diff` for standard mode, `diff::get_regex_highlights` for regex mode.
+  - [x] Return `Vec<FilePreviewResult>`.
+  - [x] **TEST**: Write integration tests in `rename.rs` covering:
+    - `compute_previews` returns correct `Diff` type for simple search.
+    - `compute_previews` returns correct `RegexGroups` type for capture groups.
+    - `compute_previews` handles empty state correctly.
 - [x] **2.2. Verify `batch_rename` Integration** (kept as-is, state used for previews only)
 
-## Phase 3: Renamer Frontend Refactor
+## Phase 3: Renamer Frontend Refactor ✓
 
 Update the frontend to use the new "backend state" model.
 
-- [ ] **3.1. Update Types**
-    - [ ] Update `src/components/BatchRenamer/types.ts` with `FilePreviewResult`, `DiffSegment`, `RegexSegment`.
-- [ ] **3.2. Refactor `BatchRenamer/index.tsx` Data Flow**
-    - [ ] Remove `selectedPaths` signal (replace with active session tracking if needed, or just rely on backend).
-    - [ ] Remove `computeDiff` and regex logic from frontend.
-    - [ ] Implement `invoke('compute_previews', ...)` effect when controls change.
-    - [ ] Update `selectFiles`/`selectFolders` to only receive counts/status.
-    - [ ] **TEST**: Update component tests to mock the new backend commands.
-- [ ] **3.3. Refactor `FileRow.tsx` Rendering**
-    - [ ] Update component to accept `FilePreviewResult`.
-    - [ ] Implement rendering for `Diff` mode (using `original_segments`).
-    - [ ] Implement rendering for `RegexGroups` mode:
-        - Original column: Render `RegexSegment[]` with color-coded groups.
-        - New Name column: Render `DiffSegment[]` (standard diff).
-    - [ ] **TEST**: Unit tests for `FileRow` checking both visual modes.
-- [ ] **3.4. Cleanup**
-    - [ ] Remove unused `src/utils/diff.ts`.
-    - [ ] Remove unused regex helpers in `renamingUtils.ts`.
+- [x] **3.1. Update Types**
+  - [x] Update `src/components/BatchRenamer/types.ts` with `FilePreviewResult`, `DiffSegment`, `RegexSegment`.
+- [x] **3.2. Refactor `BatchRenamer/index.tsx` Data Flow**
+  - [x] Remove `selectedPaths` signal (replace with active session tracking if needed, or just rely on backend).
+  - [x] Remove `computeDiff` and regex logic from frontend.
+  - [x] Implement `invoke('compute_previews', ...)` effect when controls change.
+  - [x] Update `selectFiles`/`selectFolders` to only receive counts/status.
+  - [x] **TEST**: Update component tests to mock the new backend commands.
+- [x] **3.3. Refactor `FileRow.tsx` Rendering**
+  - [x] Update component to accept `FilePreviewResult`.
+  - [x] Implement rendering for `Diff` mode (using `original_segments`).
+  - [x] Implement rendering for `RegexGroups` mode:
+    - Original column: Render `RegexSegment[]` with color-coded groups.
+    - New Name column: Render `DiffSegment[]` (standard diff).
+  - [x] **TEST**: Unit tests for `FileRow` checking both visual modes.
+- [x] **3.4. Cleanup**
+  - [x] Remove unused `src/utils/diff.ts`.
+  - [x] Remove unused regex helpers in `renamingUtils.ts`.

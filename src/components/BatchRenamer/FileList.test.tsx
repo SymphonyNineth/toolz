@@ -251,7 +251,16 @@ describe('FileList', () => {
       path: '/path/diff.txt',
       name: 'old_name.txt',
       newName: 'new_name.txt',
-      status: 'idle'
+      status: 'idle',
+      previewType: 'diff',
+      originalSegments: [
+        { segmentType: 'removed', text: 'old' },
+        { segmentType: 'unchanged', text: '_name.txt' },
+      ],
+      modifiedSegments: [
+        { segmentType: 'added', text: 'new' },
+        { segmentType: 'unchanged', text: '_name.txt' },
+      ],
     }];
     render(() => <FileList files={diffFiles} />);
     

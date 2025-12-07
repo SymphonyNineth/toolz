@@ -19,7 +19,9 @@ interface OriginalNameWithRegexProps {
  * Renders original filename with backend-provided regex segments.
  * Capture groups are color-coded; non-matching text stays neutral.
  */
-const OriginalNameWithRegex: Component<OriginalNameWithRegexProps> = (props) => {
+const OriginalNameWithRegex: Component<OriginalNameWithRegexProps> = (
+  props
+) => {
   const getClass = (segment: RegexSegment) => {
     if (segment.type === "text") return "";
     if (segment.id === 0) return "bg-base-content/10 text-base-content";
@@ -32,11 +34,16 @@ const OriginalNameWithRegex: Component<OriginalNameWithRegexProps> = (props) => 
       <For each={props.segments}>
         {(segment) => {
           const colorClass = getClass(segment);
-          if (!colorClass && isRegexSegmentGroup(segment)) {
+          if (!colorClass && !isRegexSegmentGroup(segment)) {
             return <span>{segment.value}</span>;
           }
           return (
-            <span class={`rounded-sm px-0.5 mx-px ${colorClass}`} title={segment.type === "group" ? `Group ${segment.id}` : undefined}>
+            <span
+              class={`rounded-sm px-0.5 mx-px ${colorClass}`}
+              title={
+                segment.type === "group" ? `Group ${segment.id}` : undefined
+              }
+            >
               {segment.type === "group" ? segment.text : segment.value}
             </span>
           );
@@ -47,4 +54,3 @@ const OriginalNameWithRegex: Component<OriginalNameWithRegexProps> = (props) => 
 };
 
 export default OriginalNameWithRegex;
-
